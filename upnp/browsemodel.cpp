@@ -16,6 +16,7 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QDebug>
+#include <QStringList>
 #include <QTimer>
 #include <QUrl>
 
@@ -23,7 +24,7 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpdevicemodel.h"
 
 const int BROWSE_SLICE = 100;
-const char DEFAULT_FILTER[] = "res@size,res@duration,dc:title,upnp:class,@id,upnp:albumArtURI";
+const char DEFAULT_FILTER[] = "res@size,res@duration,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album";
 const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
 const char VIDEO_PREFIX[] = "object.item.videoItem";
@@ -39,16 +40,16 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_currentOffset(0)
     , m_busy(true)
     , m_done(false)
+    , m_action(0)
 {
     QHash<int, QByteArray> roles;
 
     roles[BrowseRoleTitle] = "title";
     roles[BrowseRoleId] = "upnpId";
     roles[BrowseRoleUPnPClass] = "upnpClass";
-    roles[BrowseRoleDuration] = "duration";
-    roles[BrowseRoleSize] = "size";
     roles[BrowseRoleIcon] = "icon";
     roles[BrowseRoleType] = "type";
+    roles[BrowseRoleDetail] = "detail";
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
@@ -137,6 +138,80 @@ static QUrl findUriForObject(GUPnPDIDLLiteObject *object)
     return url;
 }
 
+static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
+{
+    QString result;
+    QStringList sizes = QStringList() << QLatin1String("GiB")
+                                      << QLatin1String("MiB")
+                                      << QLatin1String("KiB")
+                                      << QLatin1String("bytes");
+
+    GList* resources = gupnp_didl_lite_object_get_resources(object);
+    GList* it = resources;
+
+    const char *author = gupnp_didl_lite_object_get_artist(object);
+    const char *album = gupnp_didl_lite_object_get_album(object);
+
+    if (author != 0) {
+        result += QString::fromLatin1("by %1").arg(QString::fromUtf8(author));
+    }
+
+    if (album != 0) {
+        if (not result.isEmpty()) {
+            result += QLatin1String(" ");
+        }
+        result += QString::fromLatin1("on %1").arg(QString::fromUtf8(album));
+    }
+
+    while (it) {
+        GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
+        GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
+        // use first non-transcoded uri; might be problematic
+        if (gupnp_protocol_info_get_dlna_conversion (info) == GUPNP_DLNA_CONVERSION_NONE) {
+            long duration = gupnp_didl_lite_resource_get_duration(res);
+            gint64 size = gupnp_didl_lite_resource_get_size64(res);
+            if (duration > 0) {
+                int hours = duration / 60 / 60;
+                duration %= 3600;
+                int minutes = duration / 60;
+                duration %= 60;
+                qDebug() << hours << minutes << duration;
+                if ((hours > 0 || minutes > 0 || duration > 0) &&
+                    not result.isEmpty()) {
+                    result += QLatin1String(" ");
+                }
+                if (hours > 0) {
+                    result += QString::fromLatin1("%1:").arg(hours);
+                }
+                if (minutes > 0 || hours > 0 || duration > 0) {
+                    result += QString::fromLatin1("%1:").arg((int) minutes, hours > 0 || minutes > 9 ? 2 : 1, 10, QLatin1Char('0'));
+                }
+                if (duration > 0 || hours > 0 || minutes > 0) {
+                    result += QString::fromLatin1("%1").arg((int) duration, 2, 10, QLatin1Char('0'));
+                }
+
+                if (size > 0) {
+                    while (size > 1024 && sizes.last() != QLatin1String("GiB")) {
+                        size >>= 10;
+                        sizes.removeLast();
+                    }
+                    if (not result.isEmpty()) {
+                        result += " ";
+                    }
+                    result += QString::fromLatin1("%1%2").arg(QString::number(size), sizes.last());
+                }
+            }
+
+            break;
+        }
+        it = it->next;
+    }
+
+
+    g_list_free_full(resources, g_object_unref);
+    return result;
+}
+
 QVariant BrowseModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {
@@ -172,6 +247,11 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
         } else {
             return QLatin1String("object");
         }
+    case BrowseRoleDetail:
+        if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
+            return QString();
+        }
+        return createDetailsForObject(object);
     default:
         return QVariant();
     }

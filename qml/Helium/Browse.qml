@@ -87,7 +87,7 @@ Page {
                         Label {
                             //visible: model.type === "container";
                             id: subText
-                            text: model.upnpId
+                            text: model.detail
                             font.weight: Font.Light
                             font.pixelSize: 22
                             color: "#cc6633"

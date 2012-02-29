@@ -36,11 +36,10 @@ public:
         BrowseRoleTitle = Qt::DisplayRole,
         BrowseRoleId = Qt::UserRole + 1,
         BrowseRoleUPnPClass,
-        BrowseRoleDuration,
-        BrowseRoleSize,
         BrowseRoleIcon,
         BrowseRoleURI,
-        BrowseRoleType
+        BrowseRoleType,
+        BrowseRoleDetail
     };
 
     explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),
