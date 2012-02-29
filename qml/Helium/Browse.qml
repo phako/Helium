@@ -10,10 +10,9 @@ Page {
         ToolIcon {
             iconId: "toolbar-back"
             onClicked: {
+                browseModelStack.pop();
                 if (browseModelStack.empty()) {
                     pageStack.pop()
-                } else {
-                    browseModelStack.pop();
                 }
             }
         }

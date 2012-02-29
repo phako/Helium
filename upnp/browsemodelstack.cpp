@@ -36,5 +36,4 @@ void BrowseModelStack::pop()
     }
 
     delete m_stack.takeLast();
-    m_stack.removeLast();
 }
