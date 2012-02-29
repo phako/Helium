@@ -35,6 +35,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_contentDirectory(proxy)
     , m_id(id)
     , m_currentOffset(0)
+    , m_busy(true)
 {
     QHash<int, QByteArray> roles;
 
@@ -78,8 +79,9 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
         GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
         GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
         const char *profile = gupnp_protocol_info_get_dlna_profile(info);
-        if (strncmp(profile, "JPEG_TN", 7) == 0 ||
-            strncmp(profile, "PNG_TN", 6) == 0) {
+        if (profile != 0 &&
+            (strncmp(profile, "JPEG_TN", 7) == 0 ||
+             strncmp(profile, "PNG_TN", 6) == 0)) {
             thumbnail.setUrl(QString::fromUtf8(gupnp_didl_lite_resource_get_uri(res)));
             break;
         }
@@ -204,6 +206,8 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     guint total_matches;
     char *result;
     BrowseModel *model = reinterpret_cast<BrowseModel *>(user_data);
+
+    model->setBusy(false);
 
     gupnp_service_proxy_end_action(proxy,
                                    action,

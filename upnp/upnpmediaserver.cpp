@@ -21,6 +21,8 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QtDeclarative>
 
+#include "browsemodelstack.h"
+
 const char UPnPMediaServer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaServer:";
 const char UPnPMediaServer::CONTENT_DIRECTORY_SERVICE[] = "urn:schemas-upnp-org:service:ContentDirectory";
 
@@ -39,7 +41,7 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
     }
 }
 
-QAbstractListModel *UPnPMediaServer::browse(const QString &id)
+void UPnPMediaServer::browse(const QString &id)
 {
-    return new BrowseModel(m_contentDirectory, id);
+    BrowseModelStack::getDefault().push(new BrowseModel(m_contentDirectory, id));
 }

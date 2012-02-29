@@ -5,13 +5,18 @@ import org.jensge.UPnP 1.0
 
 Page {
     property string page;
-    property string containerId;
-    property variant browseModel;
 
-    Binding {
-        target: browseListView
-        property: "model"
-        value: browseModel
+    tools: ToolBarLayout {
+        ToolIcon {
+            iconId: "toolbar-back"
+            onClicked: {
+                if (browseModelStack.empty()) {
+                    pageStack.pop()
+                } else {
+                    browseModelStack.pop();
+                }
+            }
+        }
     }
 
     Rectangle {
@@ -22,7 +27,17 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        BusyIndicator {
+            visible: browseModel.busy
+            running: browseModel.busy
+            platformStyle: BusyIndicatorStyle {
+                size: "large"
+            }
+            anchors.centerIn: parent
+        }
+
         ListView {
+            visible: !browseModel.busy
             id: browseListView
             width: parent.width
             height: parent.height
@@ -48,15 +63,26 @@ Page {
 
                 Row {
                     anchors.fill: parent
+                    spacing: 10
+
+                    Image {
+                        asynchronous: true
+                        source: icon
+                        width: 96
+                        height: 96
+                        fillMode: Image.PreserveAspectFit
+                        id: imgIcon
+                    }
 
                     Column {
-                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.verticalCenter: imgIcon.verticalCenter
 
                         Label {
                             id: mainText
                             text: model.title
                             font.weight: Font.Bold
                             font.pixelSize: 26
+                            elide: Text.ElideRight
                         }
 
                         Label {
@@ -71,6 +97,7 @@ Page {
                 }
 
                 Image {
+                    visible: type === "container"
                     source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
                     anchors.right: parent.right;
                     anchors.verticalCenter: parent.verticalCenter
@@ -80,14 +107,9 @@ Page {
                     id: mouseArea
                     anchors.fill: background
                     onClicked: {
-/*                        if (type === "container") {
+                        if (type === "container") {
                             server.browse(upnpId);
-                            var component = Qt.createComponent("Browse.qml");
-                            if (component.status === Component.Ready) {
-                                var page = component.createObject(mainPage, {"page": friendlyName, "containerId": "0" });
-                                pageStack.push(page);
-                            }
-                        }*/
+                        }
                     }
                 }
             }

@@ -41,8 +41,9 @@ SOURCES += main.cpp \
     upnp/upnpdevicemodel.cpp \
     upnp/upnpservermodel.cpp \
     upnp/upnprenderermodel.cpp \
-    upnp/browsemodel.cpp \
-    upnp/proxymodel.cpp
+    upnp/proxymodel.cpp \
+    upnp/browsemodelstack.cpp \
+    upnp/browsemodel.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -66,5 +67,6 @@ HEADERS += \
     upnp/upnprenderermodel.h \
     upnp/browsemodel.h \
     upnp/proxymodel.h \
-    upnp/refptrg.h
+    upnp/refptrg.h \
+    upnp/browsemodelstack.h
 RESOURCES +=

@@ -8,7 +8,8 @@
 #include "upnp/upnpmediaserver.h"
 #include "upnp/upnpservermodel.h"
 #include "upnp/upnprenderermodel.h"
-#include "upnp/proxymodel.h"
+#include "upnp/browsemodel.h"
+#include "upnp/browsemodelstack.h"
 
 #include <QtDeclarative>
 
@@ -20,7 +21,6 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // QML glue
     qmlRegisterType<UPnPRenderer>("org.jensge.UPnP", 1, 0, "UPnPRenderer");
     qmlRegisterType<UPnPMediaServer>("org.jensge.UPnP", 1, 0, "UPnPMediaServer");
-    qmlRegisterType<ProxyModel>("org.jensge.UPnP", 1, 0, "ProxyModel");
     qmlRegisterType<BrowseModel>("org.jensge.UPnP", 1, 0, "BrowseModel");
 
     QScopedPointer<QApplication> app(createApplication(argc, argv));
@@ -32,6 +32,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rootContext = viewer.rootContext();
     rootContext->setContextProperty("serverModel", &serverModel);
     rootContext->setContextProperty("rendererModel", &rendererModel);
+    rootContext->setContextProperty("browseModel", 0);
+    rootContext->setContextProperty("browseModelStack", &BrowseModelStack::getDefault());
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();

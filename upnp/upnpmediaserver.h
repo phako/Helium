@@ -38,7 +38,7 @@ public:
 Q_SIGNALS:
     
 public Q_SLOTS:
-    QAbstractListModel *browse(const QString &id = QLatin1String("0"));
+    void browse(const QString &id = QLatin1String("0"));
 
 private:
     ServiceProxy m_contentDirectory;

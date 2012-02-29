@@ -29,6 +29,7 @@ typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
 class BrowseModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
 public:
     enum BrowseRoles {
         BrowseRoleTitle = Qt::DisplayRole,
@@ -48,12 +49,20 @@ public:
     // virtual functions from QAbstractListModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
+    bool busy() const { return m_busy; }
 
 Q_SIGNALS:
-    
+    void busyChanged();
 private Q_SLOTS:
     void onStartBrowse();
 private:
+    void setBusy(bool busy) {
+        if (m_busy != busy) {
+            m_busy = busy;
+            Q_EMIT busyChanged();
+        }
+    }
+
     static void on_browse(GUPnPServiceProxy       *proxy,
                           GUPnPServiceProxyAction *action,
                           gpointer                 user_data);
@@ -66,6 +75,7 @@ private:
     ServiceProxy m_contentDirectory;
     QString m_id;
     guint m_currentOffset;
+    bool m_busy;
 };
 
 #endif // BROWSEMODEL_H
