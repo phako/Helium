@@ -67,8 +67,8 @@ Page {
                     Image {
                         asynchronous: true
                         source: icon
-                        width: 96
-                        height: 96
+                        width: 64
+                        height: 64
                         fillMode: Image.PreserveAspectFit
                         id: imgIcon
                     }
