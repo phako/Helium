@@ -50,12 +50,15 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
     bool busy() const { return m_busy; }
+    static BrowseModel &empty() { return m_empty; }
 
 Q_SIGNALS:
     void busyChanged();
 private Q_SLOTS:
     void onStartBrowse();
 private:
+    static BrowseModel m_empty;
+
     void setBusy(bool busy) {
         if (m_busy != busy) {
             m_busy = busy;

@@ -71,11 +71,9 @@ Page {
                     onClicked: {
                         deviceListView.currentIndex = index;
                         server.wrapDevice(serverModel.get(index));
-                        var component = Qt.createComponent("Browse.qml");
-                        if (component.status === Component.Ready) {
-                            var page = component.createObject(mainPage, {"page": friendlyName, "containerId": "0", "browseModel": server.browse(0) });
-                            pageStack.push(page);
-                        }
+                        server.browse("0");
+                        browse.page = friendlyName
+                        pageStack.push(browse)
                     }
                 }
             }

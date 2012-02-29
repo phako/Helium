@@ -28,6 +28,8 @@ const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
 const char VIDEO_PREFIX[] = "object.item.videoItem";
 
+BrowseModel BrowseModel::m_empty;
+
 BrowseModel::BrowseModel(const ServiceProxy &proxy,
                          const QString      &id,
                          QObject            *parent)
@@ -72,7 +74,6 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
         const char *album_art_uri = gupnp_didl_lite_object_get_album_art(object);
-        qDebug() << "Album art uri:" << album_art_uri;
         thumbnail.setUrl(QString::fromUtf8(album_art_uri));
     } else {
         while (it) {

@@ -32,7 +32,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rootContext = viewer.rootContext();
     rootContext->setContextProperty("serverModel", &serverModel);
     rootContext->setContextProperty("rendererModel", &rendererModel);
-    rootContext->setContextProperty("browseModel", 0);
+    rootContext->setContextProperty("browseModel", &BrowseModel::empty());
     rootContext->setContextProperty("browseModelStack", &BrowseModelStack::getDefault());
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));

@@ -18,8 +18,8 @@ PageStackWindow {
         id: serverList
     }
 
-    MainPage {
-        id: mainPage
+    Browse {
+        id: browse
     }
 
     UPnPRenderer {

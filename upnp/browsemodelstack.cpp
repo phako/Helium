@@ -30,7 +30,7 @@ void BrowseModelStack::pop()
     }
 
     if (m_stack.count() == 1) {
-        rootContext->setContextProperty("browseModel", 0);
+        rootContext->setContextProperty("browseModel", &BrowseModel::empty());
     } else {
         rootContext->setContextProperty("browseModel", m_stack.at(m_stack.count() - 2));
     }
