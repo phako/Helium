@@ -44,6 +44,10 @@ void UPnPDevice::wrapDevice(const QString &udn)
 
 QString UPnPDevice::friendlyName(void) const
 {
+    if (m_proxy.isEmpty()) {
+        return QString();
+    }
+
     return QString::fromUtf8(gupnp_device_info_get_friendly_name(GUPNP_DEVICE_INFO(m_proxy)));
 }
 

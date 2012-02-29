@@ -18,8 +18,6 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpmediaserver.h"
 #include "browsemodel.h"
 
-#include <libgupnp-av/gupnp-av.h>
-
 #include <QDebug>
 #include <QtDeclarative>
 
@@ -34,9 +32,11 @@ UPnPMediaServer::UPnPMediaServer()
 void UPnPMediaServer::wrapDevice(const QString &udn)
 {
     UPnPDevice::wrapDevice(udn);
-    GUPnPServiceInfo *info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO (m_proxy),
-                                                           UPnPMediaServer::CONTENT_DIRECTORY_SERVICE);
-    m_contentDirectory = ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+    if (not m_proxy.isEmpty()) {
+        GUPnPServiceInfo *info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO (m_proxy),
+                                                               UPnPMediaServer::CONTENT_DIRECTORY_SERVICE);
+        m_contentDirectory = ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+    }
 }
 
 QAbstractListModel *UPnPMediaServer::browse(const QString &id)

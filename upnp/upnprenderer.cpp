@@ -85,6 +85,10 @@ void UPnPRenderer::wrapDevice(const QString &udn)
 
     UPnPDevice::wrapDevice(udn);
 
+    if (m_proxy.isEmpty()) {
+        return;
+    }
+
     GUPnPServiceInfo *info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO (m_proxy),
                                                            UPnPRenderer::AV_TRANSPORT_SERVICE);
     m_avTransport = ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
