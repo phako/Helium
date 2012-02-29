@@ -130,7 +130,6 @@ static QUrl findUriForObject(GUPnPDIDLLiteObject *object)
 
 QVariant BrowseModel::data(const QModelIndex &index, int role) const
 {
-    qDebug() << "Trying to get data for" << index.row() << "and role" << role;
     if (!index.isValid()) {
         return QVariant();
     }
@@ -173,13 +172,10 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
                                   GUPnPDIDLLiteObject *object,
                                   gpointer             user_data)
 {
-    qDebug () << "On didl-item";
     Q_UNUSED(parser)
 
     BrowseModel *model = reinterpret_cast<BrowseModel *>(user_data);
-    model->beginInsertRows(QModelIndex(), model->m_data.count(), model->m_data.count());
     model->m_data.append(DIDLLiteObject(object));
-    model->endInsertRows();
 }
 
 void BrowseModel::onStartBrowse()
@@ -191,9 +187,9 @@ void BrowseModel::onStartBrowse()
                                      this,
                                      "ObjectID", G_TYPE_STRING, m_id.toUtf8().constData(),
                                      "BrowseFlag", G_TYPE_STRING, "BrowseDirectChildren",
-                                     "Filter", G_TYPE_STRING, "*", //DEFAULT_FILTER,
-                                     "StartingIndex", G_TYPE_UINT, 0, //m_currentOffset,
-                                     "RequestedCount", G_TYPE_UINT, 0, //BROWSE_SLICE,
+                                     "Filter", G_TYPE_STRING, DEFAULT_FILTER,
+                                     "StartingIndex", G_TYPE_UINT, m_currentOffset,
+                                     "RequestedCount", G_TYPE_UINT, BROWSE_SLICE,
                                      "SortCriteria", G_TYPE_STRING, "+dc:title",
                                      NULL);
 }
@@ -220,27 +216,33 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     if (error != 0) {
         qDebug() << "Browsing failed:" << error->message;
         g_error_free(error);
+
         return;
     }
+
+    if (number_returned == 0) {
+        return;
+    }
+
     RefPtrG<GUPnPDIDLLiteParser> parser = RefPtrG<GUPnPDIDLLiteParser>::wrap(gupnp_didl_lite_parser_new());
-/*    model->beginInsertRows(QModelIndex(),
+    model->beginInsertRows(QModelIndex(),
                            model->m_data.count(),
-                           model->m_data.count() + number_returned - 1); */
-    qDebug() << "beginInsert" << model->m_data.count() << model->m_data.count() + number_returned - 1;
+                           model->m_data.count() + number_returned - 1);
     g_signal_connect (G_OBJECT(parser),
                       "object-available",
                       G_CALLBACK(BrowseModel::on_didl_object),
                       user_data);
 
-    qDebug() << "before parse";
     gupnp_didl_lite_parser_parse_didl(parser, result, &error);
-    qDebug() << "after parse";
 
-//    model->endInsertRows();
-    qDebug() << "afterInsertRows";
-    model->dataChanged(model->index(0), model->index(model->rowCount()));
+    model->endInsertRows();
 
     if (result != 0) {
         g_free (result);
+    }
+
+    model->m_currentOffset += number_returned;
+    if (total_matches > 0 && model->m_currentOffset < total_matches) {
+        QTimer::singleShot(0, model, SLOT(onStartBrowse()));
     }
 }
