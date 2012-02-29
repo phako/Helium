@@ -59,6 +59,13 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     }
 }
 
+BrowseModel::~BrowseModel()
+{
+    if (m_action != 0) {
+        gupnp_service_proxy_cancel_action (m_contentDirectory, m_action);
+    }
+}
+
 int BrowseModel::rowCount(const QModelIndex &/*parent*/) const
 {
     return m_data.count();
@@ -183,17 +190,17 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
 void BrowseModel::onStartBrowse()
 {
     qDebug () << "Starting to browse" << m_id;
-    gupnp_service_proxy_begin_action(m_contentDirectory,
-                                     "Browse",
-                                     BrowseModel::on_browse,
-                                     this,
-                                     "ObjectID", G_TYPE_STRING, m_id.toUtf8().constData(),
-                                     "BrowseFlag", G_TYPE_STRING, "BrowseDirectChildren",
-                                     "Filter", G_TYPE_STRING, DEFAULT_FILTER,
-                                     "StartingIndex", G_TYPE_UINT, m_currentOffset,
-                                     "RequestedCount", G_TYPE_UINT, BROWSE_SLICE,
-                                     "SortCriteria", G_TYPE_STRING, "+dc:title",
-                                     NULL);
+    m_action = gupnp_service_proxy_begin_action(m_contentDirectory,
+                                                "Browse",
+                                                BrowseModel::on_browse,
+                                                this,
+                                                "ObjectID", G_TYPE_STRING, m_id.toUtf8().constData(),
+                                                "BrowseFlag", G_TYPE_STRING, "BrowseDirectChildren",
+                                                "Filter", G_TYPE_STRING, DEFAULT_FILTER,
+                                                "StartingIndex", G_TYPE_UINT, m_currentOffset,
+                                                "RequestedCount", G_TYPE_UINT, BROWSE_SLICE,
+                                                "SortCriteria", G_TYPE_STRING, "+dc:title",
+                                                NULL);
 }
 
 void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
@@ -215,6 +222,7 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
                                    "NumberReturned", G_TYPE_UINT, &number_returned,
                                    "TotalMatches", G_TYPE_UINT, &total_matches,
                                    NULL);
+    model->m_action = 0;
     if (error != 0) {
         qDebug() << "Browsing failed:" << error->message;
         g_error_free(error);

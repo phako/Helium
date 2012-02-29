@@ -46,6 +46,7 @@ public:
     explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),
                          const QString      &id = QLatin1String("0"),
                          QObject            *parent = 0);
+    ~BrowseModel();
 
     // virtual functions from QAbstractListModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -93,6 +94,7 @@ private:
     guint m_currentOffset;
     bool m_busy;
     bool m_done;
+    GUPnPServiceProxyAction *m_action;
 };
 
 #endif // BROWSEMODEL_H
