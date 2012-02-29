@@ -70,30 +70,31 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     const char *upnp_class = gupnp_didl_lite_object_get_upnp_class (object);
 
-    if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX)) == 0) {
+    if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
         const char *album_art_uri = gupnp_didl_lite_object_get_album_art(object);
+        qDebug() << "Album art uri:" << album_art_uri;
         thumbnail.setUrl(QString::fromUtf8(album_art_uri));
-    }
-
-    while (it) {
-        GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
-        GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
-        const char *profile = gupnp_protocol_info_get_dlna_profile(info);
-        if (profile != 0 &&
-            (strncmp(profile, "JPEG_TN", 7) == 0 ||
-             strncmp(profile, "PNG_TN", 6) == 0)) {
-            thumbnail.setUrl(QString::fromUtf8(gupnp_didl_lite_resource_get_uri(res)));
-            break;
+    } else {
+        while (it) {
+            GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
+            GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
+            const char *profile = gupnp_protocol_info_get_dlna_profile(info);
+            if (profile != 0 &&
+                (strncmp(profile, "JPEG_TN", 7) == 0 ||
+                 strncmp(profile, "PNG_TN", 6) == 0)) {
+                thumbnail.setUrl(QString::fromUtf8(gupnp_didl_lite_resource_get_uri(res)));
+                break;
+            }
+            it = it->next;
         }
-        it = it->next;
     }
 
     if (thumbnail.isEmpty()) {
-        if (strncmp(upnp_class, IMAGE_PREFIX, sizeof(IMAGE_PREFIX)) == 0) {
+        if (strncmp(upnp_class, IMAGE_PREFIX, sizeof(IMAGE_PREFIX) - 1) == 0) {
             thumbnail.setUrl("image://theme/icon-m-content-image-inverse");
-        } else if (strncmp(upnp_class, VIDEO_PREFIX, sizeof(VIDEO_PREFIX)) == 0) {
+        } else if (strncmp(upnp_class, VIDEO_PREFIX, sizeof(VIDEO_PREFIX) - 1) == 0) {
             thumbnail.setUrl("image://theme/icon-m-content-videos-inverse");
-        } else if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX)) == 0) {
+        } else if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
             thumbnail.setUrl("image://theme/icon-m-content-audio-inverse");
         }
     }
