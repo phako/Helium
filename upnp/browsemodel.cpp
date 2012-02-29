@@ -38,6 +38,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_id(id)
     , m_currentOffset(0)
     , m_busy(true)
+    , m_done(false)
 {
     QHash<int, QByteArray> roles;
 
@@ -245,5 +246,17 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     model->m_currentOffset += number_returned;
     if (total_matches > 0 && model->m_currentOffset < total_matches) {
         QTimer::singleShot(0, model, SLOT(onStartBrowse()));
+    } else {
+        model->setDone(true);
     }
+}
+
+void BrowseModel::refresh() {
+    beginResetModel();
+    setDone(false);
+    setBusy(true);
+    m_currentOffset = 0;
+    m_data.clear();
+    QTimer::singleShot(0, this, SLOT(onStartBrowse()));
+    endResetModel();
 }

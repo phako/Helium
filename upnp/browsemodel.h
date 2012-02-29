@@ -30,6 +30,7 @@ class BrowseModel : public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
+    Q_PROPERTY(bool done READ done NOTIFY doneChanged)
 public:
     enum BrowseRoles {
         BrowseRoleTitle = Qt::DisplayRole,
@@ -50,10 +51,14 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
     bool busy() const { return m_busy; }
+    bool done() const { return m_done; }
     static BrowseModel &empty() { return m_empty; }
 
 Q_SIGNALS:
     void busyChanged();
+    void doneChanged();
+public Q_SLOTS:
+    void refresh();
 private Q_SLOTS:
     void onStartBrowse();
 private:
@@ -64,6 +69,14 @@ private:
             m_busy = busy;
             Q_EMIT busyChanged();
         }
+    }
+
+    void setDone(bool done) {
+        if (m_done != done) {
+            m_done = done;
+        }
+
+        Q_EMIT doneChanged();
     }
 
     static void on_browse(GUPnPServiceProxy       *proxy,
@@ -79,6 +92,7 @@ private:
     QString m_id;
     guint m_currentOffset;
     bool m_busy;
+    bool m_done;
 };
 
 #endif // BROWSEMODEL_H

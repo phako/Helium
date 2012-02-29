@@ -137,12 +137,23 @@ Page {
             }
         }
 
+        BusyIndicator {
+            anchors.centerIn: refreshButton
+            visible: !browseModel.busy && !browseModel.done
+            running: visible
+            style: BusyIndicatorStyle {
+                size: "small"
+            }
+        }
+
         ToolIcon {
+            visible: browseModel.done
             id: refreshButton
             platformIconId: "icon-m-common-refresh"
             anchors.right: parent.right
             anchors.rightMargin: 10
             anchors.verticalCenter: parent.verticalCenter
+            onClicked: browseModel.refresh()
         }
     }
 }
