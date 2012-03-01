@@ -44,20 +44,28 @@ public:
 
     explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),
                          const QString      &id = QLatin1String("0"),
+                         const QString      &sortCriteria = QLatin1String(""),
                          QObject            *parent = 0);
     ~BrowseModel();
 
     // virtual functions from QAbstractListModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role) const;
+
+    // property getters
     bool busy() const { return m_busy; }
     bool done() const { return m_done; }
+
+    // static functions
     static BrowseModel &empty() { return m_empty; }
 
 Q_SIGNALS:
+    // property signals
     void busyChanged();
     void doneChanged();
 public Q_SLOTS:
+
+    // QML callable functions
     void refresh();
 private Q_SLOTS:
     void onStartBrowse();
@@ -86,13 +94,14 @@ private:
                                GUPnPDIDLLiteObject *item,
                                gpointer             user_data);
 
-    QList<DIDLLiteObject> m_data;
-    ServiceProxy m_contentDirectory;
-    QString m_id;
-    guint m_currentOffset;
-    bool m_busy;
-    bool m_done;
+    QList<DIDLLiteObject>    m_data;
+    ServiceProxy             m_contentDirectory;
+    QString                  m_id;
+    guint                    m_currentOffset;
+    bool                     m_busy;
+    bool                     m_done;
     GUPnPServiceProxyAction *m_action;
+    QString                  m_sortCriteria;
 };
 
 #endif // BROWSEMODEL_H

@@ -107,7 +107,7 @@ Page {
                     anchors.fill: background
                     onClicked: {
                         if (type === "container") {
-                            server.browse(upnpId);
+                            server.browse(upnpId, upnpClass);
                         }
                     }
                 }

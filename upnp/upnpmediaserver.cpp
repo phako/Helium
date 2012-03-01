@@ -30,8 +30,8 @@ UPnPMediaServer::UPnPMediaServer()
     : UPnPDevice()
     , m_contentDirectory()
     , m_connectionManager()
-    , m_sortCapabilities()
     , m_protocolInfo()
+    , m_sortCriteria()
 {
 }
 
@@ -57,15 +57,13 @@ void UPnPMediaServer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServic
     }
 
     if (self->isReady()) {
-        qDebug() << self->m_sortCapabilities;
-        qDebug() << self->m_protocolInfo;
         Q_EMIT self->ready();
     }
 }
 
 bool UPnPMediaServer::isReady()
 {
-    return (not m_sortCapabilities.isNull() && not m_protocolInfo.isNull());
+    return (not m_sortCriteria.isEmpty() && not m_protocolInfo.isNull());
 }
 
 void UPnPMediaServer::on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
@@ -83,18 +81,42 @@ void UPnPMediaServer::on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPSe
         qWarning() << "Failed to get sort capabilites:" << error->message;
         g_error_free(error);
 
-        self->m_sortCapabilities = QLatin1String("");
+        self->setupSortCriterias(QLatin1String(""));
     } else {
-        self->m_sortCapabilities = QString::fromUtf8(sort_caps);
+        self->setupSortCriterias(QString::fromUtf8(sort_caps));
 
         g_free (sort_caps);
     }
 
     if (self->isReady()) {
-        qDebug() << self->m_sortCapabilities;
-        qDebug() << self->m_protocolInfo;
         Q_EMIT self->ready();
     }
+}
+
+void UPnPMediaServer::setupSortCriterias(const QString &caps)
+{
+    QStringList sortCaps = caps.split(QLatin1Char(','));
+    QStringList sortCriteria;
+
+    int titleIndex = sortCaps.indexOf(QLatin1String("dc:title"));
+    int classIndex = sortCaps.indexOf(QLatin1String("upnp:class"));
+    int trackNrIndex = sortCaps.indexOf(QLatin1String("upnp:originalTrackNumber"));
+    if (classIndex >= 0) {
+        sortCriteria << sortCaps.at(classIndex);
+    }
+    if (titleIndex >= 0) {
+        sortCriteria << sortCaps.at(titleIndex);
+    }
+    m_sortCriteria[SORT_DEFAULT] = sortCriteria.replaceInStrings(QRegExp(QLatin1String("^")), QLatin1String("+")).join(QLatin1String(","));
+    sortCriteria.clear();
+
+    if (trackNrIndex >= 0) {
+        sortCriteria << sortCaps.at(trackNrIndex);
+    }
+    if (titleIndex >= 0) {
+        sortCriteria << sortCaps.at(titleIndex);
+    }
+    m_sortCriteria[SORT_MUSIC_ALUBM] = sortCriteria.replaceInStrings(QRegExp(QLatin1String("^")), QLatin1String("+")).join(QLatin1String(","));
 }
 
 void UPnPMediaServer::wrapDevice(const QString &udn)
@@ -121,13 +143,20 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
     }
 }
 
-void UPnPMediaServer::browse(const QString &id)
+void UPnPMediaServer::browse(const QString &id, const QString &upnpClass)
 {
-    BrowseModel *model = new BrowseModel(m_contentDirectory, id);
-    BrowseModelStack::getDefault().push(model);
+    SortOrder sortOrder = SORT_DEFAULT;
+    if (upnpClass.startsWith(QLatin1String("object.container.album.musicAlbum"))) {
+        sortOrder = SORT_MUSIC_ALUBM;
+    }
+
     if (isReady()) {
+        BrowseModel *model = new BrowseModel(m_contentDirectory, id, m_sortCriteria[sortOrder]);
+        BrowseModelStack::getDefault().push(model);
         QTimer::singleShot(0, model, SLOT(onStartBrowse()));
     } else {
+        BrowseModel *model = new BrowseModel(m_contentDirectory, id);
+        BrowseModelStack::getDefault().push(model);
         connect(this, SIGNAL(ready()), model, SLOT(onStartBrowse()));
     }
 }

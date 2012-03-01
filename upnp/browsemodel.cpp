@@ -33,6 +33,7 @@ BrowseModel BrowseModel::m_empty;
 
 BrowseModel::BrowseModel(const ServiceProxy &proxy,
                          const QString      &id,
+                         const QString      &sortCriteria,
                          QObject            *parent)
     : QAbstractListModel(parent)
     , m_contentDirectory(proxy)
@@ -41,6 +42,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_busy(true)
     , m_done(false)
     , m_action(0)
+    , m_sortCriteria(sortCriteria)
 {
     QHash<int, QByteArray> roles;
 
@@ -278,7 +280,7 @@ void BrowseModel::onStartBrowse()
                                                 "Filter", G_TYPE_STRING, DEFAULT_FILTER,
                                                 "StartingIndex", G_TYPE_UINT, m_currentOffset,
                                                 "RequestedCount", G_TYPE_UINT, BROWSE_SLICE,
-                                                "SortCriteria", G_TYPE_STRING, "+dc:title",
+                                                "SortCriteria", G_TYPE_STRING, m_sortCriteria.toUtf8().constData(),
                                                 NULL);
 }
 

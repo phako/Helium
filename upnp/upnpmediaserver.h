@@ -24,32 +24,40 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include <QAbstractListModel>
 
 #include "upnpdevice.h"
+#include "browsemodel.h"
 
 class UPnPMediaServer : public UPnPDevice
 {
     Q_OBJECT
+    Q_ENUMS(SortOrder)
 public:
+    enum SortOrder {
+        SORT_DEFAULT,
+        SORT_MUSIC_ALUBM
+    };
+
     static const char DEVICE_TYPE[];
     static const char CONTENT_DIRECTORY_SERVICE[];
 
     explicit UPnPMediaServer();
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
+    Q_INVOKABLE void browse(const QString &id = QLatin1String("0"), const QString &upnpClass = QLatin1String("object.container"));
 
 Q_SIGNALS:
     void ready();
 public Q_SLOTS:
-    void browse(const QString &id = QLatin1String("0"));
 
 private:
-    ServiceProxy m_contentDirectory;
-    ServiceProxy m_connectionManager;
-    QString      m_sortCapabilities;
-    QString      m_protocolInfo;
+    ServiceProxy              m_contentDirectory;
+    ServiceProxy              m_connectionManager;
+    QString                   m_protocolInfo;
+    QHash<SortOrder, QString> m_sortCriteria;
 
     static void on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data);
     static void on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data);
 
     bool isReady();
+    void setupSortCriterias(const QString &caps);
 };
 
 #endif // UPNPMEDIASERVER_H
