@@ -43,10 +43,12 @@ public:
     QString udn() const;
     QString type() const;
     Q_INVOKABLE virtual void wrapDevice(const QString& udn);
+    ServiceProxy getService(const char *service);
 
     // static helper functions
     static QUrl getIcon(GUPnPDeviceProxy *proxy);
 
+    static const char CONNECTION_MANAGER_SERVICE[];
 Q_SIGNALS:
     Q_REVISION(1) void friendlyNameChanged();
     Q_REVISION(1) void iconChanged();

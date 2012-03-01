@@ -36,12 +36,20 @@ public:
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
 
 Q_SIGNALS:
-    
+    void ready();
 public Q_SLOTS:
     void browse(const QString &id = QLatin1String("0"));
 
 private:
     ServiceProxy m_contentDirectory;
+    ServiceProxy m_connectionManager;
+    QString      m_sortCapabilities;
+    QString      m_protocolInfo;
+
+    static void on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data);
+    static void on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data);
+
+    bool isReady();
 };
 
 #endif // UPNPMEDIASERVER_H

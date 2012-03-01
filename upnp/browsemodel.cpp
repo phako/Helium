@@ -53,11 +53,6 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
-
-    // go through event loop
-    if (!proxy.isEmpty()) {
-        QTimer::singleShot(0, this, SLOT(onStartBrowse()));
-    }
 }
 
 BrowseModel::~BrowseModel()
@@ -269,6 +264,10 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
 
 void BrowseModel::onStartBrowse()
 {
+    if (m_contentDirectory.isEmpty()) {
+        return;
+    }
+
     qDebug () << "Starting to browse" << m_id;
     m_action = gupnp_service_proxy_begin_action(m_contentDirectory,
                                                 "Browse",

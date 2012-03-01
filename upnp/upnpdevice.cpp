@@ -20,6 +20,8 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnprenderer.h"
 #include "upnpdevicemodel.h"
 
+const char UPnPDevice::CONNECTION_MANAGER_SERVICE[] = "urn:schemas-upnp-org:service:ConnectionManager";
+
 UPnPDevice::UPnPDevice()
     : QObject(0)
     , m_proxy()
@@ -116,4 +118,15 @@ QString UPnPDevice::type() const
     GUPnPDeviceInfo *info = GUPNP_DEVICE_INFO(m_proxy);
 
     return QString::fromUtf8(gupnp_device_info_get_device_type(info));
+}
+
+ServiceProxy UPnPDevice::getService(const char *service)
+{
+    if (not m_proxy.isEmpty()) {
+        GUPnPServiceInfo *info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO (m_proxy), service);
+
+        return ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+    }
+
+    return ServiceProxy ();
 }
