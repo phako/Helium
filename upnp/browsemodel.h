@@ -74,9 +74,8 @@ private:
     void setDone(bool done) {
         if (m_done != done) {
             m_done = done;
+            Q_EMIT doneChanged();
         }
-
-        Q_EMIT doneChanged();
     }
 
     static void on_browse(GUPnPServiceProxy       *proxy,
