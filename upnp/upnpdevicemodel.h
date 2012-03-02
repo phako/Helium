@@ -48,6 +48,14 @@ public:
 
     static UPnPDeviceModel *getDefault();
     static GUPnPDeviceProxy *lookup(const QString& udn);
+private Q_SLOTS:
+    void onDeviceUnavailable(QString udn);
+    void onDeviceAvailable(void *device_info);
+
+    void onRowsInserted() {
+        qDebug() << "Rows inserted";
+    }
+
 private:
     static UPnPDeviceModel *instance;
 

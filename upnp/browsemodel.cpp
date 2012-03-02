@@ -294,8 +294,6 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     char *result;
     BrowseModel *model = reinterpret_cast<BrowseModel *>(user_data);
 
-    model->setBusy(false);
-
     gupnp_service_proxy_end_action(proxy,
                                    action,
                                    &error,
@@ -303,40 +301,58 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
                                    "NumberReturned", G_TYPE_UINT, &number_returned,
                                    "TotalMatches", G_TYPE_UINT, &total_matches,
                                    NULL);
+    QMetaObject::invokeMethod(model, "setBusy", Qt::QueuedConnection,
+                              Q_ARG(bool, false));
     model->m_action = 0;
     if (error != 0) {
         qDebug() << "Browsing failed:" << error->message;
         g_error_free(error);
+        if (result != 0) {
+            g_free (result);
+        }
 
         return;
     }
 
     if (number_returned == 0) {
+        if (result != 0) {
+            g_free(result);
+        }
         return;
     }
 
+    QMetaObject::invokeMethod(model, "onBrowseDone", Qt::QueuedConnection,
+                              Q_ARG(QByteArray, QByteArray::fromRawData(result, strlen(result))),
+                              Q_ARG(uint, number_returned),
+                              Q_ARG(uint, total_matches));
+}
+
+void BrowseModel::onBrowseDone(QByteArray result, uint number_returned, uint total_matches)
+{
     RefPtrG<GUPnPDIDLLiteParser> parser = RefPtrG<GUPnPDIDLLiteParser>::wrap(gupnp_didl_lite_parser_new());
-    model->beginInsertRows(QModelIndex(),
-                           model->m_data.count(),
-                           model->m_data.count() + number_returned - 1);
+    beginInsertRows(QModelIndex(),
+                           m_data.count(),
+                           m_data.count() + number_returned - 1);
     g_signal_connect (G_OBJECT(parser),
                       "object-available",
                       G_CALLBACK(BrowseModel::on_didl_object),
-                      user_data);
+                      this);
 
-    gupnp_didl_lite_parser_parse_didl(parser, result, &error);
+    GError *error = 0;
+    gupnp_didl_lite_parser_parse_didl(parser, result.constData(), &error);
 
-    model->endInsertRows();
+    endInsertRows();
 
-    if (result != 0) {
-        g_free (result);
+    if (not result.isNull()) {
+        g_free(const_cast<char *>(result.constData()));
+        result.setRawData(0, 0);
     }
 
-    model->m_currentOffset += number_returned;
-    if (total_matches > 0 && model->m_currentOffset < total_matches) {
-        QTimer::singleShot(0, model, SLOT(onStartBrowse()));
+    m_currentOffset += number_returned;
+    if (total_matches > 0 && m_currentOffset < total_matches) {
+        QTimer::singleShot(0, this, SLOT(onStartBrowse()));
     } else {
-        model->setDone(true);
+        setDone(true);
     }
 }
 

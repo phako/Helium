@@ -26,7 +26,7 @@ void UPnPRenderer::setState(const QString &state)
 {
     qDebug () << "New state" << state;
     m_state = state;
-    Q_EMIT stateChanged();
+    QMetaObject::invokeMethod(this, "stateChanged", Qt::QueuedConnection);
 }
 
 void

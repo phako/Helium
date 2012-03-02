@@ -57,7 +57,8 @@ void UPnPMediaServer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServic
     }
 
     if (self->isReady()) {
-        Q_EMIT self->ready();
+        // QTBUG-24571
+        QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
     }
 }
 
@@ -89,7 +90,8 @@ void UPnPMediaServer::on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPSe
     }
 
     if (self->isReady()) {
-        Q_EMIT self->ready();
+        // QTBUG-24571
+        QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
     }
 }
 

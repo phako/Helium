@@ -35,21 +35,24 @@ UPnPDeviceModel::on_device_proxy_available(GUPnPControlPoint *cp,
 {
     Q_UNUSED(cp)
     UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
-    GUPnPDeviceInfo *device_info = GUPNP_DEVICE_INFO (proxy);
-    if (device_info == 0) {
+    if (GUPNP_IS_DEVICE_INFO(proxy) == FALSE) {
         // should not happen
         return;
     }
 
+    QMetaObject::invokeMethod(model, "onDeviceAvailable", Qt::QueuedConnection, Q_ARG(void *, g_object_ref(proxy)));
+}
+
+void UPnPDeviceModel::onDeviceAvailable(void *ptr)
+{
+    GUPnPDeviceInfo *device_info = GUPNP_DEVICE_INFO(ptr);
+
     QString udn = QString::fromUtf8(gupnp_device_info_get_udn(device_info));
-    if (!model->m_deviceInfo.contains(udn)) {
-        model->beginInsertRows(QModelIndex(),
-                               model->m_devices.count(),
-                               model->m_devices.count());
-        model->m_deviceInfo.insert(udn,
-                                   GUPNP_DEVICE_PROXY(g_object_ref(proxy)));
-        model->m_devices << udn;
-        model->endInsertRows();
+    if (!m_deviceInfo.contains(udn)) {
+        beginInsertRows(QModelIndex(), m_devices.count(), m_devices.count());
+        m_deviceInfo.insert(udn, GUPNP_DEVICE_PROXY(ptr));
+        m_devices << udn;
+        endInsertRows();
     }
 }
 
@@ -61,16 +64,21 @@ UPnPDeviceModel::on_device_proxy_unavailable(GUPnPControlPoint */*cp*/,
     QString udn = QString::fromUtf8(gupnp_device_info_get_udn(GUPNP_DEVICE_INFO(proxy)));
     UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
 
-    int index = model->m_devices.indexOf(udn);
+    QMetaObject::invokeMethod(model, "onDeviceUnavailable", Qt::QueuedConnection, Q_ARG(QString, udn));
+}
+
+void UPnPDeviceModel::onDeviceUnavailable(QString udn)
+{
+    int index = m_devices.indexOf(udn);
     if (index < 0) {
         return;
     }
 
-    model->beginRemoveRows(QModelIndex(), index, index);
-    model->m_devices.removeAt(index);
-    g_object_unref(model->m_deviceInfo[udn]);
-    model->m_deviceInfo.remove(udn);
-    model->endRemoveRows();
+    beginRemoveRows(QModelIndex(), index, index);
+    m_devices.removeAt(index);
+    g_object_unref(m_deviceInfo[udn]);
+    m_deviceInfo.remove(udn);
+    endRemoveRows();
 }
 
 void

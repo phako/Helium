@@ -69,9 +69,7 @@ public Q_SLOTS:
     void refresh();
 private Q_SLOTS:
     void onStartBrowse();
-private:
-    static BrowseModel m_empty;
-
+    void onBrowseDone(QByteArray result, uint number_returned, uint total_matches);
     void setBusy(bool busy) {
         if (m_busy != busy) {
             m_busy = busy;
@@ -85,6 +83,10 @@ private:
             Q_EMIT doneChanged();
         }
     }
+
+private:
+    static BrowseModel m_empty;
+
 
     static void on_browse(GUPnPServiceProxy       *proxy,
                           GUPnPServiceProxyAction *action,
