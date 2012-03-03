@@ -52,6 +52,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     roles[BrowseRoleIcon] = "icon";
     roles[BrowseRoleType] = "type";
     roles[BrowseRoleDetail] = "detail";
+    roles[BrowseRoleURI] = "uri";
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
