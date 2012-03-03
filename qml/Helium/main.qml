@@ -12,10 +12,18 @@ PageStackWindow {
         inverted: theme.inverted
     }
 
-    initialPage: serverList
+    initialPage: MainPage {}
 
     ServerList {
         id: serverList
+        model: serverModel
+        role: "server"
+    }
+
+    ServerList {
+        id: playerList
+        model: rendererModel
+        role: "renderer"
     }
 
     Browse {

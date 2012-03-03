@@ -6,18 +6,6 @@ import org.jensge.UPnP 1.0
 Page {
     property string page;
 
-    tools: ToolBarLayout {
-        ToolIcon {
-            iconId: "toolbar-back"
-            onClicked: {
-                browseModelStack.pop();
-                if (browseModelStack.empty()) {
-                    pageStack.pop()
-                }
-            }
-        }
-    }
-
     Rectangle {
         color: "black"
         anchors.top: title.bottom
@@ -108,6 +96,15 @@ Page {
                     onClicked: {
                         if (type === "container") {
                             server.browse(upnpId, upnpClass);
+                        }
+                    }
+
+                    onPressAndHold: {
+                        if (type !== "container") {
+                            renderer.setAVTransportUri(uri);
+                            if (renderer.state === "STOPPED") {
+                                renderer.play();
+                            }
                         }
                     }
                 }

@@ -3,6 +3,9 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Page {
+    property alias model: deviceListView.model
+    property string role
+
     Rectangle {
         color: "black"
         anchors.top: title.bottom
@@ -12,6 +15,7 @@ Page {
         anchors.right: parent.right
 
         ListView {
+            Component.onCompleted: currentIndex = -1
             id: deviceListView
             width: parent.width
             height: parent.height
@@ -19,6 +23,7 @@ Page {
             cacheBuffer: parent.height + 100
             snapMode: ListView.SnapToItem
             model : serverModel
+
             delegate:  Item {
                 id: listItem
                 height: 88
@@ -45,6 +50,7 @@ Page {
                             text: friendlyName
                             font.weight: Font.Bold
                             font.pixelSize: 26
+                            color: (role !== "server" && index === deviceListView.currentIndex) ? "red" : "white"
                         }
 
                         Label {
@@ -60,6 +66,7 @@ Page {
                 }
 
                 Image {
+                    visible: role === "server"
                     source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
                     anchors.right: parent.right;
                     anchors.verticalCenter: parent.verticalCenter
@@ -70,11 +77,17 @@ Page {
                     anchors.fill: background
                     onClicked: {
                         deviceListView.currentIndex = index;
-                        server.wrapDevice(serverModel.get(index));
-                        server.browse("0");
-                        browse.page = friendlyName
-                        pageStack.push(browse)
+                        if (role === "server") {
+                            server.wrapDevice(serverModel.get(index));
+                            server.browse("0");
+                            browse.page = friendlyName
+                            pageStack.push(browse)
+                        } else {
+                            renderer.wrapDevice(rendererModel.get(index));
+                        }
                     }
+
+                    onPressAndHold: renderer.stop();
                 }
             }
         }
