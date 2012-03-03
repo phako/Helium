@@ -37,7 +37,7 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
 {
     UPnPRenderer *renderer = reinterpret_cast<UPnPRenderer*>(user_data);
     GError *error = 0;
-    char *state_name;
+    char *state_name = 0;
 
     if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
                                                    0,
@@ -47,9 +47,11 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
                                                    G_TYPE_STRING,
                                                    &state_name,
                                                    NULL)) {
-        renderer->setState(QString::fromUtf8(state_name));
+        if (state_name != 0) {
+            renderer->setState(QString::fromUtf8(state_name));
 
-        g_free(state_name);
+            g_free(state_name);
+        }
     } else {
         qDebug() << "Failed to parse last change" << error->message;
         g_error_free(error);
