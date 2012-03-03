@@ -304,26 +304,21 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
                                    NULL);
     QMetaObject::invokeMethod(model, "setBusy", Qt::QueuedConnection,
                               Q_ARG(bool, false));
+    ScopedGPointer scopedResult(result);
     model->m_action = 0;
     if (error != 0) {
         qDebug() << "Browsing failed:" << error->message;
         g_error_free(error);
-        if (result != 0) {
-            g_free (result);
-        }
 
         return;
     }
 
     if (number_returned == 0) {
-        if (result != 0) {
-            g_free(result);
-        }
         return;
     }
 
     QMetaObject::invokeMethod(model, "onBrowseDone", Qt::QueuedConnection,
-                              Q_ARG(QByteArray, QByteArray::fromRawData(result, strlen(result))),
+                              Q_ARG(QByteArray, QByteArray::fromRawData(scopedResult.take(), strlen(result))),
                               Q_ARG(uint, number_returned),
                               Q_ARG(uint, total_matches));
 }

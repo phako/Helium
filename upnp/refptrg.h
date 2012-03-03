@@ -21,6 +21,20 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 
 #include <QDebug>
+#include <QScopedPointer>
+
+template<typename C>
+struct ScopedPointerDestroyHelperGFree
+{
+    static inline void cleanup(C *pointer)
+    {
+        if (pointer != 0) {
+            g_free ((gpointer)pointer);
+        }
+    }
+};
+
+typedef QScopedPointer<char, ScopedPointerDestroyHelperGFree<char> > ScopedGPointer;
 
 /**
  * Keep a reference on a GObject in the current scope using RAII
