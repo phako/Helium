@@ -19,7 +19,6 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #define UPNPSERVERMODEL_H
 
 #include <QSortFilterProxyModel>
-#include "upnpmediaserver.h"
 
 class UPnPServerModel : public QSortFilterProxyModel 
 {
@@ -30,6 +29,7 @@ public:
 Q_SIGNALS:
     
 public Q_SLOTS:
+    void refresh() const;
     QString get(int row) const;
 };
 

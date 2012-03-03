@@ -82,10 +82,11 @@ void UPnPDeviceModel::onDeviceUnavailable(QString udn)
 }
 
 void
-UPnPDeviceModel::on_context_available(GUPnPContextManager *manager,
+UPnPDeviceModel::on_context_available(GUPnPContextManager */*manager*/,
                                       GUPnPContext        *context,
                                       gpointer             user_data)
 {
+    UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
     if (strcmp(gssdp_client_get_interface(GSSDP_CLIENT(context)), "wlan0") != 0) {
         qDebug () << "Ignoring localhost context to not show N9 server twice";
 
@@ -93,10 +94,8 @@ UPnPDeviceModel::on_context_available(GUPnPContextManager *manager,
     }
 
     GUPnPControlPoint *cp = gupnp_control_point_new(context, GSSDP_ALL_RESOURCES);
-    gupnp_context_manager_manage_control_point (manager, cp);
 
-    // context manager takes ownership through extra ref
-    g_object_unref (cp);
+    model->m_control_points << cp;
 
     g_signal_connect(cp,
                      "device-proxy-available",
@@ -116,9 +115,20 @@ UPnPDeviceModel::on_context_available(GUPnPContextManager *manager,
 void
 UPnPDeviceModel::on_context_unavailable(GUPnPContextManager */*manager*/,
                                         GUPnPContext        *context,
-                                        gpointer             /*user_data*/)
+                                        gpointer             user_data)
 {
     qDebug() << "Context unavailable:" << gupnp_context_get_host_ip(context);
+    UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
+
+    QList<GUPnPControlPoint*>::iterator it = model->m_control_points.begin();
+    while (it != model->m_control_points.end()) {
+        if (gupnp_control_point_get_context(*it) == context) {
+            g_object_unref(*it);
+            it = model->m_control_points.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
 
 UPnPDeviceModel *UPnPDeviceModel::getDefault()
@@ -170,16 +180,6 @@ UPnPDeviceModel::~UPnPDeviceModel()
     }
 }
 
-bool UPnPDeviceModel::enabled()
-{
-    return true;
-}
-
-void UPnPDeviceModel::setEnabled(bool enabled)
-{
-    Q_UNUSED(enabled)
-}
-
 int UPnPDeviceModel::rowCount(const QModelIndex& /*parent*/) const
 {
     return m_devices.count();
@@ -218,4 +218,15 @@ QVariant UPnPDeviceModel::data(const QModelIndex &index, int role) const
     }
 
     return QVariant();
+}
+
+void UPnPDeviceModel::refresh()
+{
+    Q_FOREACH(GUPnPControlPoint *cp, m_control_points) {
+        gssdp_resource_browser_set_active(GSSDP_RESOURCE_BROWSER(cp), FALSE);
+    }
+
+    Q_FOREACH(GUPnPControlPoint *cp, m_control_points) {
+        gssdp_resource_browser_set_active(GSSDP_RESOURCE_BROWSER(cp), TRUE);
+    }
 }

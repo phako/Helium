@@ -31,3 +31,8 @@ QString UPnPRendererModel::get(int row) const
     QModelIndex index = mapToSource(this->index(row, 0));
     return sourceModel()->data(index, UPnPDeviceModel::DeviceRoleUdn).toString();
 }
+
+void UPnPRendererModel::refresh() const
+{
+    UPnPDeviceModel::getDefault()->refresh();
+}

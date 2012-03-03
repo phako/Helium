@@ -28,7 +28,6 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 class UPnPDeviceModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(bool enabled READ enabled WRITE setEnabled)
 public:
     enum DeviceRoles {
         DeviceRoleFriendlyName = Qt::UserRole + 1,
@@ -39,8 +38,6 @@ public:
 
     UPnPDeviceModel(QObject *parent = 0);
     ~UPnPDeviceModel();
-    bool enabled ();
-    void setEnabled(bool enabled);
 
     // virtual functions from QAbstractListModel
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -48,6 +45,8 @@ public:
 
     static UPnPDeviceModel *getDefault();
     static GUPnPDeviceProxy *lookup(const QString& udn);
+
+    Q_INVOKABLE void refresh();
 private Q_SLOTS:
     void onDeviceUnavailable(QString udn);
     void onDeviceAvailable(void *device_info);
@@ -66,7 +65,7 @@ private:
     static void on_device_proxy_unavailable(GUPnPControlPoint *cp,
                                             GUPnPDeviceProxy  *proxy,
                                             gpointer           user_data);
-    static void on_context_available(GUPnPContextManager *manager,
+    static void on_context_available(GUPnPContextManager *,
                                      GUPnPContext        *context,
                                      gpointer             user_data);
     static void on_context_unavailable(GUPnPContextManager *manager,

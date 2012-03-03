@@ -19,8 +19,6 @@ along with MediaController.  If not, see <http://www.gnu.org/licenses/>.
 #define UPNPRENDERERMODEL_H
 
 #include <QSortFilterProxyModel>
-#include "upnprenderer.h"
-#include "upnpdevicemodel.h"
 
 class UPnPRendererModel : public QSortFilterProxyModel
 {
@@ -28,6 +26,7 @@ class UPnPRendererModel : public QSortFilterProxyModel
 public:
     UPnPRendererModel(QObject *parent = 0);
 public Q_SLOTS:
+    void refresh() const;
     QString get(int index) const;
 };
 
