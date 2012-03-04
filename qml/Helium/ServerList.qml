@@ -14,6 +14,17 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
 
+        Component {
+            id: selectedHighlight
+            Rectangle {
+                visible: role === "renderer"
+                gradient: Gradient {
+                    GradientStop {position: 0.0; color: "#1078d8" }
+                    GradientStop {position: 1.0; color: "#3890e0" }
+                }
+            }
+        }
+
         ListView {
             Component.onCompleted: currentIndex = -1
             id: deviceListView
@@ -23,6 +34,7 @@ Page {
             cacheBuffer: parent.height + 100
             snapMode: ListView.SnapToItem
             model : serverModel
+            highlight: selectedHighlight
 
             delegate:  Item {
                 id: listItem
@@ -50,7 +62,6 @@ Page {
                             text: friendlyName
                             font.weight: Font.Bold
                             font.pixelSize: 26
-                            color: (role !== "server" && index === deviceListView.currentIndex) ? "red" : "white"
                         }
 
                         Label {
