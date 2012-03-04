@@ -41,7 +41,6 @@ SOURCES += main.cpp \
     upnp/upnpdevicemodel.cpp \
     upnp/upnpservermodel.cpp \
     upnp/upnprenderermodel.cpp \
-    upnp/proxymodel.cpp \
     upnp/browsemodelstack.cpp \
     upnp/browsemodel.cpp
 
@@ -66,7 +65,6 @@ HEADERS += \
     upnp/upnpservermodel.h \
     upnp/upnprenderermodel.h \
     upnp/browsemodel.h \
-    upnp/proxymodel.h \
     upnp/refptrg.h \
     upnp/browsemodelstack.h
 RESOURCES +=
