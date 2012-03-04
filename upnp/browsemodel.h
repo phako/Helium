@@ -67,6 +67,9 @@ public Q_SLOTS:
 
     // QML callable functions
     void refresh();
+
+    // Uh, ugly, but there seems no way to call static funcitons from QML
+    QString formatTime(long duration);
 private Q_SLOTS:
     void onStartBrowse();
     void onBrowseDone(QByteArray result, uint number_returned, uint total_matches);

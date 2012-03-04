@@ -24,7 +24,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpdevicemodel.h"
 
 const int BROWSE_SLICE = 100;
-const char DEFAULT_FILTER[] = "res@size,res@duration,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album";
+const char DEFAULT_FILTER[] = "res@size,res@duration,res@resolution,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album";
 const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
 const char VIDEO_PREFIX[] = "object.item.videoItem";
@@ -69,7 +69,6 @@ int BrowseModel::rowCount(const QModelIndex &/*parent*/) const
 {
     return m_data.count();
 }
-
 
 static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 {
@@ -136,13 +135,51 @@ static QUrl findUriForObject(GUPnPDIDLLiteObject *object)
     return url;
 }
 
-static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
+static QString formatTime(long duration)
 {
     QString result;
+
+    int hours = duration / 60 / 60;
+    duration %= 3600;
+    int minutes = duration / 60;
+    duration %= 60;
+    if ((hours > 0 || minutes > 0 || duration > 0)) {
+        result += QLatin1String(" ");
+    }
+    if (hours > 0) {
+        result += QString::fromLatin1("%1:").arg(hours);
+    }
+    if (minutes > 0 || hours > 0 || duration > 0) {
+        result += QString::fromLatin1("%1:").arg((int) minutes, hours > 0 || minutes > 9 ? 2 : 1, 10, QLatin1Char('0'));
+    }
+    if (duration > 0 || hours > 0 || minutes > 0) {
+        result += QString::fromLatin1("%1").arg((int) duration, 2, 10, QLatin1Char('0'));
+    }
+
+    return result;
+}
+
+static QString formatSize(quint64 size)
+{
+    QString result;
+
     QStringList sizes = QStringList() << QLatin1String("GiB")
                                       << QLatin1String("MiB")
                                       << QLatin1String("KiB")
                                       << QLatin1String("bytes");
+
+    while (size > 1024 && sizes.last() != QLatin1String("GiB")) {
+        size >>= 10;
+        sizes.removeLast();
+    }
+    result += QString::fromLatin1("%1%2").arg(QString::number(size), sizes.last());
+
+    return result;
+}
+
+static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
+{
+    QString result;
 
     GList* resources = gupnp_didl_lite_object_get_resources(object);
     GList* it = resources;
@@ -151,14 +188,14 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
     const char *album = gupnp_didl_lite_object_get_album(object);
 
     if (author != 0) {
-        result += QString::fromLatin1("by %1").arg(QString::fromUtf8(author));
+        result += QString::fromLatin1("%1").arg(QString::fromUtf8(author));
     }
 
     if (album != 0) {
         if (not result.isEmpty()) {
-            result += QLatin1String(" ");
+            result += QLatin1String("|");
         }
-        result += QString::fromLatin1("on %1").arg(QString::fromUtf8(album));
+        result += QString::fromLatin1("%1").arg(QString::fromUtf8(album));
     }
 
     while (it) {
@@ -167,37 +204,30 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
         // use first non-transcoded uri; might be problematic
         if (gupnp_protocol_info_get_dlna_conversion (info) == GUPNP_DLNA_CONVERSION_NONE) {
             long duration = gupnp_didl_lite_resource_get_duration(res);
-            gint64 size = gupnp_didl_lite_resource_get_size64(res);
             if (duration > 0) {
-                int hours = duration / 60 / 60;
-                duration %= 3600;
-                int minutes = duration / 60;
-                duration %= 60;
-                qDebug() << hours << minutes << duration;
-                if ((hours > 0 || minutes > 0 || duration > 0) &&
-                    not result.isEmpty()) {
-                    result += QLatin1String(" ");
+                if (not result.isEmpty()) {
+                    result += " ";
                 }
-                if (hours > 0) {
-                    result += QString::fromLatin1("%1:").arg(hours);
+                result += formatTime(duration);
+
+            }
+
+            int width = gupnp_didl_lite_resource_get_width(res);
+            int height = gupnp_didl_lite_resource_get_height(res);
+            if (width > 0 && height > 0) {
+                if (not result.isEmpty()) {
+                    result += " ";
                 }
-                if (minutes > 0 || hours > 0 || duration > 0) {
-                    result += QString::fromLatin1("%1:").arg((int) minutes, hours > 0 || minutes > 9 ? 2 : 1, 10, QLatin1Char('0'));
-                }
-                if (duration > 0 || hours > 0 || minutes > 0) {
-                    result += QString::fromLatin1("%1").arg((int) duration, 2, 10, QLatin1Char('0'));
+                result += QString::fromLatin1("%1x%2").arg(QString::number(width), QString::number(height));
+            }
+
+            gint64 size = gupnp_didl_lite_resource_get_size64(res);
+            if (size > 0) {
+                if (not result.isEmpty()) {
+                    result += " ";
                 }
 
-                if (size > 0) {
-                    while (size > 1024 && sizes.last() != QLatin1String("GiB")) {
-                        size >>= 10;
-                        sizes.removeLast();
-                    }
-                    if (not result.isEmpty()) {
-                        result += " ";
-                    }
-                    result += QString::fromLatin1("%1%2").arg(QString::number(size), sizes.last());
-                }
+                result += formatSize(size);
             }
 
             break;
@@ -205,8 +235,8 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
         it = it->next;
     }
 
-
     g_list_free_full(resources, g_object_unref);
+
     return result;
 }
 
@@ -360,4 +390,9 @@ void BrowseModel::refresh() {
     m_data.clear();
     QTimer::singleShot(0, this, SLOT(onStartBrowse()));
     endResetModel();
+}
+
+QString BrowseModel::formatTime(long duration)
+{
+    return ::formatTime(duration);
 }
