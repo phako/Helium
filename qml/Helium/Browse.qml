@@ -4,11 +4,11 @@ import com.nokia.meego 1.0
 import org.jensge.UPnP 1.0
 
 Page {
-    property string page;
+    property alias page: pageHeader.text
 
     Rectangle {
         color: "black"
-        anchors.top: title.bottom
+        anchors.top: pageHeader.bottom
         anchors.topMargin: 10
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -115,42 +115,9 @@ Page {
         }
     }
 
-    Rectangle {
-        id: title
-        width: parent.width
-        height: 70
-        color: "#CC09BA"
-
-        Label {
-            id: text
-            text: page
-            elide: Text.ElideRight
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 16
-            platformStyle: LabelStyle {
-                textColor: "white"
-                fontPixelSize: 28
-            }
-        }
-
-        BusyIndicator {
-            anchors.centerIn: refreshButton
-            visible: !browseModel.busy && !browseModel.done
-            running: visible
-            style: BusyIndicatorStyle {
-                size: "small"
-            }
-        }
-
-        ToolIcon {
-            visible: browseModel.done
-            id: refreshButton
-            platformIconId: "icon-m-common-refresh"
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: browseModel.refresh()
-        }
+    PageHeader {
+        id: pageHeader
+        busy: !browseModel.busy && !browseModel.done
+        onClicked: browseModel.refresh()
     }
 }

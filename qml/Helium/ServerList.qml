@@ -5,10 +5,11 @@ import com.nokia.meego 1.0
 Page {
     property alias model: deviceListView.model
     property string role
+    property alias title: pageHeader.text
 
     Rectangle {
         color: "black"
-        anchors.top: title.bottom
+        anchors.top: pageHeader.bottom
         anchors.topMargin: 10
         anchors.bottom: parent.bottom
         anchors.left: parent.left
@@ -95,6 +96,7 @@ Page {
                             pageStack.push(browse)
                         } else {
                             renderer.wrapDevice(rendererModel.get(index));
+                            pageStack.push(player)
                         }
                     }
 
@@ -107,34 +109,9 @@ Page {
         }
     }
 
-    Rectangle {
-        id: title
-        width: parent.width
-        height: 70
-        color: "#CC09BA"
-
-        Label {
-            id: text
-            text: "Servers"
-            elide: Text.ElideRight
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 16
-            platformStyle: LabelStyle {
-                textColor: "white"
-                fontPixelSize: 28
-            }
-        }
-
-        ToolIcon {
-            id: refreshButton
-            platformIconId: "icon-m-common-refresh"
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            onClicked: {
-                serverModel.refresh();
-            }
-        }
+    PageHeader {
+        id: pageHeader
+        busy: false
+        onClicked: model.refresh()
     }
 }
