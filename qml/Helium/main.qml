@@ -35,12 +35,14 @@ PageStackWindow {
         id: serverList
         model: serverModel
         role: "server"
+        title: qsTr("Servers")
     }
 
     ServerList {
         id: playerList
         model: rendererModel
         role: "renderer"
+        title: qsTr("Renderer")
     }
 
     Browse {
