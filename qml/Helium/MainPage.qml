@@ -32,16 +32,24 @@ Page {
                 }
             }
         }
+
         ButtonRow {
             platformStyle: TabButtonStyle {}
             TabButton {
-                iconSource: "image://theme/icon-m-toolbar-list"
+                iconSource: "image://theme/icon-m-toolbar-list-white"
                 tab: pageStackBrowse
             }
             TabButton {
-                iconSource: "image://theme/icon-m-toolbar-mediacontrol-play"
+                iconSource: "image://theme/icon-m-toolbar-mediacontrol-play-white"
                 tab: pageStackPlayer
             }
+            /*TabButton {
+                iconSource: "image://theme/icon-m-content-playlist-inverse"
+            }*/
+        }
+        ToolIcon {
+            iconId: "toolbar-view-menu"
+            onClicked: tabGroup.currentTab = pageStackPlayer
         }
     }
 
