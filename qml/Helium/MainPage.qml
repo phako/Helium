@@ -21,7 +21,8 @@ import com.nokia.meego 1.0
 Page {
     tools: ToolBarLayout {
         ToolIcon {
-            iconId: "toolbar-back"
+            enabled: tabGroup.currentTab.depth > 1
+            iconId: enabled ? "toolbar-back" : "toolbar-back-dimmed"
             onClicked: {
                 if (tabGroup.currentTab === pageStackBrowse) {
                     browseModelStack.pop();
