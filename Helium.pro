@@ -23,14 +23,16 @@ symbian:TARGET.CAPABILITY += NetworkServices
 # CONFIG += mobility
 # MOBILITY +=
 
+# Include GUPnP libs - do this before boostable stuff otherwise that won't work properly
+CONFIG += link_pkgconfig
+PKGCONFIG += gupnp-1.0 gupnp-av-1.0
+
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
-# CONFIG += qdeclarative-boostable
+CONFIG += qdeclarative-boostable
 
 # Add dependency to Symbian components
 # CONFIG += qt-components
 
-CONFIG += link_pkgconfig
-PKGCONFIG += gupnp-1.0 gupnp-av-1.0
 CONFIG += no_keywords
 
 # The .cpp file which was generated for your project. Feel free to hack it.
