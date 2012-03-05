@@ -1,0 +1,7 @@
+- Add proper error handling when any of the actions fails
+- Add proper handling of disappearing devices
+- Player page
+- Playlist
+- Download
+- Sharing plugins (push/upload)
+- Get proper playlist icon for toolbar
