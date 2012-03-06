@@ -54,3 +54,9 @@ void BrowseModelStack::pop()
 
     delete m_stack.takeLast();
 }
+
+void BrowseModelStack::clear()
+{
+    rootContext->setContextProperty("browseModel", &BrowseModel::empty());
+    qDeleteAll(m_stack);
+}

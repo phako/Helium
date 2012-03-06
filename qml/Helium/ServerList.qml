@@ -23,6 +23,25 @@ Page {
     property string role
     property alias title: pageHeader.text
 
+    Connections {
+        target: renderer
+        onUnavailable: {
+            if (role !== "server") {
+                dlgPlayerLost.open()
+            }
+        }
+    }
+
+    QueryDialog {
+        id: dlgPlayerLost
+        titleText: qsTr("Player gone")
+        message: qsTr("Connection to current player was lost")
+        acceptButtonText: qsTr("Ok")
+        onAccepted: {
+            deviceListView.currentIndex = -1
+        }
+    }
+
     Rectangle {
         color: "black"
         anchors.top: pageHeader.bottom

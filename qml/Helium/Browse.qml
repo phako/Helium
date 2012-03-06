@@ -22,6 +22,24 @@ import org.jensge.UPnP 1.0
 Page {
     property alias page: pageHeader.text
 
+    Connections {
+        target: server
+        onUnavailable: {
+            dlgServerLost.open()
+        }
+    }
+
+    QueryDialog {
+        id: dlgServerLost
+        titleText: qsTr("Server gone")
+        message: qsTr("Connection to server \"%1\" was lost").arg(page);
+        acceptButtonText: qsTr("Ok")
+        onAccepted: {
+            browseModelStack.clear();
+            main.pageStackBrowse.pop();
+        }
+    }
+
     Rectangle {
         color: "black"
         anchors.top: pageHeader.bottom

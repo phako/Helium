@@ -47,6 +47,8 @@ public:
     static GUPnPDeviceProxy *lookup(const QString& udn);
 
     Q_INVOKABLE void refresh();
+Q_SIGNALS:
+    void deviceUnavailable(const QString& udn);
 private Q_SLOTS:
     void onDeviceUnavailable(QString udn);
     void onDeviceAvailable(void *device_info);

@@ -1,5 +1,4 @@
 - Add proper error handling when any of the actions fails
-- Add proper handling of disappearing devices
 - Player page
 - Playlist
 - Download

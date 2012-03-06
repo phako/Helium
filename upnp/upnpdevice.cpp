@@ -26,6 +26,8 @@ UPnPDevice::UPnPDevice()
     : QObject(0)
     , m_proxy()
 {
+    connect(UPnPDeviceModel::getDefault(), SIGNAL(deviceUnavailable(QString)),
+            SLOT(onDeviceUnavailable(QString)));
 }
 
 UPnPDevice::~UPnPDevice()
@@ -38,10 +40,27 @@ UPnPDevice::UPnPDevice(const UPnPDevice &other)
 {
 }
 
+void UPnPDevice::onDeviceUnavailable(const QString &udn)
+{
+    if (m_proxy.isEmpty()) {
+        return;
+    }
+
+    if (udn == this->udn()) {
+        wrapDevice(QString());
+        Q_EMIT unavailable();
+    }
+}
+
 void UPnPDevice::wrapDevice(const QString &udn)
 {
+    if (udn.isNull()) {
+        m_proxy = DeviceProxy();
+
+        return;
+    }
     GUPnPDeviceProxy *proxy = UPnPDeviceModel::lookup(udn);
-    m_proxy = RefPtrG<GUPnPDeviceProxy>(proxy);
+    m_proxy = DeviceProxy(proxy);
 }
 
 QString UPnPDevice::friendlyName(void) const

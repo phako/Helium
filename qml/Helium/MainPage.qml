@@ -19,6 +19,9 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Page {
+    property alias pageStackBrowse: pageStackBrowse
+    property alias pageStackPlayer: pageStackPlayer
+
     tools: ToolBarLayout {
         ToolIcon {
             enabled: tabGroup.currentTab.depth > 1

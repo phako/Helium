@@ -29,7 +29,9 @@ PageStackWindow {
         inverted: theme.inverted
     }
 
-    initialPage: MainPage {}
+    initialPage: MainPage {
+        id: main
+    }
 
     ServerList {
         id: serverList

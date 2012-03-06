@@ -79,6 +79,7 @@ void UPnPDeviceModel::onDeviceUnavailable(QString udn)
     g_object_unref(m_deviceInfo[udn]);
     m_deviceInfo.remove(udn);
     endRemoveRows();
+    Q_EMIT deviceUnavailable(udn);
 }
 
 void
@@ -117,7 +118,6 @@ UPnPDeviceModel::on_context_unavailable(GUPnPContextManager */*manager*/,
                                         GUPnPContext        *context,
                                         gpointer             user_data)
 {
-    qDebug() << "Context unavailable:" << gupnp_context_get_host_ip(context);
     UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
 
     QList<GUPnPControlPoint*>::iterator it = model->m_control_points.begin();

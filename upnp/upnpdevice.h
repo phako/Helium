@@ -52,8 +52,10 @@ public:
 Q_SIGNALS:
     Q_REVISION(1) void friendlyNameChanged();
     Q_REVISION(1) void iconChanged();
+    void unavailable();
 
-public Q_SLOTS:
+private Q_SLOTS:
+    void onDeviceUnavailable(const QString& udn);
 protected:
     DeviceProxy m_proxy;
 };

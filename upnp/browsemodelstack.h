@@ -33,6 +33,7 @@ Q_SIGNALS:
 public Q_SLOTS:
     void pop();
     bool empty() { return m_stack.isEmpty(); }
+    void clear();
 
 private:
     static BrowseModelStack m_instance;
