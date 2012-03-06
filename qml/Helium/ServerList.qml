@@ -89,6 +89,19 @@ Page {
 
                 Row {
                     anchors.fill: parent
+                    anchors.leftMargin: 10
+                    anchors.rightMargin: 10
+
+                    // make configurable
+                    Image {
+                        visible: false
+                        asynchronous: true
+                        source: icon
+                        width: 64
+                        height: 64
+                        fillMode: Image.PreserveAspectFit
+                        id: imgIcon
+                    }
 
                     Column {
                         anchors.verticalCenter: parent.verticalCenter
