@@ -45,6 +45,7 @@ public:
 
 Q_SIGNALS:
     void ready();
+
 public Q_SLOTS:
 
 private:

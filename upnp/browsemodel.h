@@ -63,6 +63,8 @@ Q_SIGNALS:
     // property signals
     void busyChanged();
     void doneChanged();
+
+    void error(int code, const QString& message);
 public Q_SLOTS:
 
     // QML callable functions

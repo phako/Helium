@@ -22,10 +22,32 @@ import org.jensge.UPnP 1.0
 Page {
     property alias page: pageHeader.text
 
+    QueryDialog {
+        id: dlgError
+        property string errorMessage
+        property int    errorId
+
+        titleText: qsTr("Error")
+        message: qsTr("Error accessing server \"%1\":\n%2\n(Error code %3)").arg(page).arg(errorMessage).arg(errorId)
+        acceptButtonText: qsTr("Ok")
+        onAccepted: {
+            browseModelStack.pop();
+            if (browseModelStack.empty()) {
+                main.pageStackBrowse.pop();
+            }
+        }
+    }
+
     Connections {
         target: server
         onUnavailable: {
             dlgServerLost.open()
+        }
+
+        onError: {
+            dlgError.errorMessage=message;
+            dlgError.errorId=code;
+            dlgError.open();
         }
     }
 

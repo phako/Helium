@@ -53,6 +53,7 @@ Q_SIGNALS:
     Q_REVISION(1) void friendlyNameChanged();
     Q_REVISION(1) void iconChanged();
     void unavailable();
+    void error(int code, const QString& message);
 
 private Q_SLOTS:
     void onDeviceUnavailable(const QString& udn);

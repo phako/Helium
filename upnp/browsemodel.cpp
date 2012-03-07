@@ -322,7 +322,7 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     GError *error = 0;
     guint number_returned;
     guint total_matches;
-    char *result;
+    char *result = 0;
     BrowseModel *model = reinterpret_cast<BrowseModel *>(user_data);
 
     gupnp_service_proxy_end_action(proxy,
@@ -337,6 +337,10 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     ScopedGPointer scopedResult(result);
     model->m_action = 0;
     if (error != 0) {
+        QString message = QString::fromUtf8(error->message);
+        QMetaObject::invokeMethod(model, "error", Qt::QueuedConnection,
+                                  Q_ARG(int, error->code),
+                                  Q_ARG(QString, message));
         qDebug() << "Browsing failed:" << error->message;
         g_error_free(error);
 

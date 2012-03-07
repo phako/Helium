@@ -156,9 +156,10 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass)
         BrowseModel *model = new BrowseModel(m_contentDirectory, id, m_sortCriteria[sortOrder]);
         BrowseModelStack::getDefault().push(model);
         QTimer::singleShot(0, model, SLOT(onStartBrowse()));
+        connect(model,SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
     } else {
         BrowseModel *model = new BrowseModel(m_contentDirectory, id);
         BrowseModelStack::getDefault().push(model);
         connect(this, SIGNAL(ready()), model, SLOT(onStartBrowse()));
-    }
+        connect(model, SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));    }
 }
