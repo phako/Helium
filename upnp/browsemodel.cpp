@@ -100,11 +100,11 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     if (thumbnail.isEmpty()) {
         if (strncmp(upnp_class, IMAGE_PREFIX, sizeof(IMAGE_PREFIX) - 1) == 0) {
-            thumbnail.setUrl("image://theme/icon-m-content-image-inverse");
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-image-inverse"));
         } else if (strncmp(upnp_class, VIDEO_PREFIX, sizeof(VIDEO_PREFIX) - 1) == 0) {
-            thumbnail.setUrl("image://theme/icon-m-content-videos-inverse");
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-videos-inverse"));
         } else if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
-            thumbnail.setUrl("image://theme/icon-m-content-audio-inverse");
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-audio-inverse"));
         }
     }
 
@@ -176,6 +176,7 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
         result += QString::fromLatin1("%1").arg(QString::fromUtf8(album));
     }
 
+    const QLatin1String empty = QLatin1String(" ");
     while (it) {
         GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
         GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
@@ -184,7 +185,7 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
             long duration = gupnp_didl_lite_resource_get_duration(res);
             if (duration > 0) {
                 if (not result.isEmpty()) {
-                    result += " ";
+                    result += empty;
                 }
                 result += formatTime(duration);
 
@@ -194,7 +195,7 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
             int height = gupnp_didl_lite_resource_get_height(res);
             if (width > 0 && height > 0) {
                 if (not result.isEmpty()) {
-                    result += " ";
+                    result += empty;
                 }
                 result += QString::fromLatin1("%1x%2").arg(QString::number(width), QString::number(height));
             }
@@ -202,7 +203,7 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
             gint64 size = gupnp_didl_lite_resource_get_size64(res);
             if (size > 0) {
                 if (not result.isEmpty()) {
-                    result += " ";
+                    result += empty;
                 }
 
                 result += formatSize(size);
@@ -233,7 +234,7 @@ QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) co
         return QString();
     }
 
-    return gupnp_didl_lite_resource_get_uri(resource);
+    return QString::fromUtf8(gupnp_didl_lite_resource_get_uri(resource));
 }
 
 QVariant BrowseModel::data(const QModelIndex &index, int role) const
@@ -256,7 +257,7 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
         return QString::fromUtf8(gupnp_didl_lite_object_get_upnp_class(object));
     case BrowseRoleIcon:
         if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
-            return QUrl("image://theme/icon-l-folder-empty");
+            return QUrl(QLatin1String("image://theme/icon-l-folder-empty"));
         } else {
             return findIconForObject(object);
         }

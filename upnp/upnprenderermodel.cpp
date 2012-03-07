@@ -18,12 +18,14 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnprenderermodel.h"
 #include "upnpdevicemodel.h"
 
+const QLatin1String RENDERER_PATTERN = QLatin1String("^urn:schemas-upnp-org:device:MediaRenderer:\\d+");
+
 UPnPRendererModel::UPnPRendererModel(QObject *parent)
    : QSortFilterProxyModel (parent)
 {
     setSourceModel(UPnPDeviceModel::getDefault());
     setFilterRole(UPnPDeviceModel::DeviceRoleType);
-    setFilterRegExp(QRegExp("^urn:schemas-upnp-org:device:MediaRenderer:\\d+"));
+    setFilterRegExp(QRegExp(RENDERER_PATTERN));
 }
 
 QString UPnPRendererModel::get(int row) const

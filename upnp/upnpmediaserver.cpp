@@ -25,7 +25,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 const char UPnPMediaServer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaServer:";
 const char UPnPMediaServer::CONTENT_DIRECTORY_SERVICE[] = "urn:schemas-upnp-org:service:ContentDirectory";
-
+const QLatin1String MUSIC_ALBUM_CLASS = QLatin1String("object.container.album.musicAlbum");
 
 struct BrowseTask {
     QString                     containerId;
@@ -161,7 +161,7 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
 void UPnPMediaServer::browse(const QString &id, const QString &upnpClass, const QString &protocolInfo)
 {
     SortOrder sortOrder = SORT_DEFAULT;
-    if (upnpClass.startsWith(QLatin1String("object.container.album.musicAlbum"))) {
+    if (upnpClass.startsWith(MUSIC_ALBUM_CLASS)) {
         sortOrder = SORT_MUSIC_ALUBM;
     }
 

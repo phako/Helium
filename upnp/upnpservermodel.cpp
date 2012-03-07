@@ -18,12 +18,14 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpservermodel.h"
 #include "upnpdevicemodel.h"
 
+const QLatin1String SERVER_PATTERN = QLatin1String("^urn:schemas-upnp-org:device:MediaServer:\\d+");
+
 UPnPServerModel::UPnPServerModel(QObject *parent) :
     QSortFilterProxyModel (parent)
 {
     setSourceModel(UPnPDeviceModel::getDefault());
     setFilterRole(UPnPDeviceModel::DeviceRoleType);
-    setFilterRegExp(QRegExp("^urn:schemas-upnp-org:device:MediaServer:\\d+"));
+    setFilterRegExp(QRegExp(SERVER_PATTERN));
 }
 
 

@@ -71,3 +71,5 @@ HEADERS += \
     upnp/refptrg.h \
     upnp/browsemodelstack.h
 RESOURCES +=
+
+DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
