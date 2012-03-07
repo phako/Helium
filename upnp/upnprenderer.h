@@ -28,6 +28,7 @@ class UPnPRenderer : public UPnPDevice
 {
     Q_OBJECT
     Q_PROPERTY(QString state READ state NOTIFY stateChanged REVISION 1)
+    Q_PROPERTY(QString protocolInfo READ protocolInfo NOTIFY protocolInfoChanged)
 public:
     static const char DEVICE_TYPE[];
     static const char AV_TRANSPORT_SERVICE[];
@@ -38,10 +39,13 @@ public:
     QString state() { return m_state; }
     void setState(const QString& state);
 
+    QString protocolInfo() { return m_protocolInfo; }
+
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
 
 Q_SIGNALS:
     void stateChanged(void);
+    void protocolInfoChanged(void);
 
 public Q_SLOTS:
     // AVTransport:1 mandatory
@@ -57,6 +61,10 @@ private:
                         GUPnPServiceProxyAction *action,
                         gpointer                 user_data);
 
+    static void on_get_protocol_info(GUPnPServiceProxy       *proxy,
+                                     GUPnPServiceProxyAction *action,
+                                     gpointer                 user_data);
+
     static void on_transport_state_changed(GUPnPServiceProxy */*service*/,
                                            const char        */*variable*/,
                                            GValue            *value,
@@ -67,7 +75,9 @@ private:
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
     ServiceProxy m_avTransport;
+    ServiceProxy m_connectionManager;
     QString m_state;
+    QString m_protocolInfo;
 };
 
 #endif // UPNPRENDERER_H

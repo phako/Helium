@@ -34,6 +34,7 @@ BrowseModel BrowseModel::m_empty;
 BrowseModel::BrowseModel(const ServiceProxy &proxy,
                          const QString      &id,
                          const QString      &sortCriteria,
+                         const QString      &protocolInfo,
                          QObject            *parent)
     : QAbstractListModel(parent)
     , m_contentDirectory(proxy)
@@ -43,6 +44,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_done(false)
     , m_action(0)
     , m_sortCriteria(sortCriteria)
+    , m_protocolInfo(protocolInfo)
 {
     QHash<int, QByteArray> roles;
 
@@ -109,30 +111,6 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
     g_list_free_full(resources, g_object_unref);
 
     return thumbnail;
-}
-
-static QUrl findUriForObject(GUPnPDIDLLiteObject *object)
-{
-    QUrl url;
-
-    GList* resources = gupnp_didl_lite_object_get_resources(object);
-    GList* it = resources;
-
-    while (it) {
-        GUPnPDIDLLiteResource *res = (GUPnPDIDLLiteResource*) it->data;
-        GUPnPProtocolInfo *info = gupnp_didl_lite_resource_get_protocol_info(res);
-        // use first non-transcoded uri; might be problematic
-        if (gupnp_protocol_info_get_dlna_conversion (info) == GUPNP_DLNA_CONVERSION_NONE) {
-            url.setUrl(QString::fromUtf8(gupnp_didl_lite_resource_get_uri(res)));
-
-            break;
-        }
-        it = it->next;
-    }
-
-    g_list_free_full(resources, g_object_unref);
-
-    return url;
 }
 
 static QString formatTime(long duration)
@@ -240,6 +218,24 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
     return result;
 }
 
+QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) const
+{
+    DIDLLiteObject object = m_data.at(index);
+    if (object.isEmpty()) {
+        return QString();
+    }
+
+    RefPtrG<GUPnPDIDLLiteResource> resource = RefPtrG<GUPnPDIDLLiteResource>::wrap(
+               gupnp_didl_lite_object_get_compat_resource(object,
+                                                          protocolInfo.toUtf8().constData(),
+                                                          FALSE));
+    if (resource.isEmpty()) {
+        return QString();
+    }
+
+    return gupnp_didl_lite_resource_get_uri(resource);
+}
+
 QVariant BrowseModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {
@@ -266,7 +262,7 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
         }
     case BrowseRoleURI:
         if (GUPNP_IS_DIDL_LITE_ITEM(object)) {
-            return findUriForObject(object);
+            return getCompatibleUri(index.row(), m_protocolInfo);
         }
         return QVariant();
     case BrowseRoleType:
@@ -399,4 +395,13 @@ void BrowseModel::refresh() {
 QString BrowseModel::formatTime(long duration)
 {
     return ::formatTime(duration);
+}
+
+void BrowseModel::setProtocolInfo(const QString& protocolInfo)
+{
+    if (protocolInfo != m_protocolInfo) {
+        m_protocolInfo = protocolInfo;
+        Q_EMIT protocolInfoChanged();
+        Q_EMIT dataChanged(index(0), index(m_data.count() - 1));
+    }
 }

@@ -110,13 +110,14 @@ Page {
                     anchors.rightMargin: 10
                     spacing: 10
 
-                    Image {
+                    AnnotatedImage {
+                        annotated: uri === ""
+                        id: imgIcon
                         asynchronous: true
                         source: icon
                         width: 64
                         height: 64
                         fillMode: Image.PreserveAspectFit
-                        id: imgIcon
                     }
 
                     Column {
@@ -153,12 +154,12 @@ Page {
                     anchors.fill: background
                     onClicked: {
                         if (type === "container") {
-                            server.browse(upnpId, upnpClass);
+                            server.browse(upnpId, upnpClass, renderer.protocolInfo);
                         }
                     }
 
                     onPressAndHold: {
-                        if (type !== "container") {
+                        if (type !== "container" && uri !== "") {
                             renderer.setAVTransportUri(uri);
                             if (renderer.state === "STOPPED") {
                                 renderer.play();

@@ -61,6 +61,10 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
 UPnPRenderer::UPnPRenderer()
     : UPnPDevice()
     , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
+    , m_avTransport()
+    , m_connectionManager()
+    , m_state(QLatin1String("STOPPED"))
+    , m_protocolInfo(QLatin1String("*:*:*:*"))
 {
 }
 
@@ -92,12 +96,45 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     }
 
     m_avTransport = getService(UPnPRenderer::AV_TRANSPORT_SERVICE);
+    m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
     gupnp_service_proxy_add_notify(m_avTransport,
                                    "LastChange", G_TYPE_STRING,
                                    UPnPRenderer::on_transport_state_changed,
                                    this);
 
     gupnp_service_proxy_set_subscribed(m_avTransport, TRUE);
+    gupnp_service_proxy_begin_action(m_connectionManager,
+                                     "GetProtocolInfo",
+                                     UPnPRenderer::on_get_protocol_info,
+                                     this,
+                                     NULL);
+}
+
+void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+{
+    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
+    char *protocol_info = 0;
+    GError *error = 0;
+
+    gupnp_service_proxy_end_action(proxy,
+                                   action,
+                                   &error,
+                                   "Sink", G_TYPE_STRING, &protocol_info,
+                                   NULL);
+    if (error != 0) {
+        QMetaObject::invokeMethod(self, "error",
+                                  Q_ARG(int, error->code),
+                                  Q_ARG(QString, QString::fromUtf8(error->message)));
+        g_error_free(error);
+
+        self->m_protocolInfo = QLatin1String("");
+    } else {
+        self->m_protocolInfo = QString::fromUtf8(protocol_info);
+        g_free(protocol_info);
+    }
+
+    QMetaObject::invokeMethod(self, "protocolInfoChanged", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
 }
 
 void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,

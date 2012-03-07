@@ -31,6 +31,7 @@ class BrowseModel : public QAbstractListModel
     Q_OBJECT
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool done READ done NOTIFY doneChanged)
+    Q_PROPERTY(QString protocolInfo READ protocolInfo WRITE setProtocolInfo NOTIFY protocolInfoChanged)
 public:
     enum BrowseRoles {
         BrowseRoleTitle = Qt::DisplayRole,
@@ -45,6 +46,7 @@ public:
     explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),
                          const QString      &id = QLatin1String("0"),
                          const QString      &sortCriteria = QLatin1String(""),
+                         const QString      &protocolInfo = QLatin1String("*:*:*:*"),
                          QObject            *parent = 0);
     ~BrowseModel();
 
@@ -55,6 +57,8 @@ public:
     // property getters
     bool busy() const { return m_busy; }
     bool done() const { return m_done; }
+    QString protocolInfo() const { return m_protocolInfo; }
+    void setProtocolInfo(const QString& protocolInfo);
 
     // static functions
     static BrowseModel &empty() { return m_empty; }
@@ -63,6 +67,7 @@ Q_SIGNALS:
     // property signals
     void busyChanged();
     void doneChanged();
+    void protocolInfoChanged();
 
     void error(int code, const QString& message);
 public Q_SLOTS:
@@ -101,6 +106,8 @@ private:
                                GUPnPDIDLLiteObject *item,
                                gpointer             user_data);
 
+    QString getCompatibleUri(int index, const QString& protocolInfo) const;
+
     QList<DIDLLiteObject>    m_data;
     ServiceProxy             m_contentDirectory;
     QString                  m_id;
@@ -109,6 +116,7 @@ private:
     bool                     m_done;
     GUPnPServiceProxyAction *m_action;
     QString                  m_sortCriteria;
+    QString                  m_protocolInfo;
 };
 
 #endif // BROWSEMODEL_H

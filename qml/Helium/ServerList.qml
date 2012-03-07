@@ -139,7 +139,7 @@ Page {
                         deviceListView.currentIndex = index;
                         if (role === "server") {
                             server.wrapDevice(serverModel.get(index));
-                            server.browse("0");
+                            server.browse("0", "object.container", renderer.protocolInfo);
                             browse.page = friendlyName
                             pageStack.push(browse)
                         } else {

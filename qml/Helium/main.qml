@@ -53,6 +53,9 @@ PageStackWindow {
 
     UPnPRenderer {
         id: renderer
+        onProtocolInfoChanged: {
+            browseModel.protocolInfo = renderer.protocolInfo;
+        }
     }
 
     UPnPMediaServer {

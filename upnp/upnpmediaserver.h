@@ -43,10 +43,9 @@ public:
     ~UPnPMediaServer();
 
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
-    Q_INVOKABLE void browse(const QString &id = QLatin1String("0"), const QString &upnpClass = QLatin1String("object.container"));
-
-Q_SIGNALS:
-    void ready();
+    Q_INVOKABLE void browse(const QString &id = QLatin1String("0"),
+                            const QString &upnpClass = QLatin1String("object.container"),
+                            const QString &protocolInfo = QLatin1String(""));
 
 private Q_SLOTS:
     void startBrowsing();
