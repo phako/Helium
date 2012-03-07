@@ -46,13 +46,18 @@ void BrowseModelStack::pop()
         return;
     }
 
-    if (m_stack.count() == 1) {
+    QScopedPointer<BrowseModel> head(m_stack.takeLast());
+
+    if (m_stack.count() == 0) {
         rootContext->setContextProperty("browseModel", &BrowseModel::empty());
     } else {
-        rootContext->setContextProperty("browseModel", m_stack.at(m_stack.count() - 2));
+        rootContext->setContextProperty("browseModel", m_stack.last());
     }
 
-    delete m_stack.takeLast();
+    // don't delete the empty model
+    if (head.data() == &BrowseModel::empty()) {
+        head.take();
+    }
 }
 
 void BrowseModelStack::clear()

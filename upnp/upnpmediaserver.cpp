@@ -26,13 +26,25 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 const char UPnPMediaServer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaServer:";
 const char UPnPMediaServer::CONTENT_DIRECTORY_SERVICE[] = "urn:schemas-upnp-org:service:ContentDirectory";
 
+
+struct BrowseTask {
+    QString                     containerId;
+    UPnPMediaServer::SortOrder  sortOrder;
+};
+
 UPnPMediaServer::UPnPMediaServer()
     : UPnPDevice()
     , m_contentDirectory()
     , m_connectionManager()
     , m_protocolInfo()
     , m_sortCriteria()
+    , m_tasks()
 {
+}
+
+UPnPMediaServer::~UPnPMediaServer()
+{
+    qDeleteAll(m_tasks);
 }
 
 void UPnPMediaServer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
@@ -152,14 +164,38 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass)
         sortOrder = SORT_MUSIC_ALUBM;
     }
 
+    BrowseTask *task = new BrowseTask;
+    task->containerId = id;
+    task->sortOrder = sortOrder;
+    m_tasks << task;
+
+    // Browse empty model to trigger busy indicator
+    BrowseModelStack::getDefault().push(&BrowseModel::empty());
     if (isReady()) {
-        BrowseModel *model = new BrowseModel(m_contentDirectory, id, m_sortCriteria[sortOrder]);
-        BrowseModelStack::getDefault().push(model);
-        QTimer::singleShot(0, model, SLOT(onStartBrowse()));
-        connect(model,SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
+        QTimer::singleShot(0, this, SLOT(startBrowsing()));
     } else {
-        BrowseModel *model = new BrowseModel(m_contentDirectory, id);
-        BrowseModelStack::getDefault().push(model);
-        connect(this, SIGNAL(ready()), model, SLOT(onStartBrowse()));
-        connect(model, SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));    }
+        connect(this, SIGNAL(ready()), SLOT(startBrowsing()));
+    }
+}
+
+void UPnPMediaServer::startBrowsing()
+{
+    disconnect(this, SLOT(startBrowsing()));
+
+    qDebug() << "startBrowsing called";
+    QScopedPointer<BrowseTask> task(m_tasks.takeFirst());
+
+    // and remove that model again
+    BrowseModelStack::getDefault().pop();
+    BrowseModel *model = new BrowseModel(m_contentDirectory,
+                                         task->containerId,
+                                         m_sortCriteria[task->sortOrder]);
+    BrowseModelStack::getDefault().push(model);
+    QTimer::singleShot(0, model, SLOT(onStartBrowse()));
+    connect(model,SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
+
+    // not very likely, but let's check it anyway
+    if (m_tasks.count() > 0) {
+        QTimer::singleShot(0, this, SLOT(startBrowsing()));
+    }
 }
