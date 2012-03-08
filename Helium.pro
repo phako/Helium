@@ -35,6 +35,8 @@ CONFIG += qdeclarative-boostable
 
 CONFIG += no_keywords
 
+QT += network
+
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \
     upnp/upnprenderer.cpp \

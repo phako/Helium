@@ -30,6 +30,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnp/browsemodelstack.h"
 
 #include <QtDeclarative>
+#include <QNetworkConfigurationManager>
 
 QDeclarativeContext *rootContext;
 
@@ -54,16 +55,24 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     UPnPServerModel serverModel;
     UPnPRendererModel rendererModel;
 
+    // only annoy the user on start-up by showing the connection dialog.
+    // GUPnP can handle appearing and disappearing network devices itself quite
+    // fine so there's no need to listen and pop-up that stupid connection
+    // dialog all the time
+    QNetworkConfigurationManager manager;
+    QNetworkSession networkSession(manager.defaultConfiguration());
+
     QmlApplicationViewer viewer;
     rootContext = viewer.rootContext();
     rootContext->setContextProperty(QLatin1String("serverModel"), &serverModel);
     rootContext->setContextProperty(QLatin1String("rendererModel"), &rendererModel);
     rootContext->setContextProperty(QLatin1String("browseModel"), &BrowseModel::empty());
     rootContext->setContextProperty(QLatin1String("browseModelStack"), &BrowseModelStack::getDefault());
+    rootContext->setContextProperty(QLatin1String("online"), manager.isOnline());
+    rootContext->setContextProperty(QLatin1String("networkSession"), &networkSession);
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();
-
 
     return app->exec();
 }

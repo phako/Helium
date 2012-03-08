@@ -70,4 +70,10 @@ Page {
             pageStackPlayer.push(playerList);
         }
     }
+
+    Component.onCompleted: {
+        if (!online) {
+            networkSession.open();
+        }
+    }
 }
