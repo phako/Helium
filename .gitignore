@@ -1,3 +1,5 @@
 moc_*
 *.o
 *.pro.user
+*~
+*.orig
