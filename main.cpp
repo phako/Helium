@@ -43,6 +43,14 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     QScopedPointer<QApplication> app(createApplication(argc, argv));
 
+    QString locale = QLocale::system().name();
+    QTranslator translator;
+    if (!(translator.load(QLatin1String("tr_") + locale, QLatin1String(":/")))) {
+        translator.load(QLatin1String("tr_en"), QLatin1String(":/"));
+    }
+
+    app->installTranslator(&translator);
+
     UPnPServerModel serverModel;
     UPnPRendererModel rendererModel;
 
