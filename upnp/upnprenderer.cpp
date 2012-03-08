@@ -153,7 +153,7 @@ void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
     }
 }
 
-void UPnPRenderer::setAVTransportUri(const QString &uri)
+void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData)
 {
     gupnp_service_proxy_begin_action(m_avTransport,
                                      "SetAVTransportURI",
@@ -161,7 +161,7 @@ void UPnPRenderer::setAVTransportUri(const QString &uri)
                                      this,
                                      "InstanceID", G_TYPE_STRING, "0",
                                      "CurrentURI", G_TYPE_STRING, uri.toUtf8().constData(),
-                                     "CurrentURIMetaData", G_TYPE_STRING, "",
+                                     "CurrentURIMetaData", G_TYPE_STRING, metaData.toUtf8().constData(),
                                      NULL);
 }
 

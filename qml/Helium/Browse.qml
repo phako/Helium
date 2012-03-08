@@ -160,7 +160,7 @@ Page {
 
                     onPressAndHold: {
                         if (type !== "container" && uri !== "") {
-                            renderer.setAVTransportUri(uri);
+                            renderer.setAVTransportUri(uri, metadata);
                             if (renderer.state === "STOPPED") {
                                 renderer.play();
                             }

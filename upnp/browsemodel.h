@@ -40,7 +40,8 @@ public:
         BrowseRoleIcon,
         BrowseRoleURI,
         BrowseRoleType,
-        BrowseRoleDetail
+        BrowseRoleDetail,
+        BrowseRoleMetaData
     };
 
     explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),

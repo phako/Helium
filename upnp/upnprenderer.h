@@ -49,7 +49,7 @@ Q_SIGNALS:
 
 public Q_SLOTS:
     // AVTransport:1 mandatory
-    void setAVTransportUri(const QString& uri);
+    void setAVTransportUri(const QString& uri, const QString& metaData = QLatin1String(""));
     void play();
     void stop();
 private:

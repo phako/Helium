@@ -55,6 +55,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     roles[BrowseRoleType] = "type";
     roles[BrowseRoleDetail] = "detail";
     roles[BrowseRoleURI] = "uri";
+    roles[BrowseRoleMetaData] = "metadata";
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
@@ -277,6 +278,23 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
             return QString();
         }
         return createDetailsForObject(object);
+    case BrowseRoleMetaData:
+        if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
+            return QString();
+        } else {
+            xmlNode *node = gupnp_didl_lite_object_get_xml_node(object);
+            xmlChar *buffer;
+            int length;
+            xmlDocDumpMemoryEnc((xmlDocPtr) node,
+                                &buffer,
+                                &length,
+                                "UTF-8");
+            QString result = QString::fromUtf8((char *)buffer, length);
+            xmlFree(BAD_CAST(buffer));
+
+            return result;
+        }
+        return QString();
     default:
         return QVariant();
     }
