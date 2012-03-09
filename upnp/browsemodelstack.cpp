@@ -46,7 +46,7 @@ void BrowseModelStack::pop()
         return;
     }
 
-    QScopedPointer<BrowseModel> head(m_stack.takeLast());
+    BrowseModel *head = m_stack.takeLast();
 
     if (m_stack.count() == 0) {
         rootContext->setContextProperty(QLatin1String("browseModel"), &BrowseModel::empty());
@@ -55,13 +55,19 @@ void BrowseModelStack::pop()
     }
 
     // don't delete the empty model
-    if (head.data() == &BrowseModel::empty()) {
-        head.take();
+    if (head != &BrowseModel::empty()) {
+        head->deleteLater();
     }
 }
 
 void BrowseModelStack::clear()
 {
     rootContext->setContextProperty(QLatin1String("browseModel"), &BrowseModel::empty());
-    qDeleteAll(m_stack);
+    Q_FOREACH(BrowseModel* model, m_stack) {
+        if (model != &BrowseModel::empty()) {
+            model->deleteLater();
+        }
+    }
+
+    m_stack.clear();
 }
