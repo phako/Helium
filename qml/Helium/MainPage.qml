@@ -31,6 +31,7 @@ Page {
                     browseModelStack.pop();
                     if (browseModelStack.empty()) {
                         pageStackBrowse.pop()
+                        server.wrapDevice("");
                     }
                 }
             }
