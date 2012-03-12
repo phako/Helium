@@ -363,6 +363,8 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
     }
 
     if (number_returned == 0) {
+        QMetaObject::invokeMethod(model, "setDone", Qt::QueuedConnection,
+                                  Q_ARG(bool, true));
         return;
     }
 
