@@ -222,15 +222,29 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
 
 QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) const
 {
+    RefPtrG<GUPnPDIDLLiteResource> resource;
     DIDLLiteObject object = m_data.at(index);
+
     if (object.isEmpty()) {
         return QString();
     }
 
-    RefPtrG<GUPnPDIDLLiteResource> resource = RefPtrG<GUPnPDIDLLiteResource>::wrap(
+    // work-around GNOME bug 671246
+    QStringList protocolInfoList = protocolInfo.split(QLatin1Char(','));
+    while (protocolInfoList.size() > 0) {
+        int split = MIN(255, protocolInfoList.size());
+        QString protocolInfoStrip = QStringList(protocolInfoList.mid(0, split)).join(QLatin1String(","));
+        protocolInfoList = protocolInfoList.mid(split);
+
+        resource = RefPtrG<GUPnPDIDLLiteResource>::wrap(
                gupnp_didl_lite_object_get_compat_resource(object,
-                                                          protocolInfo.toUtf8().constData(),
+                                                          protocolInfoStrip.toUtf8().constData(),
                                                           FALSE));
+        if (not resource.isEmpty()) {
+            break;
+        }
+    }
+
     if (resource.isEmpty()) {
         return QString();
     }
