@@ -71,6 +71,7 @@ Page {
             snapMode: ListView.SnapToItem
             model : serverModel
             highlight: selectedHighlight
+            highlightMoveSpeed: -1
 
             delegate:  Item {
                 id: listItem
