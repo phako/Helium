@@ -30,45 +30,50 @@ Item {
         source: "image://theme/meegotouch-list-background-pressed-center"
     }
 
-    Row {
-        anchors.fill: parent
+    AnnotatedImage {
+        id: imgIcon
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
         anchors.leftMargin: 10
-        anchors.rightMargin: 10
-        spacing: 10
+        annotated: uri === ""
+        asynchronous: true
+        source: icon
+        width: 64
+        height: 64
+        fillMode: Image.PreserveAspectFit
+    }
 
-        AnnotatedImage {
-            annotated: uri === ""
-            id: imgIcon
-            asynchronous: true
-            source: icon
-            width: 64
-            height: 64
-            fillMode: Image.PreserveAspectFit
+    Column {
+        anchors.left: imgIcon.right
+        anchors.leftMargin: 10
+        anchors.verticalCenter: imgIcon.verticalCenter
+        anchors.right: (imgDrilldown.visible ? imgDrilldown.left : listItem.right)
+        anchors.rightMargin: 10
+
+        Label {
+            id: mainText
+            width: parent.width
+            text: model.title
+            font.weight: Font.Bold
+            font.pixelSize: 26
+            elide: Text.ElideRight
         }
 
-        Column {
-            anchors.verticalCenter: imgIcon.verticalCenter
-
-            Label {
-                id: mainText
-                text: model.title
-                font.weight: Font.Bold
-                font.pixelSize: 26
-                elide: Text.ElideRight
-            }
-
-            Label {
-                //visible: model.type === "container";
-                id: subText
-                text: model.detail
-                font.weight: Font.Light
-                font.pixelSize: 22
-                color: "#cc6633"
-            }
+        Label {
+            visible: model.detail !== ""
+            id: subText
+            width: parent.width
+            text: model.detail
+            font.weight: Font.Light
+            font.pixelSize: 22
+            color: "dark grey"
+            elide: Text.ElideRight
         }
     }
 
     Image {
+        id: imgDrilldown
         visible: type === "container"
         source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
         anchors.right: parent.right;
@@ -79,7 +84,6 @@ Item {
         id: mouseArea
         anchors.fill: background
         onClicked: {
-            console.log("onClicked");
             if (type === "container") {
                 server.browse(upnpId, upnpClass, renderer.protocolInfo);
             }
