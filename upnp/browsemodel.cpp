@@ -28,6 +28,10 @@ const char DEFAULT_FILTER[] = "res@size,res@duration,res@resolution,dc:title,upn
 const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
 const char VIDEO_PREFIX[] = "object.item.videoItem";
+const char MUSIC_ALBUM_CLASS[] = "object.container.album.musicAlbum";
+const char ARTIST_CLASS[] = "object.container.person.musicArtist";
+const char GENRE_CLASS[] = "object.container.genre.musicGenre";
+const char CONTAINER_PREFIX[] = "object.container";
 
 BrowseModel BrowseModel::m_empty;
 
@@ -81,7 +85,8 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     const char *upnp_class = gupnp_didl_lite_object_get_upnp_class (object);
 
-    if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
+    if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0 ||
+        strncmp(upnp_class, MUSIC_ALBUM_CLASS, sizeof(MUSIC_ALBUM_CLASS) - 1) == 0) {
         const char *album_art_uri = gupnp_didl_lite_object_get_album_art(object);
         thumbnail.setUrl(QString::fromUtf8(album_art_uri));
     } else {
@@ -106,6 +111,14 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
             thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-videos-inverse"));
         } else if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0) {
             thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-audio-inverse"));
+        } else if (strncmp(upnp_class, MUSIC_ALBUM_CLASS, sizeof(MUSIC_ALBUM_CLASS) - 1) == 0) {
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-album-inverse"));
+        } else if (strncmp(upnp_class, ARTIST_CLASS, sizeof(ARTIST_CLASS) - 1) == 0) {
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-artist-inverse"));
+        } else if (strncmp(upnp_class, GENRE_CLASS, sizeof(GENRE_CLASS) - 1) == 0) {
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-genre-inverse"));
+        } else if (strncmp(upnp_class, CONTAINER_PREFIX, sizeof(CONTAINER_PREFIX) - 1) == 0) {
+            thumbnail.setUrl(QLatin1String("image://theme/icon-l-folder-empty"));
         }
     }
 
@@ -271,11 +284,7 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
     case BrowseRoleUPnPClass:
         return QString::fromUtf8(gupnp_didl_lite_object_get_upnp_class(object));
     case BrowseRoleIcon:
-        if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
-            return QUrl(QLatin1String("image://theme/icon-l-folder-empty"));
-        } else {
-            return findIconForObject(object);
-        }
+        return findIconForObject(object);
     case BrowseRoleURI:
         if (GUPNP_IS_DIDL_LITE_ITEM(object)) {
             return getCompatibleUri(index.row(), m_protocolInfo);
