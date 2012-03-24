@@ -88,6 +88,7 @@ Page {
             cacheBuffer: parent.height + 100
             snapMode: ListView.SnapToItem
             model: browseModel
+            currentIndex: browseModel.lastIndex
 
             delegate: BrowseDelegate {}
         }

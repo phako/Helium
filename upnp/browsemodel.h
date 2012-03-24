@@ -32,6 +32,7 @@ class BrowseModel : public QAbstractListModel
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool done READ done NOTIFY doneChanged)
     Q_PROPERTY(QString protocolInfo READ protocolInfo WRITE setProtocolInfo NOTIFY protocolInfoChanged)
+    Q_PROPERTY(int lastIndex READ lastIndex WRITE setLastIndex NOTIFY lastIndexChanged)
 public:
     enum BrowseRoles {
         BrowseRoleTitle = Qt::DisplayRole,
@@ -59,7 +60,11 @@ public:
     bool busy() const { return m_busy; }
     bool done() const { return m_done; }
     QString protocolInfo() const { return m_protocolInfo; }
+    int lastIndex() const { return m_lastIndex; }
+
+    // property setters
     void setProtocolInfo(const QString& protocolInfo);
+    void setLastIndex(int index);
 
     // static functions
     static BrowseModel &empty() { return m_empty; }
@@ -69,6 +74,7 @@ Q_SIGNALS:
     void busyChanged();
     void doneChanged();
     void protocolInfoChanged();
+    void lastIndexChanged();
 
     void error(int code, const QString& message);
 public Q_SLOTS:
@@ -118,6 +124,7 @@ private:
     GUPnPServiceProxyAction *m_action;
     QString                  m_sortCriteria;
     QString                  m_protocolInfo;
+    int                      m_lastIndex;
 };
 
 #endif // BROWSEMODEL_H

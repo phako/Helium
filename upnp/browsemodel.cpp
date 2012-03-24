@@ -49,6 +49,7 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
     , m_action(0)
     , m_sortCriteria(sortCriteria)
     , m_protocolInfo(protocolInfo)
+    , m_lastIndex(-1)
 {
     QHash<int, QByteArray> roles;
 
@@ -447,5 +448,13 @@ void BrowseModel::setProtocolInfo(const QString& protocolInfo)
         m_protocolInfo = protocolInfo;
         Q_EMIT protocolInfoChanged();
         Q_EMIT dataChanged(index(0), index(m_data.count() - 1));
+    }
+}
+
+void BrowseModel::setLastIndex(int index)
+{
+    if (index != m_lastIndex) {
+        m_lastIndex = index;
+        Q_EMIT lastIndexChanged();
     }
 }

@@ -84,6 +84,7 @@ Item {
         id: mouseArea
         anchors.fill: background
         onClicked: {
+            browseModel.lastIndex = index
             if (type === "container") {
                 server.browse(upnpId, upnpClass, renderer.protocolInfo);
             }
