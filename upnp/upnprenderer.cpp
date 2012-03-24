@@ -16,8 +16,28 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QDebug>
+#include <QStringList>
 
 #include "upnprenderer.h"
+
+static quint64 parseDurationString(const QString& duration)
+{
+    quint64 seconds = 0;
+    int factor = 1;
+
+    int length = duration.indexOf(QLatin1Char('.')) > 0 ?: duration.length();
+    QStringList list = duration.left(length).split(QLatin1Char(':'));
+    if (list.count() > 3) {
+        return 0;
+    }
+
+    for (int i = list.count() - 1; i >= 0; i--) {
+        seconds += list[i].toInt() * factor;
+        factor *= 60;
+    }
+
+    return seconds;
+}
 
 const char UPnPRenderer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaRenderer:";
 const char UPnPRenderer::AV_TRANSPORT_SERVICE[] = "urn:schemas-upnp-org:service:AVTransport";
@@ -26,7 +46,35 @@ void UPnPRenderer::setState(const QString &state)
 {
     qDebug () << "New state" << state;
     m_state = state;
+    if (state == QLatin1String("PLAYING")) {
+        m_progressTimer.start(1000);
+    } else {
+        m_progressTimer.stop();
+    }
     QMetaObject::invokeMethod(this, "stateChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setDuration(const QString& trackDuration)
+{
+    if (trackDuration == m_duration) {
+        return;
+    }
+
+    m_duration = trackDuration;
+    m_durationInSeconds = parseDurationString(m_duration);
+
+    QMetaObject::invokeMethod(this, "durationChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setURI(const QString& uri)
+{
+    if (uri == m_uri) {
+        return;
+    }
+
+    m_uri = uri;
+
+    QMetaObject::invokeMethod(this, "uriChanged", Qt::QueuedConnection);
 }
 
 void
@@ -38,19 +86,35 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
     UPnPRenderer *renderer = reinterpret_cast<UPnPRenderer*>(user_data);
     GError *error = 0;
     char *state_name = 0;
+    char *track_duration = 0;
+    char *track_uri = 0;
+
+    qDebug() << g_value_get_string(value);
 
     if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
                                                    0,
                                                    g_value_get_string(value),
                                                    &error,
-                                                   "TransportState",
-                                                   G_TYPE_STRING,
-                                                   &state_name,
+                                                   "TransportState", G_TYPE_STRING, &state_name,
+                                                   "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
+                                                   "CurrentTrackURI", G_TYPE_STRING, &track_uri,
                                                    NULL)) {
         if (state_name != 0) {
             renderer->setState(QString::fromUtf8(state_name));
 
             g_free(state_name);
+        }
+
+        if (track_duration != 0) {
+            renderer->setDuration(QString::fromUtf8(track_duration));
+
+            g_free(track_duration);
+        }
+
+        if (track_uri != 0) {
+            renderer->setURI(QString::fromUtf8(track_uri));
+
+            g_free(track_uri);
         }
     } else {
         qDebug() << "Failed to parse last change" << error->message;
@@ -65,7 +129,21 @@ UPnPRenderer::UPnPRenderer()
     , m_connectionManager()
     , m_state(QLatin1String("STOPPED"))
     , m_protocolInfo(QLatin1String("*:*:*:*"))
+    , m_duration(QLatin1String("0:00:00"))
+    , m_progressTimer()
+    , m_canPause(false)
 {
+    connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
+}
+
+void UPnPRenderer::onProgressTimeout()
+{
+    gupnp_service_proxy_begin_action(m_avTransport,
+                                     "GetPositionInfo",
+                                     UPnPRenderer::on_get_position_info,
+                                     this,
+                                     "InstanceID", G_TYPE_UINT, 0,
+                                     NULL);
 }
 
 void UPnPRenderer::unsubscribe()
@@ -110,6 +188,32 @@ void UPnPRenderer::wrapDevice(const QString &udn)
                                      NULL);
 }
 
+void UPnPRenderer::on_get_position_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+{
+    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
+    GError *error = 0;
+    char *rel_time = 0;
+
+    gupnp_service_proxy_end_action(proxy,
+                                   action,
+                                   &error,
+                                   "RelTime", G_TYPE_STRING, &rel_time,
+                                   NULL);
+
+    if (error != 0) {
+        QMetaObject::invokeMethod(self, "error",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(int, error->code),
+                                  Q_ARG(QString, QString::fromUtf8(error->message)));
+        g_error_free(error);
+
+        return;
+    }
+
+    self->m_progress = (double)parseDurationString(QString::fromUtf8(rel_time)) / (double) self->m_durationInSeconds;
+    QMetaObject::invokeMethod(self, "progressChanged", Qt::QueuedConnection);
+}
+
 void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
 {
     UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
@@ -134,6 +238,32 @@ void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServicePr
     }
 
     QMetaObject::invokeMethod(self, "protocolInfoChanged", Qt::QueuedConnection);
+
+    gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(self->m_avTransport),
+                                               UPnPRenderer::on_got_introspection,
+                                               self);
+}
+
+void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
+                                         GUPnPServiceIntrospection *introspection,
+                                         const GError *error,
+                                         gpointer user_data)
+{
+    qDebug() << "Got service introspection!!";
+    Q_UNUSED(info)
+    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
+    if (error != 0) {
+        QMetaObject::invokeMethod(self, "error",
+                                  Q_ARG(int, error->code),
+                                  Q_ARG(QString, QString::fromUtf8(error->message)));
+    } else {
+        bool canPause = gupnp_service_introspection_get_action(introspection, "Pause") != NULL;
+        if (canPause != self->m_canPause) {
+            self->m_canPause = canPause;
+            QMetaObject::invokeMethod(self, "canPauseChanged", Qt::QueuedConnection);
+        }
+    }
+
     QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
 }
 
@@ -210,3 +340,40 @@ void UPnPRenderer::stop()
                                      NULL);
 }
 
+void UPnPRenderer::pause()
+{
+    if (m_state == QLatin1String("PAUSED_PLAYBACK")) {
+        return;
+    }
+
+    gupnp_service_proxy_begin_action(m_avTransport,
+                                     "Pause",
+                                     UPnPRenderer::on_play,
+                                     this,
+                                     "InstanceID", G_TYPE_STRING, "0",
+                                     NULL);
+}
+
+void UPnPRenderer::seekRelative(float percent)
+{
+    quint64 position = percent * m_durationInSeconds;
+    qDebug() << position << m_durationInSeconds;
+
+    int hours = position / 3600;
+    position %= 3600;
+    int minutes = position / 60;
+    int seconds = position % 60;
+
+    QString target = QString::fromLatin1("%1:%2:%3").arg(hours)
+                                                    .arg(minutes, 2, 10, QLatin1Char('0'))
+                                                    .arg(seconds, 2, 10, QLatin1Char('0'));
+
+    gupnp_service_proxy_begin_action(m_avTransport,
+                                     "Seek",
+                                     UPnPRenderer::on_play,
+                                     this,
+                                     "InstanceID", G_TYPE_STRING, "0",
+                                     "Unit", G_TYPE_STRING, "REL_TIME",
+                                     "Target", G_TYPE_STRING, target.toUtf8().constData(),
+                                     NULL);
+}
