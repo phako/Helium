@@ -22,6 +22,7 @@ Page {
     property alias model: deviceListView.model
     property string role
     property alias title: pageHeader.text
+    property alias delegate: deviceListView.delegate
 
     Connections {
         target: renderer
@@ -72,86 +73,6 @@ Page {
             model : serverModel
             highlight: selectedHighlight
             highlightMoveSpeed: -1
-
-            delegate:  Item {
-                id: listItem
-                height: 88
-                width: parent.width
-
-                BorderImage {
-                    id: background
-                    anchors.fill: parent
-                    // Fill page borders
-                    anchors.leftMargin: -serverList.anchors.leftMargin
-                    anchors.rightMargin: -serverList.anchors.rightMargin
-                    visible: mouseArea.pressed
-                    source: "image://theme/meegotouch-list-background-pressed-center"
-                }
-
-                Row {
-                    anchors.fill: parent
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-
-                    // make configurable
-                    Image {
-                        visible: false
-                        asynchronous: true
-                        source: icon
-                        width: 64
-                        height: 64
-                        fillMode: Image.PreserveAspectFit
-                        id: imgIcon
-                    }
-
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-
-                        Label {
-                            id: mainText
-                            text: friendlyName
-                            font.weight: Font.Bold
-                            font.pixelSize: 26
-                        }
-
-                        Label {
-                            id: subText
-                            text: udn
-                            font.weight: Font.Light
-                            font.pixelSize: 22
-                            color: "#cc6633"
-
-                            visible: text != ""
-                        }
-                    }
-                }
-
-                Image {
-                    visible: role === "server"
-                    source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
-                    anchors.right: parent.right;
-                    anchors.verticalCenter: parent.verticalCenter
-                }
-
-                MouseArea {
-                    id: mouseArea
-                    anchors.fill: background
-                    onClicked: {
-                        deviceListView.currentIndex = index;
-                        if (role === "server") {
-                            server.wrapDevice(serverModel.get(index));
-                            server.browse("0", "object.container", renderer.protocolInfo);
-                            browse.page = friendlyName
-                            pageStack.push(browse)
-                        } else {
-                            renderer.wrapDevice(rendererModel.get(index));
-                            pageStack.push(player)
-                        }
-                    }
-
-                    onPressAndHold: renderer.stop();
-                }
-            }
         }
         ScrollDecorator {
             flickableItem: deviceListView

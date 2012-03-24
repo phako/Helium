@@ -38,6 +38,7 @@ PageStackWindow {
         model: serverModel
         role: "server"
         title: qsTr("Servers")
+        delegate: ServerDelegate {}
     }
 
     ServerList {
@@ -45,6 +46,7 @@ PageStackWindow {
         model: rendererModel
         role: "renderer"
         title: qsTr("Renderer")
+        delegate: RendererDelegate {}
     }
 
     Browse {
