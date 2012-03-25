@@ -66,7 +66,7 @@ Item {
         ToolIcon {
             enabled: renderer.state !== "PLAYING" || (renderer.state === "PLAYING" && renderer.canPause)
             id: btnPlayPause
-            iconSource: "image://theme/icon-m-toolbar-mediacontrol-play" + (enabled ? "-white" : "")
+            iconId: "toolbar-mediacontrol-play" + (enabled ? "" : "-dimmed")
             onClicked: {
                 if (renderer.state === "PLAYING") {
                     renderer.pause();
@@ -79,7 +79,7 @@ Item {
         ToolIcon {
             enabled: renderer.state !== "STOPPED"
             id: btnStop
-            iconSource: "image://theme/icon-m-toolbar-mediacontrol-stop" + (enabled ? "-white" : "")
+            iconId: "toolbar-mediacontrol-stop" + (enabled ? "" : "-dimmed")
             onClicked: {
                 renderer.stop();
             }
@@ -88,19 +88,29 @@ Item {
         Connections {
             target: renderer
             onStateChanged: {
+                var icon;
                 if (renderer.state === "PLAYING" && renderer.canPause) {
-                    btnPlayPause.iconSource = "image://theme/icon-m-toolbar-mediacontrol-pause" + (enabled ? "-white" : "");
+                    icon = "toolbar-mediacontrol-pause";
                 } else {
-                    btnPlayPause.iconSource = "image://theme/icon-m-toolbar-mediacontrol-play" + (enabled ? "-white" : "");
+                    icon = "toolbar-mediacontrol-play";
                 }
+                if (!btnPlayPause.enabled) {
+                    icon += "-dimmed";
+                }
+                btnPlayPause.iconId = icon;
             }
 
             onCanPauseChanged: {
+                var icon;
                 if (renderer.state === "PLAYING" && renderer.canPause) {
-                    btnPlayPause.iconSource = "image://theme/icon-m-toolbar-mediacontrol-pause" + (enabled ? "" : "-white");
+                    icon = "toolbar-mediacontrol-pause";
                 } else {
-                    btnPlayPause.iconSource = "image://theme/icon-m-toolbar-mediacontrol-play" + (enabled ? "" : "-white");
+                    icon = "toolbar-mediacontrol-play";
                 }
+                if (!btnPlayPause.enabled) {
+                    icon += "-dimmed";
+                }
+                btnPlayPause.iconId = icon;
             }
         }
     }
