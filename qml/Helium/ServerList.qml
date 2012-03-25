@@ -70,8 +70,6 @@ Page {
             spacing: 15
             cacheBuffer: parent.height + 100
             snapMode: ListView.SnapToItem
-            model : serverModel
-            highlight: selectedHighlight
             highlightMoveSpeed: -1
         }
         ScrollDecorator {

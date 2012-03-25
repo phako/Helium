@@ -34,6 +34,7 @@ class UPnPRenderer : public UPnPDevice
     Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(bool canPause READ canPause NOTIFY canPauseChanged)
     Q_PROPERTY(QString uri READ uri NOTIFY uriChanged)
+    Q_PROPERTY(QString position READ position NOTIFY positionChanged)
 public:
     static const char DEVICE_TYPE[];
     static const char AV_TRANSPORT_SERVICE[];
@@ -54,6 +55,8 @@ public:
     QString uri() { return m_uri; }
     void setURI(const QString &uri);
 
+    QString position() { return m_position; }
+
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
 
     Q_INVOKABLE bool canPause() const { return m_canPause; }
@@ -64,6 +67,7 @@ Q_SIGNALS:
     void progressChanged(void);
     void canPauseChanged(void);
     void uriChanged(void);
+    void positionChanged(void);
 
 public Q_SLOTS:
     // AVTransport:1 mandatory
@@ -117,6 +121,7 @@ private:
     float m_progress;
     bool m_canPause;
     QString m_uri;
+    QString m_position;
 };
 
 #endif // UPNPRENDERER_H

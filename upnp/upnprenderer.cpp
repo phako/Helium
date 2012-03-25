@@ -132,6 +132,7 @@ UPnPRenderer::UPnPRenderer()
     , m_duration(QLatin1String("0:00:00"))
     , m_progressTimer()
     , m_canPause(false)
+    , m_position(QLatin1String("0:00:00"))
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
 }
@@ -209,9 +210,10 @@ void UPnPRenderer::on_get_position_info(GUPnPServiceProxy *proxy, GUPnPServicePr
 
         return;
     }
-
+    self->m_position = QString::fromUtf8(rel_time);
     self->m_progress = (double)parseDurationString(QString::fromUtf8(rel_time)) / (double) self->m_durationInSeconds;
     QMetaObject::invokeMethod(self, "progressChanged", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(self, "positionChanged", Qt::QueuedConnection);
 }
 
 void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)

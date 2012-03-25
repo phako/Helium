@@ -22,7 +22,13 @@ Item {
     id: listItem
     height: 88
     width: parent.width
+    property real detailOpacity: 0.0
 
+    ListView.onIsCurrentItemChanged: {
+        if (!ListView.isCurrentItem) {
+            state = "normal"
+        }
+    }
 
     BorderImage {
         id: background
@@ -34,53 +40,76 @@ Item {
         source: "image://theme/meegotouch-list-background-pressed-center"
     }
 
-    Row {
-        anchors.fill: parent
+    Label {
+        id: mainText
+        anchors.left: parent.left
         anchors.leftMargin: 10
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.right: tiClose.left
         anchors.rightMargin: 10
-
-        // make configurable
-        Image {
-            visible: false
-            asynchronous: true
-            source: icon
-            width: 64
-            height: 64
-            fillMode: Image.PreserveAspectFit
-            id: imgIcon
-        }
-
-        Column {
-            anchors.verticalCenter: parent.verticalCenter
-
-            Label {
-                id: mainText
-                text: friendlyName
-                font.weight: Font.Bold
-                font.pixelSize: 26
-            }
-
-            Label {
-                id: subText
-                text: udn
-                font.weight: Font.Light
-                font.pixelSize: 22
-                color: "#cc6633"
-
-                visible: text != ""
-            }
-        }
+        elide: Text.ElideRight
+        text: friendlyName
+        font.weight: Font.Bold
+        font.pixelSize: 26
     }
+
 
     MouseArea {
         id: mouseArea
         anchors.fill: background
+        enabled: detailOpacity === 0.0
         onClicked: {
+            listItem.state = "DetailedPlayer"
             listItem.ListView.view.currentIndex = index;
             renderer.wrapDevice(rendererModel.get(index));
-            pageStack.push(player)
         }
 
         onPressAndHold: renderer.stop();
+    }
+
+    states: [
+        State {
+            name: "DetailedPlayer"
+            AnchorChanges { target: mainText; anchors.top: listItem.top; anchors.verticalCenter: undefined }
+            PropertyChanges { target: listItem; height: 148; detailOpacity: 1.0 }
+        },
+
+        State {
+            name: "normal"
+            AnchorChanges { target: mainText; anchors.top: undefined; anchors.verticalCenter: listItem.verticalCenter }
+            PropertyChanges { target: listItem; height: 88; detailOpacity: 0.0 }
+        }
+
+   ]
+
+    ToolIcon {
+        id: tiClose
+        iconId: "toolbar-up"
+        opacity: detailOpacity
+        anchors.right: listItem.right
+        anchors.verticalCenter: mainText.verticalCenter
+        anchors.rightMargin: 10
+        onClicked: {
+            listItem.ListView.view.currentIndex = -1;
+            listItem.state = "normal"
+        }
+    }
+
+    Player {
+        anchors.bottom: parent.bottom
+        id: playerControls
+        width: parent.width
+        opacity: listItem.detailOpacity
+    }
+
+    transitions: Transition {
+        ParallelAnimation {
+            NumberAnimation { duration: 300; properties: "detailOpacity,height" }
+            AnchorAnimation {}
+        }
+    }
+
+    Component.onCompleted: {
+        listItem.state = "normal"
     }
 }
