@@ -88,7 +88,7 @@ UPnPDeviceModel::on_context_available(GUPnPContextManager */*manager*/,
                                       gpointer             user_data)
 {
     UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
-    if (strcmp(gssdp_client_get_interface(GSSDP_CLIENT(context)), "wlan0") != 0) {
+    if (strcmp(gssdp_client_get_interface(GSSDP_CLIENT(context)), "lo") == 0) {
         qDebug () << "Ignoring localhost context to not show N9 server twice";
 
         return;
