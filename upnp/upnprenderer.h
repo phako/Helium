@@ -42,25 +42,31 @@ public:
     explicit UPnPRenderer();
     ~UPnPRenderer();
     
+    // Property getters
     QString state() { return m_state; }
-    void setState(const QString& state);
-
     QString duration() { return m_duration; }
-    void setDuration(const QString& duration);
-
     QString protocolInfo() { return m_protocolInfo; }
-
     float progress() { return m_progress; }
-
     QString uri() { return m_uri; }
-    void setURI(const QString &uri);
-
     QString position() { return m_position; }
+    bool canPause() const { return m_canPause; }
 
+    // QML invokable functions
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
 
-    Q_INVOKABLE bool canPause() const { return m_canPause; }
+    // UPnP RPC calls
+    // AVTransport:1 mandatory
+    Q_INVOKABLE void setAVTransportUri(const QString& uri, const QString& metaData = QLatin1String(""));
+    Q_INVOKABLE void play();
+    Q_INVOKABLE void stop();
+    Q_INVOKABLE void seekRelative(float percent);
+
+    // AVTransport:1 optional
+    Q_INVOKABLE void pause();
+
 Q_SIGNALS:
+
+    // Property notifiers
     void stateChanged(void);
     void protocolInfoChanged(void);
     void durationChanged(void);
@@ -69,18 +75,18 @@ Q_SIGNALS:
     void uriChanged(void);
     void positionChanged(void);
 
-public Q_SLOTS:
-    // AVTransport:1 mandatory
-    void setAVTransportUri(const QString& uri, const QString& metaData = QLatin1String(""));
-    void play();
-    void stop();
-    void seekRelative(float percent);
-
-    // AVTransport:1 optional
-    void pause();
 private Q_SLOTS:
     void onProgressTimeout();
 private:
+    // private property setters
+    void setState(const QString &state);
+    void setDuration(const QString &duration);
+    void setProgress(float progress);
+    void setProtocolInfo(const QString &protocolInfo);
+    void setURI(const QString &uri);
+    void setCanPause(bool canPause);
+    void setPosition(const QString &position);
+
     static void on_get_position_info(GUPnPServiceProxy       *proxy,
                                      GUPnPServiceProxyAction *action,
                                      gpointer                 user_data);

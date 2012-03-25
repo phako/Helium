@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <cmath>
+
 #include <QDebug>
 #include <QStringList>
 
@@ -66,6 +68,28 @@ void UPnPRenderer::setDuration(const QString& trackDuration)
     QMetaObject::invokeMethod(this, "durationChanged", Qt::QueuedConnection);
 }
 
+void UPnPRenderer::setProgress(float progress)
+{
+    if (fabs(progress - m_progress) < 0.00001) {
+        return;
+    }
+
+    m_progress = progress;
+
+    QMetaObject::invokeMethod(this, "progressChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setProtocolInfo(const QString &protocolInfo)
+{
+    if (m_protocolInfo == protocolInfo) {
+        return;
+    }
+
+    m_protocolInfo = protocolInfo;
+
+    QMetaObject::invokeMethod(this, "protocolInfoChanged", Qt::QueuedConnection);
+}
+
 void UPnPRenderer::setURI(const QString& uri)
 {
     if (uri == m_uri) {
@@ -75,6 +99,28 @@ void UPnPRenderer::setURI(const QString& uri)
     m_uri = uri;
 
     QMetaObject::invokeMethod(this, "uriChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setCanPause(bool canPause)
+{
+    if (canPause == this->m_canPause) {
+        return;
+    }
+
+    m_canPause = canPause;
+
+    QMetaObject::invokeMethod(this, "canPauseChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setPosition(const QString &position)
+{
+    if (position == m_position) {
+        return;
+    }
+
+    m_position = position;
+
+    QMetaObject::invokeMethod(this, "positionChanged", Qt::QueuedConnection);
 }
 
 void
@@ -88,8 +134,6 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
     char *state_name = 0;
     char *track_duration = 0;
     char *track_uri = 0;
-
-    qDebug() << g_value_get_string(value);
 
     if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
                                                    0,
@@ -132,6 +176,7 @@ UPnPRenderer::UPnPRenderer()
     , m_duration(QLatin1String("0:00:00"))
     , m_progressTimer()
     , m_canPause(false)
+    , m_uri()
     , m_position(QLatin1String("0:00:00"))
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
@@ -170,9 +215,19 @@ void UPnPRenderer::wrapDevice(const QString &udn)
 
     UPnPDevice::wrapDevice(udn);
 
+    // reset to initial state
+    setState(QLatin1String("STOPPED"));
+    setProtocolInfo(QLatin1String("*:*:*:*"));
+    setDuration(QLatin1String("0:00:00"));
+    setCanPause(false);
+    setURI(QString());
+    setPosition(QLatin1String("0:00:00"));
+    setProgress(0.0f);
+
     if (m_proxy.isEmpty()) {
         return;
     }
+
 
     m_avTransport = getService(UPnPRenderer::AV_TRANSPORT_SERVICE);
     m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
@@ -210,10 +265,9 @@ void UPnPRenderer::on_get_position_info(GUPnPServiceProxy *proxy, GUPnPServicePr
 
         return;
     }
-    self->m_position = QString::fromUtf8(rel_time);
-    self->m_progress = (double)parseDurationString(QString::fromUtf8(rel_time)) / (double) self->m_durationInSeconds;
-    QMetaObject::invokeMethod(self, "progressChanged", Qt::QueuedConnection);
-    QMetaObject::invokeMethod(self, "positionChanged", Qt::QueuedConnection);
+
+    self->setPosition(QString::fromUtf8(rel_time));
+    self->setProgress((double) parseDurationString(QString::fromUtf8(rel_time)) / (double) self->m_durationInSeconds);
 }
 
 void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
@@ -228,22 +282,24 @@ void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServicePr
                                    "Sink", G_TYPE_STRING, &protocol_info,
                                    NULL);
     if (error != 0) {
+        if (protocol_info != 0) {
+            g_free(protocol_info);
+        }
+
+        protocol_info = 0;
         QMetaObject::invokeMethod(self, "error",
                                   Q_ARG(int, error->code),
                                   Q_ARG(QString, QString::fromUtf8(error->message)));
         g_error_free(error);
-
-        self->m_protocolInfo = QLatin1String("");
-    } else {
-        self->m_protocolInfo = QString::fromUtf8(protocol_info);
-        g_free(protocol_info);
     }
 
-    QMetaObject::invokeMethod(self, "protocolInfoChanged", Qt::QueuedConnection);
-
+    self->setProtocolInfo(QString::fromUtf8(protocol_info));
     gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(self->m_avTransport),
                                                UPnPRenderer::on_got_introspection,
                                                self);
+    if (protocol_info != 0) {
+        g_free(protocol_info);
+    }
 }
 
 void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
@@ -260,10 +316,7 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
                                   Q_ARG(QString, QString::fromUtf8(error->message)));
     } else {
         bool canPause = gupnp_service_introspection_get_action(introspection, "Pause") != NULL;
-        if (canPause != self->m_canPause) {
-            self->m_canPause = canPause;
-            QMetaObject::invokeMethod(self, "canPauseChanged", Qt::QueuedConnection);
-        }
+        self->setCanPause(canPause);
     }
 
     QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
@@ -359,7 +412,6 @@ void UPnPRenderer::pause()
 void UPnPRenderer::seekRelative(float percent)
 {
     quint64 position = percent * m_durationInSeconds;
-    qDebug() << position << m_durationInSeconds;
 
     int hours = position / 3600;
     position %= 3600;
