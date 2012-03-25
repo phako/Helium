@@ -92,6 +92,7 @@ Item {
         onClicked: {
             listItem.ListView.view.currentIndex = -1;
             listItem.state = "normal"
+            renderer.wrapDevice("");
         }
     }
 
