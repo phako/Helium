@@ -20,7 +20,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QAbstractListModel>
 
-#include <libgupnp-av/gupnp-av.h>
+#include "gupnp-av/gupnp-av.h"
 
 #include "refptrg.h"
 
