@@ -119,7 +119,7 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
         } else if (strncmp(upnp_class, GENRE_CLASS, sizeof(GENRE_CLASS) - 1) == 0) {
             thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-genre-inverse"));
         } else if (strncmp(upnp_class, CONTAINER_PREFIX, sizeof(CONTAINER_PREFIX) - 1) == 0) {
-            thumbnail.setUrl(QLatin1String("image://theme/icon-l-folder-empty"));
+            thumbnail.setUrl(QLatin1String("image://theme/icon-m-toolbar-directory-white"));
         }
     }
 
