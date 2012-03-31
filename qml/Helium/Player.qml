@@ -50,13 +50,13 @@ Item {
             text: renderer.position
             color: "white"
             anchors.left: parent.left
-            font.pixelSize: 16
+            font.pixelSize: 26
         }
         Text {
             text: renderer.duration
             color: "white"
             anchors.right: parent.right
-            font.pixelSize: 16
+            font.pixelSize: 26
         }
     }
 
