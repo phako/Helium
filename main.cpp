@@ -37,6 +37,8 @@ QDeclarativeContext *rootContext;
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     g_type_init ();
+    g_set_application_name("Helium");
+
     // QML glue
     qmlRegisterType<UPnPRenderer>("org.jensge.UPnP", 1, 0, "UPnPRenderer");
     qmlRegisterType<UPnPMediaServer>("org.jensge.UPnP", 1, 0, "UPnPMediaServer");
