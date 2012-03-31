@@ -306,17 +306,30 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
         if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
             return QString();
         } else {
-            xmlNode *node = gupnp_didl_lite_object_get_xml_node(object);
-            xmlChar *buffer;
-            int length;
-            xmlDocDumpMemoryEnc((xmlDocPtr) node,
-                                &buffer,
-                                &length,
-                                "UTF-8");
-            QString result = QString::fromUtf8((char *)buffer, length);
-            xmlFree(BAD_CAST(buffer));
+            GList *resources, *it;
 
-            return result;
+            // produce minimal DIDL
+            RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new ("en"));
+            GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
+            gupnp_didl_lite_object_set_title(item, gupnp_didl_lite_object_get_title(object));
+            gupnp_didl_lite_object_set_upnp_class(item, gupnp_didl_lite_object_get_upnp_class(object));
+            gupnp_didl_lite_object_set_parent_id(item, gupnp_didl_lite_object_get_parent_id(object));
+            gupnp_didl_lite_object_set_id(item, gupnp_didl_lite_object_get_id(object));
+            gupnp_didl_lite_object_set_restricted(item, gupnp_didl_lite_object_get_restricted(object));
+            it = resources = gupnp_didl_lite_object_get_resources(object);
+            while (it != 0) {
+                GUPnPDIDLLiteResource *orig_resource = GUPNP_DIDL_LITE_RESOURCE(it->data);
+                GUPnPDIDLLiteResource *resource = gupnp_didl_lite_object_add_resource(item);
+                gupnp_didl_lite_resource_set_uri(resource,
+                                                 gupnp_didl_lite_resource_get_uri (orig_resource));
+                gupnp_didl_lite_resource_set_protocol_info(resource,
+                                                           gupnp_didl_lite_resource_get_protocol_info(orig_resource));
+
+                it = it->next;
+            }
+            g_list_free_full(resources, (GDestroyNotify)g_object_unref);
+
+            return QString::fromUtf8(gupnp_didl_lite_writer_get_string(writer));
         }
         return QString();
     default:
