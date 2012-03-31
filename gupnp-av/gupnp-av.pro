@@ -1,6 +1,7 @@
 TARGET=gupnpav
 TEMPLATE=lib
 CONFIG += staticlib link_pkgconfig
+CONFIG -= qt
 
 PKGCONFIG += glib-2.0 gupnp-1.0 libxml-2.0
 
