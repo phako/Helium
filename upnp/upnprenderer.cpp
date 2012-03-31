@@ -123,6 +123,28 @@ void UPnPRenderer::setPosition(const QString &position)
     QMetaObject::invokeMethod(this, "positionChanged", Qt::QueuedConnection);
 }
 
+void UPnPRenderer::setCanSeek(bool canSeek)
+{
+    if (canSeek == m_canSeek) {
+        return;
+    }
+
+    m_canSeek = canSeek;
+
+    QMetaObject::invokeMethod(this, "canSeekChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setSeekMode(const QString &seekMode)
+{
+    if (seekMode == m_seekMode) {
+        return;
+    }
+
+    m_seekMode = seekMode;
+
+    QMetaObject::invokeMethod(this, "seekModeChanged", Qt::QueuedConnection);
+}
+
 void
 UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
                                           const char        */*variable*/,
@@ -178,6 +200,8 @@ UPnPRenderer::UPnPRenderer()
     , m_canPause(false)
     , m_uri()
     , m_position(QLatin1String("0:00:00"))
+    , m_canSeek(false)
+    , m_seekMode(QLatin1String(""))
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
 }
@@ -307,8 +331,8 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
                                          const GError *error,
                                          gpointer user_data)
 {
-    qDebug() << "Got service introspection!!";
     Q_UNUSED(info)
+
     UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
     if (error != 0) {
         QMetaObject::invokeMethod(self, "error",
@@ -317,6 +341,23 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
     } else {
         bool canPause = gupnp_service_introspection_get_action(introspection, "Pause") != NULL;
         self->setCanPause(canPause);
+
+        // check supported seek types
+        const GUPnPServiceStateVariableInfo *seekModeInfo =
+            gupnp_service_introspection_get_state_variable(introspection, "A_ARG_TYPE_SeekMode");
+        GList *it = seekModeInfo->allowed_values;
+        while (it != 0) {
+            if (strcmp ((const char *)it->data, "REL_TIME") == 0 ||
+                strcmp ((const char *)it->data, "ABS_TIME") == 0) {
+                self->setCanSeek(true);
+                self->setSeekMode(QString::fromLatin1((const char *)it->data));
+
+                break;
+            }
+            it = it->next;
+        }
+
+        g_object_unref(introspection);
     }
 
     QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
@@ -411,6 +452,10 @@ void UPnPRenderer::pause()
 
 void UPnPRenderer::seekRelative(float percent)
 {
+    if (not canSeek()) {
+        return;
+    }
+
     quint64 position = percent * m_durationInSeconds;
 
     int hours = position / 3600;
@@ -427,7 +472,7 @@ void UPnPRenderer::seekRelative(float percent)
                                      UPnPRenderer::on_play,
                                      this,
                                      "InstanceID", G_TYPE_STRING, "0",
-                                     "Unit", G_TYPE_STRING, "REL_TIME",
+                                     "Unit", G_TYPE_STRING, m_seekMode.toUtf8().constData(),
                                      "Target", G_TYPE_STRING, target.toUtf8().constData(),
                                      NULL);
 }

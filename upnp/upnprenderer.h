@@ -33,6 +33,8 @@ class UPnPRenderer : public UPnPDevice
     Q_PROPERTY(QString protocolInfo READ protocolInfo NOTIFY protocolInfoChanged)
     Q_PROPERTY(float progress READ progress NOTIFY progressChanged)
     Q_PROPERTY(bool canPause READ canPause NOTIFY canPauseChanged)
+    Q_PROPERTY(bool canSeek READ canSeek NOTIFY canSeekChanged)
+    Q_PROPERTY(QString seekMode READ seekMode NOTIFY seekModeChanged)
     Q_PROPERTY(QString uri READ uri NOTIFY uriChanged)
     Q_PROPERTY(QString position READ position NOTIFY positionChanged)
 public:
@@ -50,6 +52,8 @@ public:
     QString uri() { return m_uri; }
     QString position() { return m_position; }
     bool canPause() const { return m_canPause; }
+    bool canSeek() const { return m_canSeek; }
+    QString seekMode() { return m_seekMode; }
 
     // QML invokable functions
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
@@ -74,6 +78,8 @@ Q_SIGNALS:
     void canPauseChanged(void);
     void uriChanged(void);
     void positionChanged(void);
+    void canSeekChanged(void);
+    void seekModeChanged(void);
 
 private Q_SLOTS:
     void onProgressTimeout();
@@ -86,6 +92,8 @@ private:
     void setURI(const QString &uri);
     void setCanPause(bool canPause);
     void setPosition(const QString &position);
+    void setCanSeek(bool canSeek);
+    void setSeekMode(const QString &seekMode);
 
     static void on_get_position_info(GUPnPServiceProxy       *proxy,
                                      GUPnPServiceProxyAction *action,
@@ -128,6 +136,8 @@ private:
     bool m_canPause;
     QString m_uri;
     QString m_position;
+    bool m_canSeek;
+    QString m_seekMode;
 };
 
 #endif // UPNPRENDERER_H

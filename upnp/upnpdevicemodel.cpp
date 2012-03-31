@@ -34,6 +34,7 @@ UPnPDeviceModel::on_device_proxy_available(GUPnPControlPoint *cp,
                                            gpointer           user_data)
 {
     Q_UNUSED(cp)
+
     UPnPDeviceModel *model = reinterpret_cast<UPnPDeviceModel*>(user_data);
     if (GUPNP_IS_DEVICE_INFO(proxy) == FALSE) {
         // should not happen

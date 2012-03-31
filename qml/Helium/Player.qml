@@ -31,6 +31,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         MouseArea {
+            enabled: renderer.canSeek
             anchors.fill: parent
             onReleased: {
                 renderer.seekRelative(mouseX / width)
