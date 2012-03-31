@@ -336,6 +336,7 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
     UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
     if (error != 0) {
         QMetaObject::invokeMethod(self, "error",
+                                  Qt::QueuedConnection,
                                   Q_ARG(int, error->code),
                                   Q_ARG(QString, QString::fromUtf8(error->message)));
     } else {
