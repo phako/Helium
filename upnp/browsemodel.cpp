@@ -16,6 +16,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QDebug>
+#include <QHostAddress>
 #include <QStringList>
 #include <QTimer>
 #include <QUrl>
@@ -238,6 +239,7 @@ QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) co
 {
     RefPtrG<GUPnPDIDLLiteResource> resource;
     DIDLLiteObject object = m_data.at(index);
+    QString urlString;
 
     if (object.isEmpty()) {
         return QString();
@@ -255,7 +257,14 @@ QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) co
                                                           protocolInfoStrip.toUtf8().constData(),
                                                           FALSE));
         if (not resource.isEmpty()) {
-            break;
+            urlString = QString::fromUtf8(gupnp_didl_lite_resource_get_uri(resource));
+            QUrl url(urlString);
+
+            // check that uri has a host and that the host is an IP address
+            if (not (url.host().isEmpty()) &&
+                not QHostAddress(url.host()).isNull()) {
+                break;
+            }
         }
     }
 
@@ -263,7 +272,49 @@ QString BrowseModel::getCompatibleUri(int index, const QString &protocolInfo) co
         return QString();
     }
 
-    return QString::fromUtf8(gupnp_didl_lite_resource_get_uri(resource));
+    return urlString;
+}
+
+static QString generateMetaData(GUPnPDIDLLiteObject *object)
+{
+    GList *resources, *it;
+
+    // produce minimal DIDL
+    RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new ("en"));
+    GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
+    const char *title = gupnp_didl_lite_object_get_title(object);
+
+    // maximum title length is 256 bytes
+    if (strlen(title) > 256) {
+        char *tmp = 0;
+        const char *end_ptr = 0;
+
+        g_utf8_validate(title, 256, &end_ptr);
+        tmp = g_strndup(title, end_ptr - title);
+        gupnp_didl_lite_object_set_title(item, tmp);
+        g_free(tmp);
+    } else {
+        gupnp_didl_lite_object_set_title(item, title);
+    }
+
+    gupnp_didl_lite_object_set_upnp_class(item, gupnp_didl_lite_object_get_upnp_class(object));
+    gupnp_didl_lite_object_set_parent_id(item, gupnp_didl_lite_object_get_parent_id(object));
+    gupnp_didl_lite_object_set_id(item, gupnp_didl_lite_object_get_id(object));
+    gupnp_didl_lite_object_set_restricted(item, gupnp_didl_lite_object_get_restricted(object));
+    it = resources = gupnp_didl_lite_object_get_resources(object);
+    while (it != 0) {
+        GUPnPDIDLLiteResource *orig_resource = GUPNP_DIDL_LITE_RESOURCE(it->data);
+        GUPnPDIDLLiteResource *resource = gupnp_didl_lite_object_add_resource(item);
+        gupnp_didl_lite_resource_set_uri(resource,
+                                         gupnp_didl_lite_resource_get_uri (orig_resource));
+        gupnp_didl_lite_resource_set_protocol_info(resource,
+                                                   gupnp_didl_lite_resource_get_protocol_info(orig_resource));
+
+        it = it->next;
+    }
+    g_list_free_full(resources, (GDestroyNotify)g_object_unref);
+
+    return QString::fromUtf8(gupnp_didl_lite_writer_get_string(writer));
 }
 
 QVariant BrowseModel::data(const QModelIndex &index, int role) const
@@ -306,30 +357,7 @@ QVariant BrowseModel::data(const QModelIndex &index, int role) const
         if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
             return QString();
         } else {
-            GList *resources, *it;
-
-            // produce minimal DIDL
-            RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new ("en"));
-            GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
-            gupnp_didl_lite_object_set_title(item, gupnp_didl_lite_object_get_title(object));
-            gupnp_didl_lite_object_set_upnp_class(item, gupnp_didl_lite_object_get_upnp_class(object));
-            gupnp_didl_lite_object_set_parent_id(item, gupnp_didl_lite_object_get_parent_id(object));
-            gupnp_didl_lite_object_set_id(item, gupnp_didl_lite_object_get_id(object));
-            gupnp_didl_lite_object_set_restricted(item, gupnp_didl_lite_object_get_restricted(object));
-            it = resources = gupnp_didl_lite_object_get_resources(object);
-            while (it != 0) {
-                GUPnPDIDLLiteResource *orig_resource = GUPNP_DIDL_LITE_RESOURCE(it->data);
-                GUPnPDIDLLiteResource *resource = gupnp_didl_lite_object_add_resource(item);
-                gupnp_didl_lite_resource_set_uri(resource,
-                                                 gupnp_didl_lite_resource_get_uri (orig_resource));
-                gupnp_didl_lite_resource_set_protocol_info(resource,
-                                                           gupnp_didl_lite_resource_get_protocol_info(orig_resource));
-
-                it = it->next;
-            }
-            g_list_free_full(resources, (GDestroyNotify)g_object_unref);
-
-            return QString::fromUtf8(gupnp_didl_lite_writer_get_string(writer));
+            return generateMetaData(object);
         }
         return QString();
     default:
