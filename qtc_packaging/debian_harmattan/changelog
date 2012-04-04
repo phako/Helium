@@ -1,10 +1,10 @@
- helium (0.3.0) unstable; urgency=low
-  * Player controls
-  * Works on PR1.0
+helium (0.3.0) unstable; urgency=low
+   * Player controls
+   * Works on PR1.0
 
  -- Jens Georg <mail+helium@jensge.org>  Mon, 26 Mar 2012 12:02:59 +0200
 
- helium (0.2.0) unstable; urgency=low
+helium (0.2.0) unstable; urgency=low
    * Basic controls available, working
 
  -- Jens Georg <mail+helium@jensge.org>  Mon, 26 Mar 2012 12:00:24 +0200
