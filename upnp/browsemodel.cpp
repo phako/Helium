@@ -186,7 +186,7 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
 
     if (album != 0) {
         if (not result.isEmpty()) {
-            result += QLatin1String("|");
+            result += QLatin1String(" | ");
         }
         result += QString::fromLatin1("%1").arg(QString::fromUtf8(album));
     }
