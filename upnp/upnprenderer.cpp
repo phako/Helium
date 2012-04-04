@@ -22,6 +22,17 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "upnprenderer.h"
 
+struct SetAVTransportCall {
+    QString m_uri;
+    QString m_metaData;
+    UPnPRenderer *m_renderer;
+
+    SetAVTransportCall(const QString& uri, const QString &metaData, UPnPRenderer *renderer)
+        : m_uri(uri)
+        , m_metaData(metaData)
+        , m_renderer(renderer) { }
+};
+
 static quint64 parseDurationString(const QString& duration)
 {
     quint64 seconds = 0;
@@ -366,30 +377,78 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
 
 void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
                                             GUPnPServiceProxyAction *action,
-                                            gpointer                 /*user_data*/)
+                                            gpointer                 user_data)
 {
+    QScopedPointer<SetAVTransportCall> call(static_cast<SetAVTransportCall*>(user_data));
     GError *error = 0;
     // needed to free the action
     gupnp_service_proxy_end_action(proxy,
                                    action,
                                    &error,
                                    NULL);
-    if (error != 0) {
-        qDebug() << "Failed to set the transport URI:" << error->message;
-        g_error_free (error);
+    if (error == 0) {
+        return;
     }
+
+    // "Transport locked". Call Stop() and try again.
+    if (error->code == 705) {
+        gupnp_service_proxy_begin_action(call->m_renderer->m_avTransport,
+                                         "Stop",
+                                         UPnPRenderer::on_stop,
+                                         call.take(),
+                                         "InstanceID", G_TYPE_STRING, "0",
+                                         NULL);
+        g_error_free (error);
+
+        return;
+    }
+
+    QMetaObject::invokeMethod(call->m_renderer, "error",
+                              Qt::QueuedConnection,
+                              Q_ARG(int, error->code),
+                              Q_ARG(QString, QString::fromUtf8(error->message)));
+
+    g_error_free (error);
 }
 
 void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData)
 {
+    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this);
+
     gupnp_service_proxy_begin_action(m_avTransport,
                                      "SetAVTransportURI",
                                      UPnPRenderer::on_set_av_transport_uri,
-                                     this,
+                                     call,
                                      "InstanceID", G_TYPE_STRING, "0",
                                      "CurrentURI", G_TYPE_STRING, uri.toUtf8().constData(),
                                      "CurrentURIMetaData", G_TYPE_STRING, metaData.toUtf8().constData(),
                                      NULL);
+}
+
+void UPnPRenderer::on_stop (GUPnPServiceProxy       *proxy,
+                            GUPnPServiceProxyAction *action,
+                            gpointer                 user_data)
+{
+    QScopedPointer<SetAVTransportCall> call(static_cast<SetAVTransportCall*>(user_data));
+    GError *error = 0;
+
+    // needed to free the action
+    gupnp_service_proxy_end_action(proxy,
+                                   action,
+                                   &error,
+                                   NULL);
+    if (error != 0) {
+        QMetaObject::invokeMethod(call->m_renderer, "error",
+                                  Qt::QueuedConnection,
+                                  Q_ARG(int, error->code),
+                                  Q_ARG(QString, QString::fromUtf8(error->message)));
+
+        g_error_free (error);
+
+        return;
+    }
+
+    call->m_renderer->setAVTransportUri(call->m_uri, call->m_metaData);
 }
 
 void UPnPRenderer::on_play (GUPnPServiceProxy       *proxy,

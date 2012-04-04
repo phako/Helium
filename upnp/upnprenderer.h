@@ -106,6 +106,10 @@ private:
                         GUPnPServiceProxyAction *action,
                         gpointer                 user_data);
 
+    static void on_stop(GUPnPServiceProxy       *proxy,
+                        GUPnPServiceProxyAction *action,
+                        gpointer                 user_data);
+
     static void on_get_protocol_info(GUPnPServiceProxy       *proxy,
                                      GUPnPServiceProxyAction *action,
                                      gpointer                 user_data);
