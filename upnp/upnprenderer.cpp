@@ -292,11 +292,7 @@ void UPnPRenderer::on_get_position_info(GUPnPServiceProxy *proxy, GUPnPServicePr
                                    NULL);
 
     if (error != 0) {
-        QMetaObject::invokeMethod(self, "error",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(int, error->code),
-                                  Q_ARG(QString, QString::fromUtf8(error->message)));
-        g_error_free(error);
+        self->propagateError(error);
 
         return;
     }
@@ -322,10 +318,7 @@ void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServicePr
         }
 
         protocol_info = 0;
-        QMetaObject::invokeMethod(self, "error",
-                                  Q_ARG(int, error->code),
-                                  Q_ARG(QString, QString::fromUtf8(error->message)));
-        g_error_free(error);
+        self->propagateError(error);
     }
 
     self->setProtocolInfo(QString::fromUtf8(protocol_info));
@@ -346,10 +339,7 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
 
     UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
     if (error != 0) {
-        QMetaObject::invokeMethod(self, "error",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(int, error->code),
-                                  Q_ARG(QString, QString::fromUtf8(error->message)));
+        self->propagateError(error);
     } else {
         bool canPause = gupnp_service_introspection_get_action(introspection, "Pause") != NULL;
         self->setCanPause(canPause);
@@ -403,12 +393,7 @@ void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
         return;
     }
 
-    QMetaObject::invokeMethod(call->m_renderer, "error",
-                              Qt::QueuedConnection,
-                              Q_ARG(int, error->code),
-                              Q_ARG(QString, QString::fromUtf8(error->message)));
-
-    g_error_free (error);
+    call->m_renderer->propagateError(error);
 }
 
 void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData)
@@ -438,12 +423,7 @@ void UPnPRenderer::on_stop (GUPnPServiceProxy       *proxy,
                                    &error,
                                    NULL);
     if (error != 0) {
-        QMetaObject::invokeMethod(call->m_renderer, "error",
-                                  Qt::QueuedConnection,
-                                  Q_ARG(int, error->code),
-                                  Q_ARG(QString, QString::fromUtf8(error->message)));
-
-        g_error_free (error);
+        call->m_renderer->propagateError(error);
 
         return;
     }

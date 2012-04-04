@@ -149,3 +149,21 @@ ServiceProxy UPnPDevice::getService(const char *service)
 
     return ServiceProxy ();
 }
+
+void UPnPDevice::propagateError(GError *error)
+{
+    QMetaObject::invokeMethod(this, "error",
+                              Qt::QueuedConnection,
+                              Q_ARG(int, error->code),
+                              Q_ARG(QString, QString::fromUtf8(error->message)));
+
+    g_error_free (error);
+}
+
+void UPnPDevice::propagateError(const GError *error)
+{
+    QMetaObject::invokeMethod(this, "error",
+                              Qt::QueuedConnection,
+                              Q_ARG(int, error->code),
+                              Q_ARG(QString, QString::fromUtf8(error->message)));
+}

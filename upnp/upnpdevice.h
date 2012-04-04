@@ -60,6 +60,9 @@ private Q_SLOTS:
     void onDeviceUnavailable(const QString& udn);
 protected:
     DeviceProxy m_proxy;
+
+    void propagateError(GError *error);
+    void propagateError(const GError *error);
 };
 
 #endif // UPNPDEVICE_H
