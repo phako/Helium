@@ -27,6 +27,12 @@ Page {
             enabled: tabGroup.currentTab.depth > 1
             iconId: enabled ? "toolbar-back" : "toolbar-back-dimmed"
             onClicked: {
+                if (tabGroup.currentTab.currentPage === about) {
+                    tabGroup.currentTab.pop();
+
+                    return;
+                }
+
                 if (tabGroup.currentTab === pageStackBrowse) {
                     browseModelStack.pop();
                     if (browseModelStack.empty()) {
@@ -38,6 +44,7 @@ Page {
         }
 
         ButtonRow {
+            visible: tabGroup.currentTab.currentPage !== about
             platformStyle: TabButtonStyle {}
             TabButton {
                 iconSource: "image://theme/icon-m-toolbar-list-white"
@@ -52,8 +59,26 @@ Page {
             }*/
         }
         ToolIcon {
+            visible: tabGroup.currentTab.currentPage !== about
             iconId: "toolbar-view-menu"
-            onClicked: tabGroup.currentTab = pageStackPlayer
+            onClicked: {
+                if (menu.status === DialogStatus.Closed) {
+                    menu.open();
+                } else {
+                    menu.close();
+                }
+            }
+        }
+    }
+
+    Menu {
+        id: menu
+        visualParent: tabGroup.currentTab
+        content: MenuLayout {
+            MenuItem {
+                text: qsTr("About...")
+                onClicked: tabGroup.currentTab.push(about)
+            }
         }
     }
 

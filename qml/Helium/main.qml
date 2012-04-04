@@ -33,6 +33,10 @@ PageStackWindow {
         id: main
     }
 
+    About {
+        id: about
+    }
+
     ServerList {
         id: serverList
         model: serverModel
