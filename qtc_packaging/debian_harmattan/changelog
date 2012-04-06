@@ -1,3 +1,10 @@
+helium (0.4.0) unstable; urgency=low
+   * Fix leaks
+   * Improve player controls
+   * UI improvements
+
+ -- Jens Georg <mail+helium@jensge.org>  Fri, 06 Apr 2012 20:04:33 +0200
+
 helium (0.3.0) unstable; urgency=low
    * Player controls
    * Works on PR1.0
