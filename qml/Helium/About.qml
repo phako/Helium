@@ -35,11 +35,11 @@ Page {
             textFormat: Text.RichText
             wrapMode: Text.WrapAtWordBoundaryOrAnywhere
             text: "An UPnP control point for your N9" +
-                  "<p>Copyright © 2012 Jens Georg &lt;<a href=\"mailto:mail+helium@jensge.org\">mail+helium@jensge.org</a>&gt;<br>" +
-                  "<a href=\"https://gitorious.org/helium/helium\">https://gitorious.org/helium/helium</a><br>" +
-                  "<a href=\"https://www.transifex.net/projects/p/Helium\">https://www.transifex.net/projects/p/Helium</a></p>" +
+                  "<p>Copyright © 2012<br />Jens Georg &lt;<a href=\"mailto:mail+helium@jensge.org\">mail+helium@jensge.org</a>&gt;</p>" +
+                  "<p><strong>Website</strong><br />" +
+                  "<a href=\"https://gitorious.org/helium/helium\">https://gitorious.org/helium/helium</a>" +
 
-                  "<p>The issue tracker is located at<br />" +
+                  "<p><strong>Issue tracker</strong><br />" +
                   "<a href=\"https://github.com/phako/Helium/issues\">https://github.com/phako/Helium/issues</a></p>" +
 
                   "<p>This program is free software: you can redistribute it and/or modify " +
@@ -62,26 +62,10 @@ Page {
         flickableItem: flickable
     }
 
-    Rectangle {
+    PageHeader {
         id: rtnTitle
-        anchors.top: parent.top
-        width: parent.width
-        height: 70
-        color: "black"
-
-        Label {
-            id: text
-            text: "About Helium"
-            elide: Text.ElideRight
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.left: parent.left
-            anchors.leftMargin: 16
-            anchors.right: parent.right
-            anchors.rightMargin: 16
-            platformStyle: LabelStyle {
-                textColor: "white"
-                fontPixelSize: 28
-            }
-        }
+        text: qsTr("About Helium")
+        refreshable: false
+        busy: false
     }
 }
