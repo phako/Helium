@@ -54,6 +54,8 @@ void UPnPDeviceModel::onDeviceAvailable(void *ptr)
         m_deviceInfo.insert(udn, GUPNP_DEVICE_PROXY(ptr));
         m_devices << udn;
         endInsertRows();
+    } else {
+        g_object_unref(device_info);
     }
 }
 
