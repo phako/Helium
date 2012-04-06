@@ -158,7 +158,7 @@ void UPnPDevice::propagateError(GError *error)
                               Q_ARG(int, error->code),
                               Q_ARG(QString, QString::fromUtf8(error->message)));
 
-    g_error_free (error);
+    g_error_free(error);
 }
 
 void UPnPDevice::propagateError(const GError *error)
