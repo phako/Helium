@@ -457,6 +457,10 @@ void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
 
 void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData)
 {
+    if (m_avTransport.isEmpty()) {
+        return;
+    }
+
     SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this);
 
     gupnp_service_proxy_begin_action(m_avTransport,
@@ -508,7 +512,7 @@ void UPnPRenderer::on_play (GUPnPServiceProxy       *proxy,
 
 void UPnPRenderer::play()
 {
-    if (m_state == QLatin1String("PLAYING")) {
+    if (m_avTransport.isEmpty() || m_state == QLatin1String("PLAYING")) {
         return;
     }
 
@@ -523,7 +527,7 @@ void UPnPRenderer::play()
 
 void UPnPRenderer::stop()
 {
-    if (m_state == QLatin1String("STOPPED")) {
+    if (m_avTransport.isEmpty() || m_state == QLatin1String("STOPPED")) {
         return;
     }
 
