@@ -22,6 +22,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "upnprenderer.h"
 
+const QString START_POSITION = QLatin1String("0:00:00");
+
 struct SetAVTransportCall {
     QString m_uri;
     QString m_metaData;
@@ -64,6 +66,12 @@ void UPnPRenderer::setState(const QString &state)
     } else {
         m_progressTimer.stop();
     }
+
+    if (state == QLatin1String("STOPPED")) {
+        setProgress(0.0);
+        setPosition(START_POSITION);
+    }
+
     QMetaObject::invokeMethod(this, "stateChanged", Qt::QueuedConnection);
 }
 
@@ -257,11 +265,11 @@ UPnPRenderer::UPnPRenderer()
     , m_connectionManager()
     , m_state(QLatin1String("STOPPED"))
     , m_protocolInfo(QLatin1String("*:*:*:*"))
-    , m_duration(QLatin1String("0:00:00"))
+    , m_duration(START_POSITION)
     , m_progressTimer()
     , m_canPause(false)
     , m_currentTitle()
-    , m_position(QLatin1String("0:00:00"))
+    , m_position(START_POSITION)
     , m_canSeek(false)
     , m_seekMode(QLatin1String(""))
 {
@@ -304,10 +312,10 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     // reset to initial state
     setState(QLatin1String("STOPPED"));
     setProtocolInfo(QLatin1String("*:*:*:*"));
-    setDuration(QLatin1String("0:00:00"));
+    setDuration(START_POSITION);
     setCanPause(false);
     setTitle(QString());
-    setPosition(QLatin1String("0:00:00"));
+    setPosition(START_POSITION);
     setProgress(0.0f);
 
     if (m_proxy.isEmpty()) {
