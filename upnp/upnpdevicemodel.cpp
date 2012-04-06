@@ -209,7 +209,13 @@ QVariant UPnPDeviceModel::data(const QModelIndex &index, int role) const
     switch (role) {
         case Qt::DisplayRole: // for use in QListView
         case DeviceRoleFriendlyName:
-            return QString::fromUtf8(gupnp_device_info_get_friendly_name(info));
+        {
+            char *friendly_name = gupnp_device_info_get_friendly_name(info);
+            QString result = QString::fromUtf8(friendly_name);
+            g_free(friendly_name);
+
+            return result;
+        }
         case DeviceRoleIcon:
             return UPnPDevice::getIcon(proxy);
         case DeviceRoleUdn:
