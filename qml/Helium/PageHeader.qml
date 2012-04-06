@@ -36,6 +36,8 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: 16
+        anchors.right: refreshable ? refreshButton.left : parent.right
+        anchors.rightMargin: 16
         platformStyle: LabelStyle {
             textColor: "white"
             fontPixelSize: 28
