@@ -75,38 +75,39 @@ QString UPnPDevice::friendlyName(void) const
 QUrl UPnPDevice::getIcon (GUPnPDeviceProxy *proxy)
 {
     GUPnPDeviceInfo *di = GUPNP_DEVICE_INFO(proxy);
+
     if (di == 0) {
         return QUrl();
     }
 
     // prefer PNG due to the proper transparency
-    QString url = QString::fromUtf8(gupnp_device_info_get_icon_url(di,
-                                                                   "image/png",
-                                                                   -1,
-                                                                   120,
-                                                                   120,
-                                                                   TRUE,
-                                                                   NULL,
-                                                                   NULL,
-                                                                   NULL,
-                                                                   NULL));
-    if (!url.isEmpty()) {
-        return QUrl(url);
+    ScopedGPointer icon(gupnp_device_info_get_icon_url(di,
+                                                       "image/png",
+                                                       -1,
+                                                       120,
+                                                       120,
+                                                       TRUE,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL,
+                                                       NULL));
+    if (not icon.isNull()) {
+        return QUrl(QString::fromUtf8(icon.data()));
     }
 
     // device didn't have PNG icon, let's use anything we can get
-    url = QString::fromUtf8(gupnp_device_info_get_icon_url(di,
-                                                           NULL,
-                                                           -1,
-                                                           120,
-                                                           120,
-                                                           TRUE,
-                                                           NULL,
-                                                           NULL,
-                                                           NULL,
-                                                           NULL));
-    if (!url.isEmpty()) {
-        return QUrl(url);
+    icon.reset (gupnp_device_info_get_icon_url(di,
+                                               NULL,
+                                               -1,
+                                               120,
+                                               120,
+                                               TRUE,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL));
+    if (not icon.isNull()) {
+        return QUrl(QString::fromUtf8(icon.data()));
     }
 
     const char *type = gupnp_device_info_get_device_type(di);
