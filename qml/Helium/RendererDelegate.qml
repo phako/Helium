@@ -53,7 +53,6 @@ Item {
         font.pixelSize: 26
     }
 
-
     MouseArea {
         id: mouseArea
         anchors.fill: background
