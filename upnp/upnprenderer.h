@@ -35,7 +35,7 @@ class UPnPRenderer : public UPnPDevice
     Q_PROPERTY(bool canPause READ canPause NOTIFY canPauseChanged)
     Q_PROPERTY(bool canSeek READ canSeek NOTIFY canSeekChanged)
     Q_PROPERTY(QString seekMode READ seekMode NOTIFY seekModeChanged)
-    Q_PROPERTY(QString uri READ uri NOTIFY uriChanged)
+    Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString position READ position NOTIFY positionChanged)
 public:
     static const char DEVICE_TYPE[];
@@ -49,7 +49,7 @@ public:
     QString duration() { return m_duration; }
     QString protocolInfo() { return m_protocolInfo; }
     float progress() { return m_progress; }
-    QString uri() { return m_uri; }
+    QString title() { return m_currentTitle; }
     QString position() { return m_position; }
     bool canPause() const { return m_canPause; }
     bool canSeek() const { return m_canSeek; }
@@ -76,7 +76,7 @@ Q_SIGNALS:
     void durationChanged(void);
     void progressChanged(void);
     void canPauseChanged(void);
-    void uriChanged(void);
+    void titleChanged(void);
     void positionChanged(void);
     void canSeekChanged(void);
     void seekModeChanged(void);
@@ -89,7 +89,7 @@ private:
     void setDuration(const QString &duration);
     void setProgress(float progress);
     void setProtocolInfo(const QString &protocolInfo);
-    void setURI(const QString &uri);
+    void setTitle(const QString &uri);
     void setCanPause(bool canPause);
     void setPosition(const QString &position);
     void setCanSeek(bool canSeek);
@@ -138,7 +138,7 @@ private:
     quint64 m_currentPosition;
     float m_progress;
     bool m_canPause;
-    QString m_uri;
+    QString m_currentTitle;
     QString m_position;
     bool m_canSeek;
     QString m_seekMode;

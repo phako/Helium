@@ -19,6 +19,17 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Item {
+    Label {
+        id: txtTitle
+        anchors.bottom: buttons.top
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+        anchors.bottomMargin: 10
+        anchors.left: parent.left
+        anchors.right: parent.right
+        elide: Text.ElideRight
+        text: renderer.title
+    }
 
     ProgressBar {
         id: progressBar

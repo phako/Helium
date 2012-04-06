@@ -20,6 +20,9 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib-object.h>
 
+#include <libgupnp/gupnp.h>
+#include <gupnp-av/gupnp-av.h>
+
 #include <QDebug>
 #include <QScopedPointer>
 
@@ -103,5 +106,6 @@ private:
 
 typedef RefPtrG<GUPnPServiceProxy> ServiceProxy;
 typedef RefPtrG<GUPnPDeviceProxy> DeviceProxy;
+typedef RefPtrG<GUPnPDIDLLiteParser> DIDLLiteParser;
 
 #endif // SCOPEREF_H

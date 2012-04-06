@@ -441,7 +441,7 @@ void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
 
 void BrowseModel::onBrowseDone(QByteArray result, uint number_returned, uint total_matches)
 {
-    RefPtrG<GUPnPDIDLLiteParser> parser = RefPtrG<GUPnPDIDLLiteParser>::wrap(gupnp_didl_lite_parser_new());
+    DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new());
     beginInsertRows(QModelIndex(),
                            m_data.count(),
                            m_data.count() + number_returned - 1);

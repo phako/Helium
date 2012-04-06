@@ -101,15 +101,15 @@ void UPnPRenderer::setProtocolInfo(const QString &protocolInfo)
     QMetaObject::invokeMethod(this, "protocolInfoChanged", Qt::QueuedConnection);
 }
 
-void UPnPRenderer::setURI(const QString& uri)
+void UPnPRenderer::setTitle(const QString& uri)
 {
-    if (uri == m_uri) {
+    if (uri == m_currentTitle) {
         return;
     }
 
-    m_uri = uri;
+    m_currentTitle = uri;
 
-    QMetaObject::invokeMethod(this, "uriChanged", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, "titleChanged", Qt::QueuedConnection);
 }
 
 void UPnPRenderer::setCanPause(bool canPause)
@@ -156,6 +156,19 @@ void UPnPRenderer::setSeekMode(const QString &seekMode)
     QMetaObject::invokeMethod(this, "seekModeChanged", Qt::QueuedConnection);
 }
 
+static void
+on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gpointer user_data)
+{
+    Q_UNUSED(parser)
+    GUPnPDIDLLiteObject **object = static_cast<GUPnPDIDLLiteObject **>(user_data);
+
+    if (*object != 0) {
+        return;
+    }
+
+    *object = GUPNP_DIDL_LITE_OBJECT(g_object_ref(item));
+}
+
 void
 UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
                                           const char        */*variable*/,
@@ -167,7 +180,11 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
     char *state_name = 0;
     char *track_duration = 0;
     char *track_uri = 0;
+    char *track_meta_data = 0;
+    char *av_transport_meta_data = 0;
+    const char *meta_data = 0;
 
+    qDebug() << g_value_get_string(value);
     if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
                                                    0,
                                                    g_value_get_string(value),
@@ -175,6 +192,8 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
                                                    "TransportState", G_TYPE_STRING, &state_name,
                                                    "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
                                                    "CurrentTrackURI", G_TYPE_STRING, &track_uri,
+                                                   "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
+                                                   "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
                                                    NULL)) {
         if (state_name != 0) {
             renderer->setState(QString::fromUtf8(state_name));
@@ -188,8 +207,40 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
             g_free(track_duration);
         }
 
-        if (track_uri != 0) {
-            renderer->setURI(QString::fromUtf8(track_uri));
+        if (track_meta_data != 0) {
+            meta_data = track_meta_data;
+        } else if (av_transport_meta_data != 0) {
+            meta_data = av_transport_meta_data;
+        }
+
+        if (meta_data != 0) {
+            DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
+            GError *error = 0;
+            GUPnPDIDLLiteObject *object = 0;
+
+            g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
+
+            if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
+                if (object != 0) {
+                    renderer->setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
+                }
+            }
+
+            if (object != 0) {
+                g_object_unref(object);
+            }
+        }
+
+        if (track_meta_data != 0) {
+            g_free(track_meta_data);
+        }
+
+        if (av_transport_meta_data != 0) {
+            g_free(av_transport_meta_data);
+        }
+
+        if (renderer->m_currentTitle.isEmpty() && track_uri != 0) {
+            renderer->setTitle(QString::fromUtf8(track_uri));
 
             g_free(track_uri);
         }
@@ -209,7 +260,7 @@ UPnPRenderer::UPnPRenderer()
     , m_duration(QLatin1String("0:00:00"))
     , m_progressTimer()
     , m_canPause(false)
-    , m_uri()
+    , m_currentTitle()
     , m_position(QLatin1String("0:00:00"))
     , m_canSeek(false)
     , m_seekMode(QLatin1String(""))
@@ -255,7 +306,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setProtocolInfo(QLatin1String("*:*:*:*"));
     setDuration(QLatin1String("0:00:00"));
     setCanPause(false);
-    setURI(QString());
+    setTitle(QString());
     setPosition(QLatin1String("0:00:00"));
     setProgress(0.0f);
 
