@@ -89,6 +89,7 @@ Page {
             snapMode: ListView.SnapToItem
             model: browseModel
             currentIndex: browseModel.lastIndex
+            highlightMoveSpeed: -1
 
             delegate: BrowseDelegate {
                 mainText: model.title
@@ -96,15 +97,26 @@ Page {
                 iconAnnotated: model.uri === ""
                 drillDown: model.type === "container"
 
+                Rectangle {
+                    id: selectedHighlight
+                    visible: model.type !== "container" && browseModel.lastIndex === index
+                    anchors.fill: parent
+                    gradient: Gradient {
+                        GradientStop {position: 0.0; color: "#1078d8" }
+                        GradientStop {position: 1.0; color: "#3890e0" }
+                    }
+                    z: -1
+                }
+
                 onClicked: {
                     browseModel.lastIndex = index
                     if (type === "container") {
                         server.browse(upnpId, upnpClass, renderer.protocolInfo);
                     }
-
                 }
 
                 onPressAndHold: {
+                    browseModel.lastIndex = index
                     if (type !== "container" && uri !== "") {
                         renderer.setAVTransportUri(uri, metadata);
                         if (renderer.state === "STOPPED") {
