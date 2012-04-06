@@ -42,7 +42,22 @@ PageStackWindow {
         model: serverModel
         role: "server"
         title: qsTr("Servers")
-        delegate: ServerDelegate {}
+        delegate: BrowseDelegate {
+            id: serverDelegate
+            mainText: model.friendlyName
+            subText: model.udn
+            showIcon: false
+            iconAnnotated: false
+            drillDown: true
+
+            onClicked: {
+                serverDelegate.ListView.view.currentIndex = index;
+                server.wrapDevice(serverModel.get(index));
+                server.browse("0", "object.container", renderer.protocolInfo);
+                browse.page = friendlyName
+                pageStack.push(browse)
+            }
+        }
     }
 
     ServerList {

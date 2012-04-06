@@ -90,7 +90,29 @@ Page {
             model: browseModel
             currentIndex: browseModel.lastIndex
 
-            delegate: BrowseDelegate {}
+            delegate: BrowseDelegate {
+                mainText: model.title
+                subText: model.detail
+                iconAnnotated: model.uri === ""
+                drillDown: model.type === "container"
+
+                onClicked: {
+                    browseModel.lastIndex = index
+                    if (type === "container") {
+                        server.browse(upnpId, upnpClass, renderer.protocolInfo);
+                    }
+
+                }
+
+                onPressAndHold: {
+                    if (type !== "container" && uri !== "") {
+                        renderer.setAVTransportUri(uri, metadata);
+                        if (renderer.state === "STOPPED") {
+                            renderer.play();
+                        }
+                    }
+                }
+            }
         }
         ScrollDecorator {
             flickableItem: browseListView

@@ -20,6 +20,16 @@ import com.nokia.meego 1.0
 
 Item {
     id: listItem
+
+    property alias mainText: lblMainText.text
+    property alias subText: lblSubText.text
+    property alias drillDown: imgDrilldown.visible
+    property alias iconAnnotated: imgIcon.annotated
+    property alias showIcon: imgIcon.visible
+
+    signal clicked
+    signal pressAndHold
+
     height: 88
     width: parent.width
 
@@ -36,7 +46,6 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.top: parent.top
         anchors.leftMargin: 10
-        annotated: uri === ""
         asynchronous: true
         source: icon
         width: 64
@@ -45,16 +54,15 @@ Item {
     }
 
     Column {
-        anchors.left: imgIcon.right
+        anchors.left: imgIcon.visible ? imgIcon.right : parent.left
         anchors.leftMargin: 10
         anchors.verticalCenter: imgIcon.verticalCenter
         anchors.right: (imgDrilldown.visible ? imgDrilldown.left : listItem.right)
         anchors.rightMargin: 10
 
         Label {
-            id: mainText
+            id: lblMainText
             width: parent.width
-            text: model.title
             font.weight: Font.Bold
             font.pixelSize: 26
             elide: Text.ElideRight
@@ -62,9 +70,8 @@ Item {
 
         Label {
             visible: model.detail !== ""
-            id: subText
+            id: lblSubText
             width: parent.width
-            text: model.detail
             font.weight: Font.Light
             font.pixelSize: 22
             color: "dark grey"
@@ -74,7 +81,6 @@ Item {
 
     Image {
         id: imgDrilldown
-        visible: type === "container"
         source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
         anchors.right: parent.right;
         anchors.verticalCenter: parent.verticalCenter
@@ -84,19 +90,11 @@ Item {
         id: mouseArea
         anchors.fill: background
         onClicked: {
-            browseModel.lastIndex = index
-            if (type === "container") {
-                server.browse(upnpId, upnpClass, renderer.protocolInfo);
-            }
+            listItem.clicked()
         }
 
         onPressAndHold: {
-            if (type !== "container" && uri !== "") {
-                renderer.setAVTransportUri(uri, metadata);
-                if (renderer.state === "STOPPED") {
-                    renderer.play();
-                }
-            }
+            listItem.pressAndHold()
         }
     }
 }
