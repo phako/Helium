@@ -80,6 +80,11 @@ Page {
     PageHeader {
         id: pageHeader
         busy: false
-        onClicked: model.refresh()
+        onClicked: {
+            if (!networkControl.online) {
+                networkControl.connect();
+            }
+            model.refresh();
+        }
     }
 }

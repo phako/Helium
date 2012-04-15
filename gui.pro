@@ -51,7 +51,8 @@ SOURCES += main.cpp \
     upnp/upnpservermodel.cpp \
     upnp/upnprenderermodel.cpp \
     upnp/browsemodelstack.cpp \
-    upnp/browsemodel.cpp
+    upnp/browsemodel.cpp \
+    networkcontrol.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -76,7 +77,8 @@ HEADERS += \
     upnp/upnprenderermodel.h \
     upnp/browsemodel.h \
     upnp/refptrg.h \
-    upnp/browsemodelstack.h
+    upnp/browsemodelstack.h \
+    networkcontrol.h
 RESOURCES += \
     res.qrc
 

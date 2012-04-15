@@ -98,8 +98,8 @@ Page {
     }
 
     Component.onCompleted: {
-        if (!online) {
-            networkSession.open();
+        if (!networkControl.online) {
+            networkControl.connect();
         }
     }
 }
