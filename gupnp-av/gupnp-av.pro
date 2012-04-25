@@ -5,6 +5,9 @@ CONFIG -= qt
 
 PKGCONFIG += glib-2.0 gupnp-1.0 libxml-2.0
 
+QMAKE_CFLAGS_RELEASE += -w
+QMAKE_CFLAGS_DEBUG += -w
+
 HEADERS = gupnp-av-error.h \
           gupnp-av.h \
           gupnp-av-marshal.h \
