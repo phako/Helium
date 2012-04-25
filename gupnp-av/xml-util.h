@@ -76,4 +76,8 @@ xml_util_set_child                      (xmlNode    *parent_node,
                                          const char *name,
                                          const char *value);
 
+G_GNUC_INTERNAL gboolean
+xml_util_verify_attribute_is_boolean    (xmlNode    *node,
+                                         const char *attribute_name);
+
 #endif /* __XML_UTIL_H__ */

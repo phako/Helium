@@ -90,7 +90,7 @@ get_resolution_info (GUPnPDIDLLiteResource *resource,
         if (tokens == NULL || tokens[0] == NULL || tokens[1] == NULL) {
                 g_warning ("Failed to resolution string '%s'\n", resolution);
 
-                return;
+                goto return_point;
         }
 
         if (width)
@@ -98,6 +98,7 @@ get_resolution_info (GUPnPDIDLLiteResource *resource,
         if (height)
                 *height = atoi (tokens[1]);
 
+return_point:
         g_strfreev (tokens);
 }
 
@@ -266,6 +267,7 @@ gupnp_didl_lite_resource_get_property (GObject    *object,
         case PROP_SIZE:
                 g_value_set_long (value,
                                   gupnp_didl_lite_resource_get_size (resource));
+                break;
         case PROP_SIZE64:
                 g_value_set_int64 (value,
                                    gupnp_didl_lite_resource_get_size64 (resource));
@@ -358,7 +360,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
         g_type_class_add_private (klass, sizeof (GUPnPDIDLLiteResourcePrivate));
 
         /**
-         * GUPnPDIDLLiteResource:xml-node
+         * GUPnPDIDLLiteResource:xml-node:
          *
          * The pointer to res node in XML document.
          **/
@@ -376,7 +378,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:xml-doc
+         * GUPnPDIDLLiteResource:xml-doc:
          *
          * The reference to XML document containing this object.
          *
@@ -399,7 +401,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:uri
+         * GUPnPDIDLLiteResource:uri:
          *
          * The URI associated with this resource.
          **/
@@ -416,7 +418,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:import-uri
+         * GUPnPDIDLLiteResource:import-uri:
          *
          * The Import URI associated with this resource.
          **/
@@ -434,7 +436,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:protocol-info
+         * GUPnPDIDLLiteResource:protocol-info:
          *
          * The protocol info associated with this resource.
          **/
@@ -452,7 +454,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:size
+         * GUPnPDIDLLiteResource:size:
          *
          * The size (in bytes) of this resource.
          **/
@@ -471,7 +473,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                     G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:size64
+         * GUPnPDIDLLiteResource:size64:
          *
          * The size (in bytes) of this resource.
          **/
@@ -490,7 +492,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                      G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:duration
+         * GUPnPDIDLLiteResource:duration:
          *
          * The duration (in seconds) of this resource.
          **/
@@ -510,7 +512,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                     G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:bitrate
+         * GUPnPDIDLLiteResource:bitrate:
          *
          * The bitrate of this resource.
          **/
@@ -529,7 +531,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:sample-freq
+         * GUPnPDIDLLiteResource:sample-freq:
          *
          * The sample frequency of this resource.
          **/
@@ -548,7 +550,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:bits-per-sample
+         * GUPnPDIDLLiteResource:bits-per-sample:
          *
          * The sample size of this resource.
          **/
@@ -567,7 +569,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:protection
+         * GUPnPDIDLLiteResource:protection:
          *
          * The protection system used for this resource.
          **/
@@ -585,7 +587,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:audio-channels
+         * GUPnPDIDLLiteResource:audio-channels:
          *
          * The number of audio channels in this resource.
          **/
@@ -605,7 +607,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:width
+         * GUPnPDIDLLiteResource:width:
          *
          * The width of this image/video resource.
          **/
@@ -624,7 +626,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:height
+         * GUPnPDIDLLiteResource:height:
          *
          * The height of this image/video resource.
          **/
@@ -643,7 +645,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteResource:color-depth
+         * GUPnPDIDLLiteResource:color-depth:
          *
          * The color-depth of this image/video resource.
          **/
@@ -664,7 +666,7 @@ gupnp_didl_lite_resource_class_init (GUPnPDIDLLiteResourceClass *klass)
 }
 
 /**
- * gupnp_didl_lite_resource_new_from_xml
+ * gupnp_didl_lite_resource_new_from_xml:
  * @xml_node: The pointer to 'res' node in XML document
  * @xml_doc: The reference to XML document containing this resource
  *
@@ -687,12 +689,12 @@ gupnp_didl_lite_resource_new_from_xml (xmlNode     *xml_node,
 }
 
 /**
- * gupnp_didl_lite_resource_get_xml_node
+ * gupnp_didl_lite_resource_get_xml_node:
  * @resource: The #GUPnPDIDLLiteResource
  *
  * Get the pointer to res node in XML document.
  *
- * Return value: The pointer to res node in XML document.
+ * Returns: (transfer none): The pointer to res node in XML document.
  **/
 xmlNode *
 gupnp_didl_lite_resource_get_xml_node (GUPnPDIDLLiteResource *resource)
@@ -703,7 +705,7 @@ gupnp_didl_lite_resource_get_xml_node (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_uri
+ * gupnp_didl_lite_resource_get_uri:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the URI associated with the @resource.
@@ -722,7 +724,7 @@ gupnp_didl_lite_resource_get_uri (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_import_uri
+ * gupnp_didl_lite_resource_get_import_uri:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the import URI associated with the @resource.
@@ -739,12 +741,12 @@ gupnp_didl_lite_resource_get_import_uri (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_protocol_info
+ * gupnp_didl_lite_resource_get_protocol_info:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the protocol info associated with the @resource.
  *
- * Return value: The protocol info associated with the @resource or %NULL. The
+ * Returns: (transfer none): The protocol info associated with the @resource or %NULL. The
  * returned object must not be unrefed.
  **/
 GUPnPProtocolInfo *
@@ -780,7 +782,7 @@ gupnp_didl_lite_resource_get_protocol_info (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_size
+ * gupnp_didl_lite_resource_get_size:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the size (in bytes) of the @resource.
@@ -794,7 +796,7 @@ gupnp_didl_lite_resource_get_size (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_size64
+ * gupnp_didl_lite_resource_get_size64:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the size (in bytes) of the @resource.
@@ -813,7 +815,7 @@ gupnp_didl_lite_resource_get_size64 (GUPnPDIDLLiteResource *resource)
 
 
 /**
- * gupnp_didl_lite_resource_get_duration
+ * gupnp_didl_lite_resource_get_duration:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the duration (in seconds) of the @resource.
@@ -836,7 +838,7 @@ gupnp_didl_lite_resource_get_duration (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_bitrate
+ * gupnp_didl_lite_resource_get_bitrate:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the bitrate (in bytes per second) of the @resource.
@@ -854,7 +856,7 @@ gupnp_didl_lite_resource_get_bitrate (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_sample_freq
+ * gupnp_didl_lite_resource_get_sample_freq:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the sample frequency of the @resource.
@@ -872,7 +874,7 @@ gupnp_didl_lite_resource_get_sample_freq (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_bits_per_sample
+ * gupnp_didl_lite_resource_get_bits_per_sample:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the sample size of the @resource.
@@ -890,7 +892,7 @@ gupnp_didl_lite_resource_get_bits_per_sample (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_protection
+ * gupnp_didl_lite_resource_get_protection:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the protection system used by the @resource.
@@ -907,7 +909,7 @@ gupnp_didl_lite_resource_get_protection (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_audio_channels
+ * gupnp_didl_lite_resource_get_audio_channels:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the number of audio channels in the @resource.
@@ -925,7 +927,7 @@ gupnp_didl_lite_resource_get_audio_channels (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_width
+ * gupnp_didl_lite_resource_get_width:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the width of this image/video resource.
@@ -945,7 +947,7 @@ gupnp_didl_lite_resource_get_width (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_height
+ * gupnp_didl_lite_resource_get_height:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the height of this image/video resource.
@@ -965,7 +967,7 @@ gupnp_didl_lite_resource_get_height (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_get_color_depth
+ * gupnp_didl_lite_resource_get_color_depth:
  * @resource: A #GUPnPDIDLLiteResource
  *
  * Get the color-depth of this image/video resource.
@@ -983,7 +985,7 @@ gupnp_didl_lite_resource_get_color_depth (GUPnPDIDLLiteResource *resource)
 }
 
 /**
- * gupnp_didl_lite_resource_set_uri
+ * gupnp_didl_lite_resource_set_uri:
  * @resource: A #GUPnPDIDLLiteResource
  * @uri: The URI as string
  *
@@ -1009,7 +1011,7 @@ gupnp_didl_lite_resource_set_uri (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_import_uri
+ * gupnp_didl_lite_resource_set_import_uri:
  * @resource: A #GUPnPDIDLLiteResource
  * @import_uri: The URI as string
  *
@@ -1031,7 +1033,7 @@ gupnp_didl_lite_resource_set_import_uri (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_protocol_info
+ * gupnp_didl_lite_resource_set_protocol_info:
  * @resource: A #GUPnPDIDLLiteResource
  * @info: The protocol string
  *
@@ -1075,7 +1077,7 @@ gupnp_didl_lite_resource_set_protocol_info (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_size
+ * gupnp_didl_lite_resource_set_size:
  * @resource: A #GUPnPDIDLLiteResource
  * @size: The size (in bytes)
  *
@@ -1092,7 +1094,7 @@ gupnp_didl_lite_resource_set_size (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_size64
+ * gupnp_didl_lite_resource_set_size64:
  * @resource: A #GUPnPDIDLLiteResource
  * @size: The size (in bytes)
  *
@@ -1126,7 +1128,7 @@ gupnp_didl_lite_resource_set_size64 (GUPnPDIDLLiteResource *resource,
 
 
 /**
- * gupnp_didl_lite_resource_set_duration
+ * gupnp_didl_lite_resource_set_duration:
  * @resource: A #GUPnPDIDLLiteResource
  * @duration: The duration (in seconds)
  *
@@ -1161,7 +1163,7 @@ gupnp_didl_lite_resource_set_duration (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_bitrate
+ * gupnp_didl_lite_resource_set_bitrate:
  * @resource: A #GUPnPDIDLLiteResource
  * @bitrate: The bitrate
  *
@@ -1193,7 +1195,7 @@ gupnp_didl_lite_resource_set_bitrate (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_sample_freq
+ * gupnp_didl_lite_resource_set_sample_freq:
  * @resource: A #GUPnPDIDLLiteResource
  * @sample_freq: The sample frequency
  *
@@ -1225,7 +1227,7 @@ gupnp_didl_lite_resource_set_sample_freq (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_bits_per_sample
+ * gupnp_didl_lite_resource_set_bits_per_sample:
  * @resource: A #GUPnPDIDLLiteResource
  * @sample_size: The number of bits per sample
  *
@@ -1258,7 +1260,7 @@ gupnp_didl_lite_resource_set_bits_per_sample
 }
 
 /**
- * gupnp_didl_lite_resource_set_protection
+ * gupnp_didl_lite_resource_set_protection:
  * @resource: A #GUPnPDIDLLiteResource
  * @protection: The protection system identifier as string
  *
@@ -1281,7 +1283,7 @@ gupnp_didl_lite_resource_set_protection (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_audio_channels
+ * gupnp_didl_lite_resource_set_audio_channels:
  * @resource: A #GUPnPDIDLLiteResource
  * @n_channels: The number of channels
  *
@@ -1313,7 +1315,7 @@ gupnp_didl_lite_resource_set_audio_channels (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_width
+ * gupnp_didl_lite_resource_set_width:
  * @resource: A #GUPnPDIDLLiteResource
  * @width: The width
  *
@@ -1348,7 +1350,7 @@ gupnp_didl_lite_resource_set_width (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_height
+ * gupnp_didl_lite_resource_set_height:
  * @resource: A #GUPnPDIDLLiteResource
  * @height: The height
  *
@@ -1384,7 +1386,7 @@ gupnp_didl_lite_resource_set_height (GUPnPDIDLLiteResource *resource,
 }
 
 /**
- * gupnp_didl_lite_resource_set_color_depth
+ * gupnp_didl_lite_resource_set_color_depth:
  * @resource: A #GUPnPDIDLLiteResource
  * @color_depth: The color-depth
  *

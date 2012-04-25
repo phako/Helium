@@ -213,3 +213,24 @@ xml_util_set_child (xmlNode    *parent_node,
         return node;
 }
 
+gboolean
+xml_util_verify_attribute_is_boolean (xmlNode    *node,
+                                      const char *attribute_name)
+{
+        const char *content;
+        char *str;
+
+        content = xml_util_get_attribute_content (node, attribute_name);
+        if (content == NULL)
+            return FALSE;
+
+        str = (char *) content;
+
+        return g_ascii_strcasecmp (str, "true") == 0 ||
+               g_ascii_strcasecmp (str, "yes") == 0 ||
+               g_ascii_strcasecmp (str, "false") == 0 ||
+               g_ascii_strcasecmp (str, "no") == 0 ||
+               g_ascii_strcasecmp (str, "0") == 0 ||
+               g_ascii_strcasecmp (str, "1") == 0;
+}
+

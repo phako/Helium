@@ -228,7 +228,7 @@ gupnp_search_criteria_parser_class_init
         object_class->finalize = gupnp_search_criteria_parser_finalize;
 
         /**
-         * GUPnPSearchCriteriaParser::begin-parens
+         * GUPnPSearchCriteriaParser::begin-parens:
          * @parser: The #GUPnPSearchCriteriaParser that received the signal
          *
          * The ::begin_parens signal is emitted to mark the beginning of a
@@ -247,7 +247,7 @@ gupnp_search_criteria_parser_class_init
                               0);
 
         /**
-         * GUPnPSearchCriteriaParser::end-parens
+         * GUPnPSearchCriteriaParser::end-parens:
          * @parser: The #GUPnPSearchCriteriaParser that received the signal
          *
          * The ::end_parens signal is emitted to mark the end of a parenthetical
@@ -266,7 +266,7 @@ gupnp_search_criteria_parser_class_init
                               0);
 
         /**
-         * GUPnPSearchCriteriaParser::conjunction
+         * GUPnPSearchCriteriaParser::conjunction:
          * @parser: The #GUPnPSearchCriteriaParser that received the signal
          *
          * The ::conjuction signal is emitted whenever a conjuction marker
@@ -285,7 +285,7 @@ gupnp_search_criteria_parser_class_init
                               0);
 
         /**
-         * GUPnPSearchCriteriaParser::disjunction
+         * GUPnPSearchCriteriaParser::disjunction:
          * @parser: The #GUPnPSearchCriteriaParser that received the signal
          *
          * The ::disjuction signal is emitted whenever a disjuction marker
@@ -304,7 +304,7 @@ gupnp_search_criteria_parser_class_init
                               0);
 
         /**
-         * GUPnPSearchCriteriaParser::expression
+         * GUPnPSearchCriteriaParser::expression:
          * @parser: The #GUPnPSearchCriteriaParser that received the signal
          * @property: The property
          * @op: The operator as #GUPnPSearchCriteriaOp
@@ -335,7 +335,7 @@ gupnp_search_criteria_parser_class_init
 }
 
 /**
- * gupnp_search_criteria_parser_new
+ * gupnp_search_criteria_parser_new:
  *
  * Return value: A new #GUPnPSearchCriteriaParser object.
  **/
@@ -554,7 +554,7 @@ scan_search_exp (GUPnPSearchCriteriaParser *parser,
 }
 
 /**
- * gupnp_search_criteria_parser_parse_text
+ * gupnp_search_criteria_parser_parse_text:
  * @parser: A #GUPnPSearchCriteriaParser
  * @text: The search criteria string to be parsed
  * @error: The location where to store the error information if any, or NULL

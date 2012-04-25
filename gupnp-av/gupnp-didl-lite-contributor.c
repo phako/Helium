@@ -159,7 +159,7 @@ gupnp_didl_lite_contributor_class_init (GUPnPDIDLLiteContributorClass *klass)
                                   sizeof (GUPnPDIDLLiteContributorPrivate));
 
         /**
-         * GUPnPDIDLLiteContributor:xml-node
+         * GUPnPDIDLLiteContributor:xml-node:
          *
          * The pointer to object node in XML document.
          **/
@@ -177,7 +177,7 @@ gupnp_didl_lite_contributor_class_init (GUPnPDIDLLiteContributorClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteContributor:xml-doc
+         * GUPnPDIDLLiteContributor:xml-doc:
          *
          * The reference to XML document containing this object.
          *
@@ -200,7 +200,7 @@ gupnp_didl_lite_contributor_class_init (GUPnPDIDLLiteContributorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteContributor:role
+         * GUPnPDIDLLiteContributor:role:
          *
          * The role of this contributor.
          **/
@@ -217,7 +217,7 @@ gupnp_didl_lite_contributor_class_init (GUPnPDIDLLiteContributorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteContributor:name
+         * GUPnPDIDLLiteContributor:name:
          *
          * The name of this contributor.
          **/
@@ -235,7 +235,7 @@ gupnp_didl_lite_contributor_class_init (GUPnPDIDLLiteContributorClass *klass)
 }
 
 /**
- * gupnp_didl_lite_contributor_get_role
+ * gupnp_didl_lite_contributor_get_role:
  * @contributor: #GUPnPDIDLLiteContributor
  *
  * Get the role of the @contributor.
@@ -254,7 +254,7 @@ gupnp_didl_lite_contributor_get_role (GUPnPDIDLLiteContributor *contributor)
 }
 
 /**
- * gupnp_didl_lite_contributor_get_name
+ * gupnp_didl_lite_contributor_get_name:
  * @contributor: A #GUPnPDIDLLiteContributor
  *
  * Get the name of the @contributor.
@@ -271,7 +271,7 @@ gupnp_didl_lite_contributor_get_name (GUPnPDIDLLiteContributor *contributor)
 }
 
 /**
- * gupnp_didl_lite_contributor_set_role
+ * gupnp_didl_lite_contributor_set_role:
  * @contributor: #GUPnPDIDLLiteContributor
  * @role: The role of the @contributor
  *
@@ -294,7 +294,7 @@ gupnp_didl_lite_contributor_set_role (GUPnPDIDLLiteContributor *contributor,
 }
 
 /**
- * gupnp_didl_lite_contributor_set_name
+ * gupnp_didl_lite_contributor_set_name:
  * @contributor: A #GUPnPDIDLLiteContributor
  * @name: The name of the contributor
  *
@@ -320,7 +320,7 @@ gupnp_didl_lite_contributor_set_name (GUPnPDIDLLiteContributor *contributor,
 }
 
 /**
- * gupnp_didl_lite_contributor_new_from_xml
+ * gupnp_didl_lite_contributor_new_from_xml:
  * @xml_node: The pointer to relevant node in XML document
  * @xml_doc: The reference to containing XML document
  *
@@ -343,12 +343,12 @@ gupnp_didl_lite_contributor_new_from_xml (xmlNode     *xml_node,
 }
 
 /**
- * gupnp_didl_lite_contributor_get_xml_node
+ * gupnp_didl_lite_contributor_get_xml_node:
  * @contributor: The #GUPnPDIDLLiteContributor
  *
- * Get the pointer to relavent node in XML document.
+ * Get the pointer to relevant node in XML document.
  *
- * Return value: The pointer to relavent node in XML document.
+ * Returns: (transfer none): The pointer to relevant node in XML document.
  **/
 xmlNode *
 gupnp_didl_lite_contributor_get_xml_node (GUPnPDIDLLiteContributor *contributor)

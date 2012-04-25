@@ -238,6 +238,7 @@ gupnp_didl_lite_object_get_property (GObject    *object,
                         (value,
                          gupnp_didl_lite_object_get_dc_namespace
                                 (didl_object));
+                break;
         case PROP_DLNA_NAMESPACE:
                 g_value_set_pointer
                         (value,
@@ -361,7 +362,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
         g_type_class_add_private (klass, sizeof (GUPnPDIDLLiteObjectPrivate));
 
         /**
-         * GUPnPDIDLLiteObject:xml-node
+         * GUPnPDIDLLiteObject:xml-node:
          *
          * The pointer to object node in XML document.
          **/
@@ -379,7 +380,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:xml-doc
+         * GUPnPDIDLLiteObject:xml-doc:
          *
          * The reference to XML document containing this object.
          *
@@ -402,7 +403,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:upnp-namespace
+         * GUPnPDIDLLiteObject:upnp-namespace:
          *
          * Pointer to the UPnP namespace registered with the XML document
          * containing this object.
@@ -423,7 +424,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:dc-namespace
+         * GUPnPDIDLLiteObject:dc-namespace:
          *
          * Pointer to the DublinCore namespace registered with the XML document
          * containing this object.
@@ -444,7 +445,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:dlna-namespace
+         * GUPnPDIDLLiteObject:dlna-namespace:
          *
          * Pointer to the DLNA metadata namespace registered with the XML
          * document containing this object.
@@ -465,7 +466,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:id
+         * GUPnPDIDLLiteObject:id:
          *
          * The ID of this object.
          **/
@@ -482,7 +483,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:parent-id
+         * GUPnPDIDLLiteObject:parent-id:
          *
          * The ID of the parent container of this object.
          **/
@@ -500,7 +501,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:restricted
+         * GUPnPDIDLLiteObject:restricted:
          *
          * Whether this object is restricted.
          **/
@@ -517,7 +518,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:title
+         * GUPnPDIDLLiteObject:title:
          *
          * The title of this object.
          **/
@@ -534,7 +535,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:upnp-class
+         * GUPnPDIDLLiteObject:upnp-class:
          *
          * The UPnP class of this object.
          **/
@@ -551,7 +552,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:creator
+         * GUPnPDIDLLiteObject:creator:
          *
          * The creator of this object.
          *
@@ -572,7 +573,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:artist
+         * GUPnPDIDLLiteObject:artist:
          *
          * The artist of this object.
          *
@@ -593,7 +594,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:author
+         * GUPnPDIDLLiteObject:author:
          *
          * The author of this object.
          *
@@ -614,7 +615,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:genre
+         * GUPnPDIDLLiteObject:genre:
          *
          * The genre of this object.
          **/
@@ -631,7 +632,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:write-status
+         * GUPnPDIDLLiteObject:write-status:
          *
          * The write status of this object.
          **/
@@ -648,7 +649,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:album
+         * GUPnPDIDLLiteObject:album:
          *
          * The album of this object.
          **/
@@ -665,7 +666,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:album-art
+         * GUPnPDIDLLiteObject:album-art:
          *
          * The URI to album art of this object.
          **/
@@ -682,7 +683,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:description
+         * GUPnPDIDLLiteObject:description:
          *
          * The description of this object.
          **/
@@ -699,7 +700,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:date
+         * GUPnPDIDLLiteObject:date:
          *
          * The date of this object.
          **/
@@ -716,7 +717,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:track-number
+         * GUPnPDIDLLiteObject:track-number:
          *
          * The original track number of this object.
          **/
@@ -733,7 +734,7 @@ gupnp_didl_lite_object_class_init (GUPnPDIDLLiteObjectClass *klass)
                                    G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteObject:dlna-managed
+         * GUPnPDIDLLiteObject:dlna-managed:
          *
          * The 'dlna:dlnaManaged' attribute.
          **/
@@ -756,16 +757,16 @@ is_resource_compatible (GUPnPDIDLLiteResource *resource,
                         const char            *sink_protocol_info)
 {
         gboolean ret = FALSE;
-        char **protocols;
-        guint8 i;
+        char **protocols, **it;
 
         protocols = g_strsplit (sink_protocol_info, ",", 0);
 
-        for (i = 0; protocols[i] && !ret; i++) {
+
+        for (it = protocols; *it != NULL && !ret; it++) {
                 GUPnPProtocolInfo *info;
                 GUPnPProtocolInfo *res_info;
 
-                info = gupnp_protocol_info_new_from_string (protocols[i], NULL);
+                info = gupnp_protocol_info_new_from_string (*it, NULL);
                 if (info == NULL)
                         continue;
 
@@ -796,6 +797,8 @@ get_contributor_list_by_name (GUPnPDIDLLiteObject *object,
                 xmlNode *contributor_node;
 
                 contributor_node = (xmlNode *) l->data;
+                if (!contributor_node->children)
+                        continue;
 
                 contributor = gupnp_didl_lite_contributor_new_from_xml
                                         (contributor_node,
@@ -860,7 +863,7 @@ gupnp_didl_lite_object_new_from_xml (xmlNode     *xml_node,
  *
  * Get the pointer to object node in XML document.
  *
- * Return value: The pointer to object node in XML document.
+ * Returns: (transfer none): The pointer to object node in XML document.
  **/
 xmlNode *
 gupnp_didl_lite_object_get_xml_node (GUPnPDIDLLiteObject *object)
@@ -876,7 +879,7 @@ gupnp_didl_lite_object_get_xml_node (GUPnPDIDLLiteObject *object)
  *
  * Get the pointer to the UPnP namespace registered with the XML document.
  *
- * Return value: The pointer to UPnP namespace in XML document.
+ * Returns: (transfer none): The pointer to UPnP namespace in XML document.
  **/
 xmlNsPtr
 gupnp_didl_lite_object_get_upnp_namespace (GUPnPDIDLLiteObject *object)
@@ -893,7 +896,7 @@ gupnp_didl_lite_object_get_upnp_namespace (GUPnPDIDLLiteObject *object)
  * Get the pointer to the DublinCore namespace registered with the XML document
  * containing this object.
  *
- * Return value: The pointer to DublinCore namespace in XML document.
+ * Returns: (transfer none): The pointer to DublinCore namespace in XML document.
  **/
 xmlNsPtr
 gupnp_didl_lite_object_get_dc_namespace (GUPnPDIDLLiteObject *object)
@@ -927,7 +930,7 @@ gupnp_didl_lite_object_get_upnp_class (GUPnPDIDLLiteObject *object)
  * Get the pointer to the DLNA metadata namespace registered with the XML
  * document containing this object.
  *
- * Return value: The pointer to DLNA namespace in XML document.
+ * Returns: (transfer none): The pointer to DLNA namespace in XML document.
  **/
 xmlNsPtr
 gupnp_didl_lite_object_get_dlna_namespace (GUPnPDIDLLiteObject *object)
@@ -938,7 +941,7 @@ gupnp_didl_lite_object_get_dlna_namespace (GUPnPDIDLLiteObject *object)
 }
 
 /**
- * gupnp_didl_lite_object_get_id
+ * gupnp_didl_lite_object_get_id:
  * @object: #GUPnPDIDLLiteObject
  *
  * Get the ID of the @object.
@@ -959,8 +962,7 @@ gupnp_didl_lite_object_get_id (GUPnPDIDLLiteObject *object)
  *
  * Get the ID of the parent of the @object.
  *
- * Return value: The ID of parent of the @object, or %NULL. #g_free after
- * usage.
+ * Return value: The ID of parent of the @object, or %NULL.
  **/
 const char *
 gupnp_didl_lite_object_get_parent_id (GUPnPDIDLLiteObject *object)
@@ -978,9 +980,9 @@ gupnp_didl_lite_object_get_parent_id (GUPnPDIDLLiteObject *object)
  *
  * Use this function to retreive property nodes by name.
  *
- * Return value: (element-type utf8) (transfer none): The list of property nodes
- * by the name @property_name belonging to @object, or %NULL. #g_list_free the
- * returned list after usage but do not modify the contents.
+ * Return value: (element-type xmlNode*) (transfer container): The list of
+ * property nodes by the name @property_name belonging to @object, or %NULL.
+ * #g_list_free the returned list after usage but do not modify the contents.
  **/
 GList *
 gupnp_didl_lite_object_get_properties (GUPnPDIDLLiteObject *object,
@@ -1052,7 +1054,8 @@ gupnp_didl_lite_object_get_creator (GUPnPDIDLLiteObject *object)
  *
  * Get the creators of the @object.
  *
- * Return value: The list of creators belonging to @object, or %NULL.
+ * Returns: (element-type GUPnPDIDLLiteContributor*) (transfer full): The list
+ * of creators belonging to @object, or %NULL.
  * #g_list_free the returned list after usage and unref each object in it.
  **/
 GList *
@@ -1089,7 +1092,8 @@ gupnp_didl_lite_object_get_artist (GUPnPDIDLLiteObject *object)
  *
  * Get the artists of the @object.
  *
- * Return value: The list of artists belonging to @object, or %NULL.
+ * Returns: (element-type GUPnPDIDLLiteContributor*) (transfer full): The list
+ * of artists belonging to @object, or %NULL.
  * #g_list_free the returned list after usage and unref each object in it.
  **/
 GList *
@@ -1125,7 +1129,8 @@ gupnp_didl_lite_object_get_author (GUPnPDIDLLiteObject *object)
  *
  * Get the authors of the @object.
  *
- * Return value: The list of authors belonging to @object, or %NULL.
+ * Returns: (element-type GUPnPDIDLLiteContributor*) (transfer full): The list
+ * of authors belonging to @object, or %NULL.
  * #g_list_free the returned list after usage and unref each object in it.
  **/
 GList *
@@ -1142,7 +1147,8 @@ gupnp_didl_lite_object_get_authors (GUPnPDIDLLiteObject *object)
  *
  * Get the descriptors of the @object.
  *
- * Return value: The list of descriptors belonging to @object, or %NULL.
+ * Returns: (element-type GUPnPDIDLLiteDescriptor*) (transfer full): The list of
+ * descriptors belonging to @object, or %NULL.
  * #g_list_free the returned list after usage and unref each object in it.
  **/
 GList *
@@ -1333,7 +1339,7 @@ gupnp_didl_lite_object_get_dlna_managed (GUPnPDIDLLiteObject *object)
  *
  * Use this function to retreive resources from the @object.
  *
- * Return value: (element-type GUPnPDIDLLiteResource) (transfer full): The list
+ * Return value: (element-type GUPnPDIDLLiteResource*) (transfer full): The list
  *               of resources belonging to  @object, or %NULL. #g_list_free the
  *               returned list after usage and unref each resource in it.
  **/
@@ -1382,7 +1388,7 @@ gupnp_didl_lite_object_get_resources (GUPnPDIDLLiteObject *object)
  * If @lenient is #TRUE, the first resource in the list is returned instead of
  * %NULL if none of resources and protocols are found to be compatible.
  *
- * Return value: The resource belonging to @object that is comaptible with
+ * Returns: (transfer full): The resource belonging to @object that is comaptible with
  * any of the protocols specified in @sink_protocol_info, or %NULL. Unref after
  * usage.
  **/
@@ -1468,7 +1474,7 @@ gupnp_didl_lite_object_set_upnp_class (GUPnPDIDLLiteObject *object,
 }
 
 /**
- * gupnp_didl_lite_object_set_id
+ * gupnp_didl_lite_object_set_id:
  * @object: #GUPnPDIDLLiteObject
  * @id: The ID
  *
@@ -1591,7 +1597,7 @@ gupnp_didl_lite_object_set_creator (GUPnPDIDLLiteObject *object,
  * Add a new creator node to the @object and return the associated
  * #GUPnPDIDLLiteContributor object.
  *
- * Return value: A new #GUPnPDIDLLiteContributor object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteContributor object. Unref after usage.
  **/
 GUPnPDIDLLiteContributor *
 gupnp_didl_lite_object_add_creator (GUPnPDIDLLiteObject *object)
@@ -1643,7 +1649,7 @@ gupnp_didl_lite_object_set_artist (GUPnPDIDLLiteObject *object,
  * Add a new Artist node to the @object and return the associated
  * #GUPnPDIDLLiteContributor object.
  *
- * Return value: A new #GUPnPDIDLLiteContributor object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteContributor object. Unref after usage.
  **/
 GUPnPDIDLLiteContributor *
 gupnp_didl_lite_object_add_artist (GUPnPDIDLLiteObject *object)
@@ -1694,7 +1700,7 @@ gupnp_didl_lite_object_set_author (GUPnPDIDLLiteObject *object,
  * Add a new author node to the @object and return the associated
  * #GUPnPDIDLLiteContributor object.
  *
- * Return value: A new #GUPnPDIDLLiteContributor object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteContributor object. Unref after usage.
  **/
 GUPnPDIDLLiteContributor *
 gupnp_didl_lite_object_add_author (GUPnPDIDLLiteObject *object)
@@ -1916,7 +1922,7 @@ gupnp_didl_lite_object_set_dlna_managed (GUPnPDIDLLiteObject *object,
  *
  * Creates a new resource, attaches it to @object and returns it.
  *
- * Return value: A new #GUPnPDIDLLiteResource object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteResource object. Unref after usage.
  **/
 GUPnPDIDLLiteResource *
 gupnp_didl_lite_object_add_resource (GUPnPDIDLLiteObject *object)
@@ -1940,7 +1946,7 @@ gupnp_didl_lite_object_add_resource (GUPnPDIDLLiteObject *object)
  *
  * Creates a new descriptor, attaches it to @object and returns it.
  *
- * Return value: A new #GUPnPDIDLLiteDescriptor object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteDescriptor object. Unref after usage.
  **/
 GUPnPDIDLLiteDescriptor *
 gupnp_didl_lite_object_add_descriptor (GUPnPDIDLLiteObject *object)

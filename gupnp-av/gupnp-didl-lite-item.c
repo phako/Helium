@@ -102,7 +102,7 @@ gupnp_didl_lite_item_class_init (GUPnPDIDLLiteItemClass *klass)
         object_class->set_property = gupnp_didl_lite_item_set_property;
 
         /**
-         * GUPnPDIDLLiteItem:ref-id
+         * GUPnPDIDLLiteItem:ref-id:
          *
          * The ref ID of this item.
          **/

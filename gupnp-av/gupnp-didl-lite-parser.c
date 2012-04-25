@@ -28,6 +28,7 @@
  */
 
 #include <string.h>
+#include <ctype.h>
 #include "gupnp-av.h"
 #include "gupnp-didl-lite-object-private.h"
 #include "xml-util.h"
@@ -45,6 +46,35 @@ enum {
 
 static guint signals[SIGNAL_LAST];
 
+static gboolean
+verify_didl_attributes (xmlNode *node)
+{
+        const char *content;
+
+        content = xml_util_get_child_element_content (node, "date");
+        if (content) {
+                /* try to roughly verify the passed date with ^\d{4}-\d{2}-\d{2} */
+                char *ptr = (char *) content;
+                int state = 0;
+                while (*ptr) {
+                        if (state == 4 || state == 7) {
+                                if (*ptr != '-')
+                                        return FALSE;
+                        } else {
+                                if (!isdigit (*ptr))
+                                        return FALSE;
+                        }
+
+                        ptr++;
+                        state++;
+                        if (state == 10)
+                                break;
+                }
+        }
+
+        return xml_util_verify_attribute_is_boolean (node, "restricted");
+}
+
 static void
 gupnp_didl_lite_parser_init (GUPnPDIDLLiteParser *parser)
 {
@@ -54,9 +84,6 @@ static void
 gupnp_didl_lite_parser_dispose (GObject *object)
 {
         GObjectClass   *gobject_class;
-        GUPnPDIDLLiteParser *parser;
-
-        parser = GUPNP_DIDL_LITE_PARSER (object);
 
         gobject_class = G_OBJECT_CLASS (gupnp_didl_lite_parser_parent_class);
         gobject_class->dispose (object);
@@ -72,7 +99,7 @@ gupnp_didl_lite_parser_class_init (GUPnPDIDLLiteParserClass *klass)
         object_class->dispose = gupnp_didl_lite_parser_dispose;
 
         /**
-         * GUPnPDIDLLiteParser::object-available
+         * GUPnPDIDLLiteParser::object-available:
          * @parser: The #GUPnPDIDLLiteParser that received the signal
          * @object: The now available #GUPnPDIDLLiteObject
          *
@@ -93,7 +120,7 @@ gupnp_didl_lite_parser_class_init (GUPnPDIDLLiteParserClass *klass)
                               GUPNP_TYPE_DIDL_LITE_OBJECT);
 
         /**
-         * GUPnPDIDLLiteParser::item-available
+         * GUPnPDIDLLiteParser::item-available:
          * @parser: The #GUPnPDIDLLiteParser that received the signal
          * @item: The now available #GUPnPDIDLLiteItem
          *
@@ -114,7 +141,7 @@ gupnp_didl_lite_parser_class_init (GUPnPDIDLLiteParserClass *klass)
                               GUPNP_TYPE_DIDL_LITE_ITEM);
 
         /**
-         * GUPnPDIDLLiteParser::container-available
+         * GUPnPDIDLLiteParser::container-available:
          * @parser: The #GUPnPDIDLLiteParser that received the signal
          * @container: The now available #GUPnPDIDLLiteContainer
          *
@@ -136,7 +163,7 @@ gupnp_didl_lite_parser_class_init (GUPnPDIDLLiteParserClass *klass)
 }
 
 /**
- * gupnp_didl_lite_parser_new
+ * gupnp_didl_lite_parser_new:
  *
  * Return value: A new #GUPnPDIDLLiteParser object.
  **/
@@ -147,7 +174,7 @@ gupnp_didl_lite_parser_new (void)
 }
 
 /**
- * gupnp_didl_lite_parser_parse_didl
+ * gupnp_didl_lite_parser_parse_didl:
  * @parser: A #GUPnPDIDLLiteParser
  * @didl: The DIDL-Lite XML string to be parsed
  * @error: The location where to store any error, or NULL
@@ -165,6 +192,7 @@ gupnp_didl_lite_parser_parse_didl (GUPnPDIDLLiteParser *parser,
 {
         xmlDoc       *doc;
         xmlNode      *element;
+        xmlNode      *node;
         xmlNs       **ns_list;
         xmlNs        *upnp_ns = NULL;
         xmlNs        *dc_ns   = NULL;
@@ -271,11 +299,26 @@ gupnp_didl_lite_parser_parse_didl (GUPnPDIDLLiteParser *parser,
                                         signals[CONTAINER_AVAILABLE],
                                         0,
                                         object);
-                else if (GUPNP_IS_DIDL_LITE_ITEM (object))
+                else if (GUPNP_IS_DIDL_LITE_ITEM (object)) {
+                        node = gupnp_didl_lite_object_get_xml_node(object);
+#if 0
+                        if (!verify_didl_attributes(node)) {
+                            g_object_unref (object);
+                            g_object_unref (xml_doc);
+                            g_set_error (error,
+                                         GUPNP_XML_ERROR,
+                                         GUPNP_XML_ERROR_INVALID_ATTRIBUTE,
+                                         "Could not parse DIDL-Lite XML:\n%s",
+                                         didl);
+
+                            return FALSE;
+                        }
+#endif
                         g_signal_emit (parser,
                                         signals[ITEM_AVAILABLE],
                                         0,
                                         object);
+                }
 
                 g_signal_emit (parser,
                                 signals[OBJECT_AVAILABLE],

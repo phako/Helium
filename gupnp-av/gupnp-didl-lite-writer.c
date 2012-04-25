@@ -33,6 +33,8 @@
 #include "gupnp-didl-lite-object-private.h"
 #include "gupnp-didl-lite-descriptor-private.h"
 
+#include "xml-util.h"
+
 G_DEFINE_TYPE (GUPnPDIDLLiteWriter,
                gupnp_didl_lite_writer,
                G_TYPE_OBJECT);
@@ -144,6 +146,16 @@ is_node_forbidden (xmlNode     *node,
 }
 
 static gboolean
+is_container_standard_prop (const char *name,
+                            const char *namespace,
+                            const char *upnp_class)
+{
+        return g_strcmp0 (upnp_class, "object.container.storageFolder") == 0 &&
+               g_strcmp0 (namespace, "upnp") == 0 &&
+               strcmp (name, "storageUsed") == 0;
+}
+
+static gboolean
 is_standard_prop (const char *name,
                   const char *namespace,
                   const char *parent_name)
@@ -191,8 +203,16 @@ filter_node (xmlNode             *node,
         xmlNode *child;
         GList   *forbidden = NULL;
         GList   *l;
+        gboolean is_container;
+        const char *container_class = NULL;
 
         filter_attributes (node, allowed, writer);
+
+        if (strcmp ((const char *) node->name, "container") == 0) {
+            is_container = TRUE;
+            container_class = xml_util_get_child_element_content (node,
+                                                                  "class");
+        }
 
         forbidden = NULL;
         for (child = node->children; child != NULL; child = child->next) {
@@ -204,7 +224,11 @@ filter_node (xmlNode             *node,
                 if (child->ns != NULL)
                         ns = (const char *) child->ns->prefix;
 
-                if (!is_standard_prop ((const char *) child->name,
+                if (!(is_container && is_container_standard_prop
+                                            ((const char *) child->name,
+                                             ns,
+                                             container_class)) &&
+                    !is_standard_prop ((const char *) child->name,
                                        ns,
                                        (const char *)  node->name) &&
                     is_node_forbidden (child, allowed, ns))
@@ -312,7 +336,7 @@ gupnp_didl_lite_writer_constructed (GObject *object)
                                   GUPNP_DIDL_LITE_WRITER_NAMESPACE_UPNP);
         priv->dlna_ns = xmlNewNs (priv->xml_node,
                                   (unsigned char *)
-                                  "urn:schemas-dlna-org:metadata-2-0/",
+                                  "urn:schemas-dlna-org:metadata-1-0/",
                                   (unsigned char *)
                                   GUPNP_DIDL_LITE_WRITER_NAMESPACE_DLNA);
         xmlNewNs (priv->xml_node,
@@ -378,7 +402,7 @@ gupnp_didl_lite_writer_class_init (GUPnPDIDLLiteWriterClass *klass)
         g_type_class_add_private (klass, sizeof (GUPnPDIDLLiteWriterPrivate));
 
         /**
-         * GUPnPDIDLLiteWriter:xml-node
+         * GUPnPDIDLLiteWriter:xml-node:
          *
          * The pointer to root node in XML document.
          **/
@@ -395,7 +419,7 @@ gupnp_didl_lite_writer_class_init (GUPnPDIDLLiteWriterClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteWriter:language
+         * GUPnPDIDLLiteWriter:language:
          *
          * The language the DIDL-Lite fragment is in.
          *
@@ -435,7 +459,7 @@ gupnp_didl_lite_writer_new (const char *language)
  *
  * Creates a new item, attaches it to @writer and returns it.
  *
- * Return value: A new #GUPnPDIDLLiteItem object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteItem object. Unref after usage.
  **/
 GUPnPDIDLLiteItem *
 gupnp_didl_lite_writer_add_item (GUPnPDIDLLiteWriter *writer)
@@ -464,7 +488,7 @@ gupnp_didl_lite_writer_add_item (GUPnPDIDLLiteWriter *writer)
  *
  * Creates a new container, attaches it to @writer and returns it.
  *
- * Return value: A new #GUPnPDIDLLiteContainer object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteContainer object. Unref after usage.
  **/
 GUPnPDIDLLiteContainer *
 gupnp_didl_lite_writer_add_container (GUPnPDIDLLiteWriter *writer)
@@ -493,7 +517,7 @@ gupnp_didl_lite_writer_add_container (GUPnPDIDLLiteWriter *writer)
  *
  * Creates a new descriptor, attaches it to @object and returns it.
  *
- * Return value: A new #GUPnPDIDLLiteDescriptor object. Unref after usage.
+ * Returns: (transfer full): A new #GUPnPDIDLLiteDescriptor object. Unref after usage.
  **/
 GUPnPDIDLLiteDescriptor *
 gupnp_didl_lite_writer_add_descriptor (GUPnPDIDLLiteWriter *writer)
@@ -546,7 +570,7 @@ gupnp_didl_lite_writer_get_string (GUPnPDIDLLiteWriter *writer)
  *
  * Get the pointer to root node in XML document.
  *
- * Return value: The pointer to root node in XML document.
+ * Returns: (transfer none): The pointer to root node in XML document.
  **/
 xmlNode *
 gupnp_didl_lite_writer_get_xml_node (GUPnPDIDLLiteWriter *writer)
@@ -562,7 +586,7 @@ gupnp_didl_lite_writer_get_xml_node (GUPnPDIDLLiteWriter *writer)
  *
  * Get the language the DIDL-Lite fragment is in.
  *
- * Return value: The language of the @writer, or %NULL.
+ * Returns: (transfer none): The language of the @writer, or %NULL.
  **/
 const char *
 gupnp_didl_lite_writer_get_language (GUPnPDIDLLiteWriter *writer)

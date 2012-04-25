@@ -50,9 +50,6 @@ static void
 gupnp_last_change_parser_dispose (GObject *object)
 {
         GObjectClass   *gobject_class;
-        GUPnPLastChangeParser *parser;
-
-        parser = GUPNP_LAST_CHANGE_PARSER (object);
 
         gobject_class = G_OBJECT_CLASS (gupnp_last_change_parser_parent_class);
         gobject_class->dispose (object);
@@ -119,7 +116,7 @@ get_instance_node (xmlDoc *doc,
 }
 
 /**
- * gupnp_last_change_parser_new
+ * gupnp_last_change_parser_new:
  *
  * Return value: A new #GUPnPLastChangeParser
  **/
@@ -131,7 +128,7 @@ gupnp_last_change_parser_new (void)
 }
 
 /**
- * gupnp_last_change_parser_parse_last_change_valist
+ * gupnp_last_change_parser_parse_last_change_valist:
  * @parser: A #GUPnPLastChangeParser
  * @instance_id: The ID of the AV instance caller is interested in
  * @last_change_xml: The xml from the "LastChange" event to parse
@@ -217,7 +214,7 @@ gupnp_last_change_parser_parse_last_change_valist
 }
 
 /**
- * gupnp_last_change_parser_parse_last_change
+ * gupnp_last_change_parser_parse_last_change:
  * @parser: A #GUPnPLastChangeParser
  * @instance_id: The ID of the AV instance caller is interested in
  * @last_change_xml: The xml from the "LastChange" event to parse

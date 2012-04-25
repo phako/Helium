@@ -241,11 +241,10 @@ add_dlna_info (GString           *str,
 
         dlna_profile = gupnp_protocol_info_get_dlna_profile (info);
         if (dlna_profile == NULL) {
-                g_string_append_printf (str, ":*");
-                return;
+                g_string_append_printf (str, ":");
+        } else {
+                g_string_append_printf (str, ":DLNA.ORG_PN=%s;", dlna_profile);
         }
-
-        g_string_append_printf (str, ":DLNA.ORG_PN=%s", dlna_profile);
 
         operation = gupnp_protocol_info_get_dlna_operation (info);
         if (operation != GUPNP_DLNA_OPERATION_NONE &&
@@ -256,14 +255,14 @@ add_dlna_info (GString           *str,
                      "http-get") == 0 ||
              strcmp (gupnp_protocol_info_get_protocol (info),
                      "rtsp-rtp-udp") == 0))
-                g_string_append_printf (str, ";DLNA.ORG_OP=%.2x", operation);
+                g_string_append_printf (str, "DLNA.ORG_OP=%.2x;", operation);
 
         /* Specify PS parameter if list of play speeds is provided */
         speeds = gupnp_protocol_info_get_play_speeds (info);
         if (speeds != NULL) {
                 int i;
 
-                g_string_append_printf (str, ";DLNA.ORG_PS=");
+                g_string_append_printf (str, "DLNA.ORG_PS=;");
 
                 for (i = 0; speeds[i]; i++) {
                         g_string_append (str, speeds[i]);
@@ -276,16 +275,28 @@ add_dlna_info (GString           *str,
         conversion = gupnp_protocol_info_get_dlna_conversion (info);
         /* omit the CI parameter for non-converted content */
         if (conversion != GUPNP_DLNA_CONVERSION_NONE)
-                g_string_append_printf (str, ";DLNA.ORG_CI=%d", conversion);
+                g_string_append_printf (str, "DLNA.ORG_CI=%d;", conversion);
 
         flags = gupnp_protocol_info_get_dlna_flags (info);
-        /* Omit the FLAGS parameter if no flags set */
-        if (flags != GUPNP_DLNA_FLAGS_NONE) {
-                g_string_append_printf (str, ";DLNA.ORG_FLAGS=%.8x", flags);
+        /* Omit the FLAGS parameter if no or DLNA profile are set */
+        if (flags != GUPNP_DLNA_FLAGS_NONE && dlna_profile != NULL) {
+                g_string_append_printf (str, "DLNA.ORG_FLAGS=%.8x", flags);
                 /*  append 24 reserved hex-digits */
                 g_string_append_printf (str,
                                         "0000" "0000" "0000"
                                         "0000" "0000" "0000");
+        }
+
+        /* if nothing of the above was set, use the "match all" rule */
+        switch (str->str[str->len - 1]) {
+                case ':':
+                        g_string_append_c (str, '*');
+                        break;
+                case ';':
+                        g_string_erase (str, str->len - 1, 1);
+                        break;
+                default:
+                        break;
         }
 }
 
@@ -445,7 +456,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
         g_type_class_add_private (klass, sizeof (GUPnPProtocolInfoPrivate));
 
         /**
-         * GUPnPProtocolInfo:protocol
+         * GUPnPProtocolInfo:protocol:
          *
          * The protocol of this info.
          **/
@@ -462,7 +473,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:network
+         * GUPnPProtocolInfo:network:
          *
          * The network this info is associated with.
          **/
@@ -480,7 +491,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:mime-type
+         * GUPnPProtocolInfo:mime-type:
          *
          * The MIME-type of this info.
          **/
@@ -497,7 +508,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:dlna-profile
+         * GUPnPProtocolInfo:dlna-profile:
          *
          * The DLNA profile of this info.
          **/
@@ -514,7 +525,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:play-speeds
+         * GUPnPProtocolInfo:play-speeds:
          *
          * The allowed play speeds on this info in the form of array of
          * strings.
@@ -534,7 +545,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                      G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:dlna-conversion
+         * GUPnPProtocolInfo:dlna-conversion:
          *
          * The DLNA conversion flags.
          **/
@@ -552,7 +563,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                      G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:dlna-operation
+         * GUPnPProtocolInfo:dlna-operation:
          *
          * The DLNA operation flags.
          **/
@@ -570,7 +581,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
                                      G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPProtocolInfo:dlna-flags
+         * GUPnPProtocolInfo:dlna-flags:
          *
          * Various generic DLNA flags.
          **/
@@ -589,7 +600,7 @@ gupnp_protocol_info_class_init (GUPnPProtocolInfoClass *klass)
 }
 
 /**
- * gupnp_protocol_info_new
+ * gupnp_protocol_info_new:
  *
  * Return value: A new #GUPnPProtocolInfo object. Unref after usage.
  **/
@@ -601,7 +612,7 @@ gupnp_protocol_info_new ()
 }
 
 /**
- * gupnp_protocol_info_new_from_string
+ * gupnp_protocol_info_new_from_string:
  * @protocol_info: The protocol info string
  * @error: The location where to store any error, or NULL
  *
@@ -649,7 +660,7 @@ gupnp_protocol_info_new_from_string (const char *protocol_info,
 }
 
 /**
- * gupnp_protocol_info_to_string
+ * gupnp_protocol_info_to_string:
  * @info: The #GUPnPProtocolInfo
  *
  * Provides the string representation of @info.
@@ -690,7 +701,7 @@ gupnp_protocol_info_to_string (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_protocol
+ * gupnp_protocol_info_get_protocol:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the protocol of this info.
@@ -707,7 +718,7 @@ gupnp_protocol_info_get_protocol (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_network
+ * gupnp_protocol_info_get_network:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the network this info is associated with.
@@ -723,7 +734,7 @@ gupnp_protocol_info_get_network (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_mime_type
+ * gupnp_protocol_info_get_mime_type:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the MIME-type of this info.
@@ -740,7 +751,7 @@ gupnp_protocol_info_get_mime_type (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_dlna_profile
+ * gupnp_protocol_info_get_dlna_profile:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the DLNA profile of this info.
@@ -757,12 +768,12 @@ gupnp_protocol_info_get_dlna_profile (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_play_speeds
+ * gupnp_protocol_info_get_play_speeds:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the allowed play speeds on this info in the form of array of strings.
  *
- * Return value: The allowed play speeds as array of strings or %NULL. This
+ * Returns: (transfer none): The allowed play speeds as array of strings or %NULL. This
  * return array and it's content must not be modified or freed.
  **/
 const char **
@@ -774,7 +785,7 @@ gupnp_protocol_info_get_play_speeds (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_dlna_conversion
+ * gupnp_protocol_info_get_dlna_conversion:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the DLNA conversion flags.
@@ -791,7 +802,7 @@ gupnp_protocol_info_get_dlna_conversion (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_dlna_operation
+ * gupnp_protocol_info_get_dlna_operation:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the DLNA operation flags.
@@ -808,7 +819,7 @@ gupnp_protocol_info_get_dlna_operation (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_get_dlna_flags
+ * gupnp_protocol_info_get_dlna_flags:
  * @info: A #GUPnPProtocolInfo
  *
  * Get the gereric DLNA flags.
@@ -825,7 +836,7 @@ gupnp_protocol_info_get_dlna_flags (GUPnPProtocolInfo *info)
 }
 
 /**
- * gupnp_protocol_info_set_protocol
+ * gupnp_protocol_info_set_protocol:
  * @info: A #GUPnPProtocolInfo
  * @protocol: The protocol string
  *
@@ -847,7 +858,7 @@ gupnp_protocol_info_set_protocol (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_network
+ * gupnp_protocol_info_set_network:
  * @info: A #GUPnPProtocolInfo
  * @network: The network string
  *
@@ -869,7 +880,7 @@ gupnp_protocol_info_set_network (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_mime_type
+ * gupnp_protocol_info_set_mime_type:
  * @info: A #GUPnPProtocolInfo
  * @mime_type: The MIME-type string
  *
@@ -891,7 +902,7 @@ gupnp_protocol_info_set_mime_type (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_dlna_profile
+ * gupnp_protocol_info_set_dlna_profile:
  * @info: A #GUPnPProtocolInfo
  * @profile: The DLNA profile string
  *
@@ -913,7 +924,7 @@ gupnp_protocol_info_set_dlna_profile (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_play_speeds
+ * gupnp_protocol_info_set_play_speeds:
  * @info: A #GUPnPProtocolInfo
  * @speeds: The allowed play speeds
  *
@@ -935,7 +946,7 @@ gupnp_protocol_info_set_play_speeds (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_dlna_conversion
+ * gupnp_protocol_info_set_dlna_conversion:
  * @info: A #GUPnPProtocolInfo
  * @conversion: The bitwise OR of one or more DLNA conversion flags
  *
@@ -955,7 +966,7 @@ gupnp_protocol_info_set_dlna_conversion (GUPnPProtocolInfo  *info,
 }
 
 /**
- * gupnp_protocol_info_set_dlna_operation
+ * gupnp_protocol_info_set_dlna_operation:
  * @info: A #GUPnPProtocolInfo
  * @operation: The bitwise OR of one or more DLNA operation flags
  *
@@ -975,7 +986,7 @@ gupnp_protocol_info_set_dlna_operation (GUPnPProtocolInfo *info,
 }
 
 /**
- * gupnp_protocol_info_set_dlna_flags
+ * gupnp_protocol_info_set_dlna_flags:
  * @info: A #GUPnPProtocolInfo
  * @flags: The bitwise OR of one or more generic DLNA flags
  *
@@ -995,7 +1006,7 @@ gupnp_protocol_info_set_dlna_flags (GUPnPProtocolInfo  *info,
 }
 
 /**
- * gupnp_protocol_info_is_compatible
+ * gupnp_protocol_info_is_compatible:
  * @info1: The first #GUPnPProtocolInfo
  * @info2: The second #GUPnPProtocolInfo
  *

@@ -180,7 +180,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                   sizeof (GUPnPDIDLLiteDescriptorPrivate));
 
         /**
-         * GUPnPDIDLLiteDescriptor:xml-node
+         * GUPnPDIDLLiteDescriptor:xml-node:
          *
          * The pointer to desc node in XML document.
          **/
@@ -198,7 +198,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                        G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteDescriptor:xml-doc
+         * GUPnPDIDLLiteDescriptor:xml-doc:
          *
          * The reference to XML document containing this object.
          *
@@ -221,7 +221,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteDescriptor:name-space
+         * GUPnPDIDLLiteDescriptor:name-space:
          *
          * The name space associated with this descriptor.
          **/
@@ -239,7 +239,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteDescriptor:id
+         * GUPnPDIDLLiteDescriptor:id:
          *
          * The ID of this descriptor.
          **/
@@ -256,7 +256,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteDescriptor:metadata-type
+         * GUPnPDIDLLiteDescriptor:metadata-type:
          *
          * The type of this descriptor.
          **/
@@ -273,7 +273,7 @@ gupnp_didl_lite_descriptor_class_init (GUPnPDIDLLiteDescriptorClass *klass)
                                       G_PARAM_STATIC_BLURB));
 
         /**
-         * GUPnPDIDLLiteDescriptor:content
+         * GUPnPDIDLLiteDescriptor:content:
          *
          * The content of this descriptor.
          **/
@@ -331,7 +331,7 @@ gupnp_didl_lite_descriptor_new_from_xml (xmlNode     *xml_node,
  *
  * Get the pointer to desc node in XML document.
  *
- * Return value: The pointer to desc node in XML document.
+ * Returns: (transfer none): The pointer to desc node in XML document.
  **/
 xmlNode *
 gupnp_didl_lite_descriptor_get_xml_node (GUPnPDIDLLiteDescriptor *descriptor)
