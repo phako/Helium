@@ -54,11 +54,12 @@ void UPnPDevice::onDeviceUnavailable(const QString &udn)
 
 void UPnPDevice::wrapDevice(const QString &udn)
 {
-    if (udn.isNull()) {
+    if (udn.isEmpty()) {
         m_proxy = DeviceProxy();
 
         return;
     }
+
     GUPnPDeviceProxy *proxy = UPnPDeviceModel::lookup(udn);
     m_proxy = DeviceProxy(proxy);
 }
