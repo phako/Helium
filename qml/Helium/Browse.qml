@@ -118,6 +118,7 @@ Page {
                 onPressAndHold: {
                     browseModel.lastIndex = index
                     if (type !== "container" && uri !== "") {
+                        feedback.start();
                         renderer.setAVTransportUri(uri, metadata);
                         if (renderer.state === "STOPPED") {
                             renderer.play();

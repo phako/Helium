@@ -19,6 +19,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QtGui/QApplication>
 
+#include <QtFeedback/QFeedbackHapticsEffect>
+
 #include "qmlapplicationviewer.h"
 #include "upnp/upnprenderer.h"
 #include "upnp/upnpdevice.h"
@@ -64,6 +66,10 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     // dialog all the time
     NetworkControl control;
 
+    QtMobility::QFeedbackHapticsEffect effect;
+    effect.setIntensity(1.0);
+    effect.setDuration(100);
+
     QmlApplicationViewer viewer;
     rootContext = viewer.rootContext();
     rootContext->setContextProperty(QLatin1String("serverModel"), &serverModel);
@@ -71,6 +77,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rootContext->setContextProperty(QLatin1String("browseModel"), &BrowseModel::empty());
     rootContext->setContextProperty(QLatin1String("browseModelStack"), &BrowseModelStack::getDefault());
     rootContext->setContextProperty(QLatin1String("networkControl"), &control);
+    rootContext->setContextProperty(QLatin1String("feedback"), &effect);
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();
