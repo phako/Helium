@@ -18,6 +18,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
+import "components"
+
 Item {
     id: listItem
 
@@ -33,11 +35,9 @@ Item {
     height: 88
     width: parent.width
 
-    BorderImage {
+    SelectionBackground {
         id: background
-        anchors.fill: parent
         visible: mouseArea.pressed
-        source: "image://theme/meegotouch-list-background-pressed-center"
     }
 
     AnnotatedImage {
