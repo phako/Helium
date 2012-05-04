@@ -42,13 +42,8 @@ Item {
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
         anchors.leftMargin: 10
-        asynchronous: true
         source: icon
-        width: 64
-        height: 64
-        fillMode: Image.PreserveAspectFit
         visible: settings.displayDeviceIcons
-        annotated: false
     }
 
     Label {

@@ -19,11 +19,16 @@ import QtQuick 1.1
 
 Image {
     property alias annotated: imgInner.visible
+    width: 64
+    height: width
+    fillMode: Image.PreserveAspectFit
+    asynchronous: true
 
     Image {
         id: imgInner
         source: "image://theme/icon-s-transfer-error"
         anchors.horizontalCenter: parent.right
         anchors.verticalCenter: parent.bottom
+        visible: false
     }
 }

@@ -46,11 +46,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         anchors.top: parent.top
         anchors.leftMargin: 10
-        asynchronous: true
         source: icon
-        width: 64
-        height: 64
-        fillMode: Image.PreserveAspectFit
     }
 
     Column {
