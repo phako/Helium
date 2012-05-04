@@ -19,6 +19,8 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 import org.jensge.UPnP 1.0
 
+import "pages"
+
 PageStackWindow {
     id: appWindow
 
@@ -37,6 +39,10 @@ PageStackWindow {
         id: about
     }
 
+    Settings {
+        id: settingsPage
+    }
+
     ServerList {
         id: serverList
         model: serverModel
@@ -46,7 +52,7 @@ PageStackWindow {
             id: serverDelegate
             mainText: model.friendlyName
             subText: model.udn
-            showIcon: false
+            showIcon: settings.displayDeviceIcons
             iconAnnotated: false
             drillDown: true
 

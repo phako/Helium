@@ -40,11 +40,25 @@ Item {
         source: "image://theme/meegotouch-list-background-pressed-center"
     }
 
+    AnnotatedImage {
+        id: imgIcon
+        anchors.left: parent.left
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.leftMargin: 10
+        asynchronous: true
+        source: icon
+        width: 64
+        height: 64
+        fillMode: Image.PreserveAspectFit
+        visible: settings.displayDeviceIcons
+        annotated: false
+    }
+
     Label {
         id: mainText
-        anchors.left: parent.left
+        anchors.left: imgIcon.visible ? imgIcon.right : parent.left
         anchors.leftMargin: 10
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.verticalCenter: imgIcon.verticalCenter
         anchors.right: tiClose.left
         anchors.rightMargin: 10
         elide: Text.ElideRight
@@ -70,15 +84,16 @@ Item {
         State {
             name: "DetailedPlayer"
             AnchorChanges { target: mainText; anchors.top: listItem.top; anchors.verticalCenter: undefined }
+            AnchorChanges { target: imgIcon; anchors.top: listItem.top; anchors.verticalCenter: undefined }
             PropertyChanges { target: listItem; height: 198; detailOpacity: 1.0 }
         },
 
         State {
             name: "normal"
             AnchorChanges { target: mainText; anchors.top: undefined; anchors.verticalCenter: listItem.verticalCenter }
+            AnchorChanges { target: imgIcon; anchors.top: undefined; anchors.verticalCenter: listItem.verticalCenter }
             PropertyChanges { target: listItem; height: 88; detailOpacity: 0.0 }
         }
-
    ]
 
     ToolIcon {
@@ -96,9 +111,10 @@ Item {
     }
 
     Player {
+        anchors.left: imgIcon.visible ? imgIcon.right : parent.left
         anchors.bottom: parent.bottom
         id: playerControls
-        width: parent.width
+        anchors.right: parent.right
         opacity: listItem.detailOpacity
     }
 

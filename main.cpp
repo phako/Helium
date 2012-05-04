@@ -32,6 +32,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnp/browsemodelstack.h"
 
 #include "networkcontrol.h"
+#include "settings.h"
 
 #include <QtDeclarative>
 
@@ -59,6 +60,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
 
     UPnPServerModel serverModel;
     UPnPRendererModel rendererModel;
+    Settings settings;
 
     // only annoy the user on start-up by showing the connection dialog.
     // GUPnP can handle appearing and disappearing network devices itself quite
@@ -78,6 +80,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rootContext->setContextProperty(QLatin1String("browseModelStack"), &BrowseModelStack::getDefault());
     rootContext->setContextProperty(QLatin1String("networkControl"), &control);
     rootContext->setContextProperty(QLatin1String("feedback"), &effect);
+    rootContext->setContextProperty(QLatin1String("settings"), &settings);
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();

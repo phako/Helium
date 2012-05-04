@@ -26,7 +26,7 @@ MOBILITY += feedback
 
 # Include GUPnP libs - do this before boostable stuff otherwise that won't work properly
 CONFIG += link_pkgconfig
-PKGCONFIG += gupnp-1.0
+PKGCONFIG += gupnp-1.0 gq-gconf
 
 # include static version of gupnp-av - thanks madde :(
 SUBDIRS += gupnp-av
@@ -52,7 +52,8 @@ SOURCES += main.cpp \
     upnp/upnprenderermodel.cpp \
     upnp/browsemodelstack.cpp \
     upnp/browsemodel.cpp \
-    networkcontrol.cpp
+    networkcontrol.cpp \
+    settings.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -66,7 +67,9 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/control \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog \
-    TODO
+    TODO \
+    qtc_packaging/debian_harmattan/postinst \
+    qtc_packaging/debian_harmattan/prerm
 
 HEADERS += \
     upnp/upnprenderer.h \
@@ -78,7 +81,8 @@ HEADERS += \
     upnp/browsemodel.h \
     upnp/refptrg.h \
     upnp/browsemodelstack.h \
-    networkcontrol.h
+    networkcontrol.h \
+    settings.h
 RESOURCES += \
     res.qrc
 

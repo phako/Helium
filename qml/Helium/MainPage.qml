@@ -21,13 +21,15 @@ import com.nokia.meego 1.0
 Page {
     property alias pageStackBrowse: pageStackBrowse
     property alias pageStackPlayer: pageStackPlayer
+    property bool minimalToolbar: tabGroup.currentTab.currentPage === about ||
+                                  tabGroup.currentTab.currentPage === settingsPage
 
     tools: ToolBarLayout {
         ToolIcon {
             enabled: tabGroup.currentTab.depth > 1
             iconId: enabled ? "toolbar-back" : "toolbar-back-dimmed"
             onClicked: {
-                if (tabGroup.currentTab.currentPage === about) {
+                if (minimalToolbar) {
                     tabGroup.currentTab.pop();
 
                     return;
@@ -44,7 +46,7 @@ Page {
         }
 
         ButtonRow {
-            visible: tabGroup.currentTab.currentPage !== about
+            visible: !minimalToolbar
             platformStyle: TabButtonStyle {}
             TabButton {
                 iconSource: "image://theme/icon-m-toolbar-list-white"
@@ -59,7 +61,7 @@ Page {
             }*/
         }
         ToolIcon {
-            visible: tabGroup.currentTab.currentPage !== about
+            visible: !minimalToolbar
             iconId: "toolbar-view-menu"
             onClicked: {
                 if (menu.status === DialogStatus.Closed) {
@@ -75,6 +77,11 @@ Page {
         id: menu
         visualParent: tabGroup.currentTab
         content: MenuLayout {
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: tabGroup.currentTab.push(settingsPage)
+            }
+
             MenuItem {
                 text: qsTr("About...")
                 onClicked: tabGroup.currentTab.push(about)
