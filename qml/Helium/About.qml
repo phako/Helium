@@ -37,6 +37,9 @@ Page {
             text: "An UPnP control point for your N9" +
                   "<p>Copyright © 2012<br />Jens Georg &lt;<a href=\"mailto:mail+helium@jensge.org\">mail+helium@jensge.org</a>&gt;</p>" +
                   "<p><strong>Website</strong><br />" +
+                  "<a href=\"http://jensge.org/helium-a-m-dmc-for-your-n9/\">http://jensge.org/helium-a-m-dmc-for-your-n9/</a>" +
+
+                  "<p><strong>Source repository</strong><br />" +
                   "<a href=\"https://gitorious.org/helium/helium\">https://gitorious.org/helium/helium</a>" +
 
                   "<p><strong>Issue tracker</strong><br />" +
