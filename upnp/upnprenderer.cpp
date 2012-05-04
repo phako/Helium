@@ -310,6 +310,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     }
 
     UPnPDevice::wrapDevice(udn);
+    Q_EMIT availableChanged();
 
     // reset to initial state
     setState(QLatin1String("NO_MEDIA_PRESENT"));

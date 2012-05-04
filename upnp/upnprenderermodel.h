@@ -20,6 +20,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QSortFilterProxyModel>
 
+class UPnPRenderer;
+
 class UPnPRendererModel : public QSortFilterProxyModel
 {
     Q_OBJECT
@@ -28,6 +30,7 @@ public:
 public Q_SLOTS:
     void refresh() const;
     QString get(int index) const;
+    UPnPRenderer *getDevice(int row) const;
 };
 
 #endif // UPNPRENDERERMODEL_H

@@ -56,6 +56,12 @@ Page {
                 onCheckedChanged: settings.displayMediaArt = checked
             }
 
+            LabelledSwitch {
+                text: qsTr("Show Device pop-up on long press")
+                checked: settings.showDevicePopUp;
+                onCheckedChanged: settings.showDevicePopUp = checked;
+            }
+
             Separator { text: qsTr("Sharing") }
 
             LabelledSwitch {

@@ -17,6 +17,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "upnprenderermodel.h"
 #include "upnpdevicemodel.h"
+#include "upnprenderer.h"
 
 const QLatin1String RENDERER_PATTERN = QLatin1String("^urn:schemas-upnp-org:device:MediaRenderer:\\d+");
 
@@ -37,4 +38,15 @@ QString UPnPRendererModel::get(int row) const
 void UPnPRendererModel::refresh() const
 {
     UPnPDeviceModel::getDefault()->refresh();
+}
+
+UPnPRenderer *UPnPRendererModel::getDevice(int row) const
+{
+    QModelIndex index = mapToSource(this->index(row, 0));
+    QString udn = sourceModel()->data(index, UPnPDeviceModel::DeviceRoleUdn).toString();
+
+    UPnPRenderer *renderer = new UPnPRenderer;
+    renderer->wrapDevice(udn);
+
+    return renderer;
 }

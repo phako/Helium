@@ -27,6 +27,7 @@ static const QString GCONF_PREFIX = QLatin1String("/apps/ControlPanel/Helium");
 static const QString DISPLAY_DEVICE_ICONS = GCONF_PREFIX + QLatin1String("/Display/show-device-icons");
 static const QString DISPLAY_MEDIA_ART = GCONF_PREFIX + QLatin1String("/Display/show-media-art");
 static const QString START_MEDIA_SHARING = GCONF_PREFIX + QLatin1String("/Sharing/start-media-sharing");
+static const QString SHOW_DEVICE_POPUP = GCONF_PREFIX + QLatin1String ("/Display/show-device-popup");
 
 const QString Settings::RYGEL_DBUS_IFACE = QLatin1String("org.gnome.Rygel1");
 
@@ -43,6 +44,9 @@ Settings::Settings(QObject *parent)
 
     m_configItems[START_MEDIA_SHARING] = new GConfItem(START_MEDIA_SHARING);
     connect (m_configItems[START_MEDIA_SHARING], SIGNAL(valueChanged()), SIGNAL(startMediaSharingChanged()));
+
+    m_configItems[SHOW_DEVICE_POPUP] = new GConfItem(SHOW_DEVICE_POPUP);
+    connect (m_configItems[SHOW_DEVICE_POPUP], SIGNAL(valueChanged()), SIGNAL(showDevicePopUpChanged()));
 
     QDBusInterface fdo(QLatin1String("org.freedesktop.DBus"), QLatin1String("/"), QLatin1String("org.freedesktop.DBus"));
     m_sharingAvailable = fdo.call(QLatin1String("ListActivatableNames")).arguments().first().toStringList().contains(RYGEL_DBUS_IFACE);
@@ -83,4 +87,15 @@ bool Settings::startMediaSharing(void)
 void Settings::setStartMediaSharing(bool value)
 {
     m_configItems[START_MEDIA_SHARING]->set(QVariant::fromValue(value));
+}
+
+bool Settings::showDevicePopUp(void)
+{
+    return m_configItems[SHOW_DEVICE_POPUP]->value().toBool();
+}
+
+void Settings::setShowDevicePopUp(bool value)
+{
+    qDebug() << "Changing showDevicePopUp" << value;
+    m_configItems[SHOW_DEVICE_POPUP]->set(QVariant::fromValue(value));
 }

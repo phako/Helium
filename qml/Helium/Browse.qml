@@ -24,6 +24,44 @@ import "components"
 Page {
     property alias page: pageHeader.text
 
+    RendererSheet {
+        id: rendererSheet
+    }
+
+    Menu {
+        id: itemContextMenu
+//        visualParent: tabGroup.currentTab
+        content: MenuLayout {
+            MenuItem {
+                text: qsTr("Play on current device")
+                enabled: renderer.available
+                onClicked: {
+                    var uri = browseListView.currentItem.myModel.uri;
+                    var metadata = browseListView.currentItem.myModel.metadata;
+                    renderer.setUriAndPlay(uri, metadata);
+                }
+            }
+
+            MenuItem {
+                Connections {
+                    target: rendererSheet
+                    onAccepted: {
+                        var tmpRenderer = rendererModel.getDevice(rendererSheet.currentIndex);
+
+                        var uri = browseListView.currentItem.myModel.uri;
+                        var metadata = browseListView.currentItem.myModel.metadata;
+                        tmpRenderer.setUriAndPlay (uri, metadata);
+                    }
+                }
+
+                text: qsTr("Play on other device...")
+                onClicked: {
+                    rendererSheet.open();
+                }
+            }
+        }
+    }
+
     QueryDialog {
         id: dlgError
         property string errorMessage
@@ -104,6 +142,7 @@ Page {
                 ActiveSelection {
                     id: selectedHighlight
                     visible: model.type !== "container" && browseModel.lastIndex === index
+                    anchors.fill: parent
                 }
 
                 onClicked: {
@@ -114,10 +153,20 @@ Page {
                 }
 
                 onPressAndHold: {
-                    browseModel.lastIndex = index
-                    if (type !== "container" && uri !== "") {
-                        feedback.start();
-                        renderer.setUriAndPlay(uri, metadata);
+                    feedback.start();
+                    if (settings.showDevicePopUp) {
+                        browseModel.lastIndex = index
+                        if (type !== "container") {
+                            if (itemContextMenu.status === DialogStatus.Closed) {
+                                itemContextMenu.open();
+                            } else {
+                                itemContextMenu.close();
+                            }
+                        }
+                    } else {
+                        if (type !== "container" && uri !== "") {
+                            renderer.setUriAndPlay(uri, metadata);
+                        }
                     }
                 }
             }

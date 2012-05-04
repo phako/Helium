@@ -39,6 +39,7 @@ class UPnPRenderer : public UPnPDevice
     Q_PROPERTY(QString seekMode READ seekMode NOTIFY seekModeChanged)
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString position READ position NOTIFY positionChanged)
+    Q_PROPERTY(bool available READ available NOTIFY availableChanged)
 public:
     static const char DEVICE_TYPE[];
     static const char AV_TRANSPORT_SERVICE[];
@@ -56,6 +57,7 @@ public:
     bool canPause() const { return m_canPause; }
     bool canSeek() const { return m_canSeek; }
     QString seekMode() { return m_seekMode; }
+    bool available() { return not m_proxy.isEmpty(); }
 
     // QML invokable functions
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
@@ -83,6 +85,7 @@ Q_SIGNALS:
     void positionChanged(void);
     void canSeekChanged(void);
     void seekModeChanged(void);
+    void availableChanged(void);
 
 private Q_SLOTS:
     void onProgressTimeout();

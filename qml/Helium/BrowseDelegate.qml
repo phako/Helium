@@ -29,6 +29,7 @@ Item {
     property alias drillDown: lblImage.drilldownVisisble
     property alias iconAnnotated: lblImage.annotated
     property alias iconVisible: lblImage.iconVisible
+    property variant myModel: model
 
     signal clicked
     signal pressAndHold
