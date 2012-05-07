@@ -18,6 +18,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
+import "components"
+
 Page {
     property alias model: deviceListView.model
     property string role
@@ -51,15 +53,9 @@ Page {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        Component {
+        ActiveSelection {
             id: selectedHighlight
-            Rectangle {
-                visible: role === "renderer"
-                gradient: Gradient {
-                    GradientStop {position: 0.0; color: "#1078d8" }
-                    GradientStop {position: 1.0; color: "#3890e0" }
-                }
-            }
+            visible: role === "renderer"
         }
 
         ListView {

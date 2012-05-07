@@ -19,6 +19,8 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 import org.jensge.UPnP 1.0
 
+import "components"
+
 Page {
     property alias page: pageHeader.text
 
@@ -97,15 +99,9 @@ Page {
                 iconAnnotated: model.uri === ""
                 drillDown: model.type === "container"
 
-                Rectangle {
+                ActiveSelection {
                     id: selectedHighlight
                     visible: model.type !== "container" && browseModel.lastIndex === index
-                    anchors.fill: parent
-                    gradient: Gradient {
-                        GradientStop {position: 0.0; color: "#1078d8" }
-                        GradientStop {position: 1.0; color: "#3890e0" }
-                    }
-                    z: -1
                 }
 
                 onClicked: {
