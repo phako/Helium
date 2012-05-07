@@ -96,7 +96,9 @@ Page {
             delegate: BrowseDelegate {
                 mainText: model.title
                 subText: model.detail
+                image: model.icon
                 iconAnnotated: model.uri === ""
+                iconVisible: settings.displayMediaArt
                 drillDown: model.type === "container"
 
                 ActiveSelection {

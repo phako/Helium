@@ -23,11 +23,12 @@ import "components"
 Item {
     id: listItem
 
-    property alias mainText: lblMainText.text
-    property alias subText: lblSubText.text
-    property alias drillDown: imgDrilldown.visible
-    property alias iconAnnotated: imgIcon.annotated
-    property alias showIcon: imgIcon.visible
+    property alias mainText: lblImage.mainText
+    property alias subText: lblImage.subText
+    property alias image: lblImage.image
+    property alias drillDown: lblImage.drilldownVisisble
+    property alias iconAnnotated: lblImage.annotated
+    property alias iconVisible: lblImage.iconVisible
 
     signal clicked
     signal pressAndHold
@@ -40,46 +41,9 @@ Item {
         visible: mouseArea.pressed
     }
 
-    AnnotatedImage {
-        id: imgIcon
+    LabelImage {
+        id: lblImage
         anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.top: parent.top
-        anchors.leftMargin: 10
-        source: icon
-    }
-
-    Column {
-        anchors.left: imgIcon.visible ? imgIcon.right : parent.left
-        anchors.leftMargin: 10
-        anchors.verticalCenter: imgIcon.verticalCenter
-        anchors.right: (imgDrilldown.visible ? imgDrilldown.left : listItem.right)
-        anchors.rightMargin: 10
-
-        Label {
-            id: lblMainText
-            width: parent.width
-            font.weight: Font.Bold
-            font.pixelSize: 26
-            elide: Text.ElideRight
-        }
-
-        Label {
-            visible: model.detail !== ""
-            id: lblSubText
-            width: parent.width
-            font.weight: Font.Light
-            font.pixelSize: 22
-            color: "dark grey"
-            elide: Text.ElideRight
-        }
-    }
-
-    Image {
-        id: imgDrilldown
-        source: "image://theme/icon-m-common-drilldown-arrow" + (theme.inverted ? "-inverse" : "")
-        anchors.right: parent.right;
-        anchors.verticalCenter: parent.verticalCenter
     }
 
     MouseArea {

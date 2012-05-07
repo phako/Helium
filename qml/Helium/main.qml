@@ -52,7 +52,8 @@ PageStackWindow {
             id: serverDelegate
             mainText: model.friendlyName
             subText: model.udn
-            showIcon: settings.displayDeviceIcons
+            image: model.icon
+            iconVisible: settings.displayDeviceIcons
             iconAnnotated: false
             drillDown: true
 

@@ -59,8 +59,8 @@ Page {
         }
 
         ListView {
-            Component.onCompleted: currentIndex = -1
             id: deviceListView
+            Component.onCompleted: currentIndex = -1
             width: parent.width
             height: parent.height
             spacing: 15
