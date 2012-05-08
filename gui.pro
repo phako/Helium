@@ -40,7 +40,7 @@ CONFIG += qdeclarative-boostable
 
 CONFIG += no_keywords
 
-QT += network
+QT += network dbus
 
 # The .cpp file which was generated for your project. Feel free to hack it.
 SOURCES += main.cpp \

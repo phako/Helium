@@ -28,23 +28,35 @@ class Settings : public QObject
     Q_OBJECT
     Q_PROPERTY(bool displayDeviceIcons READ displayDeviceIcons WRITE setDisplayDeviceIcons NOTIFY displayDeviceIconsChanged)
     Q_PROPERTY(bool displayMediaArt READ displayMediaArt WRITE setDisplayMediaArt NOTIFY displayMediaArtChanged)
+    Q_PROPERTY(bool startMediaSharing READ startMediaSharing WRITE setStartMediaSharing NOTIFY startMediaSharingChanged)
+    Q_PROPERTY(bool mediaSharingAvailable READ mediaSharingAvailable NOTIFY mediaSharingAvailableChanged)
 public:
+    static const QString RYGEL_DBUS_IFACE;
+
     explicit Settings(QObject *parent = 0);
     ~Settings();
 
-    Q_INVOKABLE bool displayDeviceIcons(void);
-    Q_INVOKABLE void setDisplayDeviceIcons(bool value);
+    bool displayDeviceIcons(void);
+    void setDisplayDeviceIcons(bool value);
 
-    Q_INVOKABLE bool displayMediaArt(void);
-    Q_INVOKABLE void setDisplayMediaArt(bool value);
+    bool displayMediaArt(void);
+    void setDisplayMediaArt(bool value);
+
+    bool startMediaSharing(void);
+    void setStartMediaSharing(bool value);
+
+    bool mediaSharingAvailable(void) { return m_sharingAvailable; }
 
 Q_SIGNALS:
     void displayDeviceIconsChanged(void);
     void displayMediaArtChanged(void);
+    void startMediaSharingChanged(void);
+    void mediaSharingAvailableChanged(void);
 
 public Q_SLOTS:
 private:
     QMap<QString, GConfItem *> m_configItems;
+    bool m_sharingAvailable;
 };
 
 #endif // SETTINGS_H

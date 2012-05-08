@@ -55,6 +55,15 @@ Page {
                 checked: settings.displayMediaArt;
                 onCheckedChanged: settings.displayMediaArt = checked
             }
+
+            Separator { text: qsTr("Sharing") }
+
+            LabelledSwitch {
+                text: qsTr("Launch media sharing on start")
+                checked: settings.startMediaSharing
+                onCheckedChanged: settings.startMediaSharing = checked
+                enabled: settings.mediaSharingAvailable
+            }
         }
     }
 

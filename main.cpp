@@ -17,9 +17,9 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <glib-object.h>
 
-#include <QtGui/QApplication>
-
+#include <QtDBus/QDBusInterface>
 #include <QtFeedback/QFeedbackHapticsEffect>
+#include <QtGui/QApplication>
 
 #include "qmlapplicationviewer.h"
 #include "upnp/upnprenderer.h"
@@ -84,6 +84,16 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();
+
+    if (settings.startMediaSharing()) {
+        QDBusInterface fdo(QLatin1String("org.freedesktop.DBus"), QLatin1String("/"), QLatin1String("org.freedesktop.DBus"));
+        bool isRunning = fdo.call(QLatin1String("NameHasOwner"), Settings::RYGEL_DBUS_IFACE).arguments().first().toBool();
+        if (settings.mediaSharingAvailable() && not isRunning) {
+            // Can't use D-Bus activation since we need to keep this particular port
+            QProcess::startDetached (QLatin1String("/usr/bin/rygel"),
+                                     QStringList() << QLatin1String("--port=57734"));
+        }
+    }
 
     return app->exec();
 }

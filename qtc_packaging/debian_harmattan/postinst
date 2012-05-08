@@ -1,5 +1,6 @@
 #!/bin/sh
 /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/show-device-icons false
 /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/show-media-art false
+/usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Sharing/start-media-sharing true
 
 exit 0
