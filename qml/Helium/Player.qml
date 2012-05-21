@@ -94,7 +94,6 @@ Item {
             iconId: "toolbar-mediacontrol-stop" + (enabled ? "" : "-dimmed")
             onClicked: {
                 renderer.stop();
-                renderer.setAVTransportUri("", "");
             }
         }
 
