@@ -104,6 +104,8 @@ public:
         }
     }
 
+    C *data() { return m_type; }
+
 private:
     void swap (RefPtrG &ref) throw ()
     {

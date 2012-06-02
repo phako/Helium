@@ -58,6 +58,7 @@ static quint64 parseDurationString(const QString& duration)
 
 const char UPnPRenderer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaRenderer:";
 const char UPnPRenderer::AV_TRANSPORT_SERVICE[] = "urn:schemas-upnp-org:service:AVTransport";
+const char UPnPRenderer::RENDERING_CONTROL_SERVICE[] = "urn:schemas-upnp-org:service:RenderingControl";
 
 void UPnPRenderer::setState(const QString &state)
 {
@@ -166,6 +167,61 @@ void UPnPRenderer::setSeekMode(const QString &seekMode)
     QMetaObject::invokeMethod(this, "seekModeChanged", Qt::QueuedConnection);
 }
 
+void UPnPRenderer::setMute(bool mute)
+{
+    if (m_mute == mute) {
+        return;
+    }
+
+    m_mute = mute;
+
+    QMetaObject::invokeMethod(this, "muteChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setVolume(unsigned int volume)
+{
+    if (m_volume == volume) {
+        return;
+    }
+
+    m_volume = volume;
+
+    QMetaObject::invokeMethod(this, "volumeChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setMaxVolume(unsigned int maxVolume)
+{
+    if (m_maxVolume == maxVolume) {
+        return;
+    }
+
+    m_maxVolume = maxVolume;
+
+    QMetaObject::invokeMethod(this, "maxVolumeChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setCanMute(bool canMute)
+{
+    if (m_canMute == canMute) {
+        return;
+    }
+
+    m_canMute = canMute;
+
+    QMetaObject::invokeMethod(this, "canMuteChanged", Qt::QueuedConnection);
+}
+
+void UPnPRenderer::setCanVolume(bool canVolume)
+{
+    if (m_canVolume == canVolume) {
+        return;
+    }
+
+    m_canVolume = canVolume;
+
+    QMetaObject::invokeMethod(this, "canVolumeChanged", Qt::QueuedConnection);
+}
+
 static void
 on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gpointer user_data)
 {
@@ -180,84 +236,115 @@ on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gp
 }
 
 void
-UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy */*service*/,
+UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy *service,
                                           const char        */*variable*/,
                                           GValue            *value,
                                           gpointer           user_data)
 {
     UPnPRenderer *renderer = reinterpret_cast<UPnPRenderer*>(user_data);
     GError *error = 0;
-    char *state_name = 0;
-    char *track_duration = 0;
-    char *track_uri = 0;
-    char *track_meta_data = 0;
-    char *av_transport_meta_data = 0;
-    const char *meta_data = 0;
 
     qDebug() << g_value_get_string(value);
-    if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
-                                                   0,
-                                                   g_value_get_string(value),
-                                                   &error,
-                                                   "TransportState", G_TYPE_STRING, &state_name,
-                                                   "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
-                                                   "CurrentTrackURI", G_TYPE_STRING, &track_uri,
-                                                   "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
-                                                   "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
-                                                   NULL)) {
-        if (state_name != 0) {
-            renderer->setState(QString::fromUtf8(state_name));
+    if (service == renderer->m_avTransport.data()) {
+        char *state_name = 0;
+        char *track_duration = 0;
+        char *track_uri = 0;
+        char *track_meta_data = 0;
+        char *av_transport_meta_data = 0;
+        const char *meta_data = 0;
 
-            g_free(state_name);
-        }
+        if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
+                                                       0,
+                                                       g_value_get_string(value),
+                                                       &error,
+                                                       "TransportState", G_TYPE_STRING, &state_name,
+                                                       "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
+                                                       "CurrentTrackURI", G_TYPE_STRING, &track_uri,
+                                                       "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
+                                                       "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
+                                                       NULL)) {
+            if (state_name != 0) {
+                renderer->setState(QString::fromUtf8(state_name));
 
-        if (track_duration != 0) {
-            renderer->setDuration(QString::fromUtf8(track_duration));
+                g_free(state_name);
+            }
 
-            g_free(track_duration);
-        }
+            if (track_duration != 0) {
+                renderer->setDuration(QString::fromUtf8(track_duration));
 
-        if (track_meta_data != 0) {
-            meta_data = track_meta_data;
-        } else if (av_transport_meta_data != 0) {
-            meta_data = av_transport_meta_data;
-        }
+                g_free(track_duration);
+            }
 
-        if (meta_data != 0) {
-            DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
-            GError *error = 0;
-            GUPnPDIDLLiteObject *object = 0;
+            if (track_meta_data != 0) {
+                meta_data = track_meta_data;
+            } else if (av_transport_meta_data != 0) {
+                meta_data = av_transport_meta_data;
+            }
 
-            g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
+            if (meta_data != 0) {
+                DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
+                GError *error = 0;
+                GUPnPDIDLLiteObject *object = 0;
 
-            if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
+                g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
+
+                if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
+                    if (object != 0) {
+                        renderer->setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
+                    }
+                }
+
                 if (object != 0) {
-                    renderer->setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
+                    g_object_unref(object);
                 }
             }
 
-            if (object != 0) {
-                g_object_unref(object);
+            if (track_meta_data != 0) {
+                g_free(track_meta_data);
             }
-        }
 
-        if (track_meta_data != 0) {
-            g_free(track_meta_data);
-        }
+            if (av_transport_meta_data != 0) {
+                g_free(av_transport_meta_data);
+            }
 
-        if (av_transport_meta_data != 0) {
-            g_free(av_transport_meta_data);
-        }
+            if (renderer->m_currentTitle.isEmpty() && track_uri != 0) {
+                renderer->setTitle(QString::fromUtf8(track_uri));
 
-        if (renderer->m_currentTitle.isEmpty() && track_uri != 0) {
-            renderer->setTitle(QString::fromUtf8(track_uri));
-
-            g_free(track_uri);
+                g_free(track_uri);
+            }
+        } else {
+            qDebug() << "Failed to parse last change" << error->message;
+            g_error_free(error);
         }
-    } else {
-        qDebug() << "Failed to parse last change" << error->message;
-        g_error_free(error);
+    } else if (service == renderer->m_renderingControl.data()) {
+        char *mute_str = 0, *volume_str = 0;
+        gboolean mute;
+        unsigned int volume;
+
+        if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
+                                                       0,
+                                                       g_value_get_string(value),
+                                                       &error,
+                                                       "Mute", G_TYPE_STRING, &mute_str,
+                                                       "Mute", G_TYPE_BOOLEAN, &mute,
+                                                       "Volume", G_TYPE_STRING, &volume_str,
+                                                       "Volume", G_TYPE_UINT, &volume,
+                                                       NULL)) {
+            if (mute_str != 0) {
+                renderer->setMute(mute == TRUE);
+                g_free(mute_str);
+            }
+
+            if (volume_str != 0) {
+                renderer->setVolume(volume);
+                g_free(volume_str);
+            }
+        } else {
+            qDebug() << "Failed to parse last change" << error->message;
+            g_error_free(error);
+        }
     }
+
 }
 
 UPnPRenderer::UPnPRenderer()
@@ -291,6 +378,14 @@ void UPnPRenderer::onProgressTimeout()
 void UPnPRenderer::unsubscribe()
 {
     gupnp_service_proxy_set_subscribed(m_avTransport, FALSE);
+    if (m_canMute || m_canVolume) {
+        gupnp_service_proxy_set_subscribed(m_renderingControl, FALSE);
+        gupnp_service_proxy_remove_notify(m_renderingControl,
+                                          "LastChange",
+                                          UPnPRenderer::on_transport_state_changed,
+                                          this);
+    }
+
     gupnp_service_proxy_remove_notify(m_avTransport,
                                       "LastChange",
                                       UPnPRenderer::on_transport_state_changed,
@@ -322,6 +417,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setProgress(0.0f);
     m_avTransport.clear();
     m_connectionManager.clear();
+    m_renderingControl.clear();
 
     if (m_proxy.isEmpty()) {
         return;
@@ -330,6 +426,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
 
     m_avTransport = getService(UPnPRenderer::AV_TRANSPORT_SERVICE);
     m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
+    m_renderingControl = getService(UPnPRenderer::RENDERING_CONTROL_SERVICE);
     gupnp_service_proxy_add_notify(m_avTransport,
                                    "LastChange", G_TYPE_STRING,
                                    UPnPRenderer::on_transport_state_changed,
@@ -422,6 +519,39 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
             }
             it = it->next;
         }
+
+        g_object_unref(introspection);
+    }
+
+    gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(self->m_renderingControl),
+                                               UPnPRenderer::on_got_rc_introspection,
+                                               self);
+}
+
+void UPnPRenderer::on_got_rc_introspection (GUPnPServiceInfo *info,
+                                            GUPnPServiceIntrospection *introspection,
+                                             const GError *error,
+                                             gpointer user_data)
+{
+    Q_UNUSED(info)
+
+    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
+    if (error != 0) {
+        self->propagateError(error);
+    } else {
+        bool canMute = gupnp_service_introspection_get_action(introspection, "SetMute") != NULL;
+        self->setCanMute(canMute);
+
+        bool canVolume = gupnp_service_introspection_get_action(introspection, "SetVolume") != NULL;
+        self->setCanVolume(canVolume);
+
+        if (canMute || canVolume) {
+            gupnp_service_proxy_add_notify(self->m_renderingControl, "LastChange", G_TYPE_STRING, UPnPRenderer::on_transport_state_changed, self);
+            gupnp_service_proxy_set_subscribed(self->m_renderingControl, TRUE);
+        }
+
+        const GUPnPServiceStateVariableInfo *volumeInfo = gupnp_service_introspection_get_state_variable(introspection, "Volume");
+        self->setMaxVolume(g_value_get_uint(&(volumeInfo->maximum)));
 
         g_object_unref(introspection);
     }
@@ -603,5 +733,37 @@ void UPnPRenderer::seekRelative(float percent)
                                      "InstanceID", G_TYPE_STRING, "0",
                                      "Unit", G_TYPE_STRING, m_seekMode.toUtf8().constData(),
                                      "Target", G_TYPE_STRING, target.toUtf8().constData(),
+                                     NULL);
+}
+
+void UPnPRenderer::setRemoteMute(bool mute)
+{
+    if (not canMute() || m_renderingControl.isEmpty() || mute == m_mute) {
+        return;
+    }
+
+    gupnp_service_proxy_begin_action(m_renderingControl,
+                                     "SetMute",
+                                     UPnPRenderer::on_play,
+                                     this,
+                                     "InstanceID", G_TYPE_STRING, "0",
+                                     "Channel", G_TYPE_STRING, "Master",
+                                     "DesiredMute", G_TYPE_BOOLEAN, mute ? TRUE : FALSE,
+                                     NULL);
+}
+
+void UPnPRenderer::setRemoteVolume(unsigned int volume)
+{
+    if (not canVolume() || m_renderingControl.isEmpty() || volume == m_volume) {
+        return;
+    }
+
+    gupnp_service_proxy_begin_action(m_renderingControl,
+                                     "SetVolume",
+                                     UPnPRenderer::on_play,
+                                     this,
+                                     "InstanceID", G_TYPE_STRING, "0",
+                                     "Channel", G_TYPE_STRING, "Master",
+                                     "DesiredVolume", G_TYPE_UINT, volume,
                                      NULL);
 }

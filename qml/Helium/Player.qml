@@ -18,6 +18,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
+import "components"
+
 Item {
     Label {
         id: txtTitle
@@ -52,12 +54,12 @@ Item {
 
     Item {
         id: times
-        anchors.bottom: parent.bottom
+        anchors.bottom: volumeControl.top
+        anchors.bottomMargin: 80
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: 16
         anchors.rightMargin: 16
-        height: 30
         Text {
             text: renderer.position
             color: "white"
@@ -69,6 +71,42 @@ Item {
             color: "white"
             anchors.right: parent.right
             font.pixelSize: 26
+        }
+    }
+
+    Rectangle {
+        color: "blue"
+        id: volumeControl
+        anchors.bottom: parent.bottom
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 16
+        anchors.rightMargin: 16
+
+        ImageToggleButton {
+            id: muteButton
+            checked: renderer.mute
+            enabled: renderer.canMute
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            offImage: "image://theme/icon-m-toolbar-volume-white"
+            onImage: "image://theme/icon-m-toolbar-volume-off-white"
+            width: 64
+            height: 64
+            onCheckedChanged: renderer.mute = checked
+        }
+
+        Slider {
+            enabled: renderer.canVolume
+            minimumValue: 0
+            maximumValue: renderer.maxVolume
+            value: renderer.volume
+            stepSize: 1
+            anchors.left: muteButton.right
+            anchors.right: parent.right
+            anchors.verticalCenter: muteButton.verticalCenter
+            anchors.rightMargin: -10
+            onValueChanged: renderer.volume = value
         }
     }
 

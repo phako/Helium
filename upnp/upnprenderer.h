@@ -40,9 +40,15 @@ class UPnPRenderer : public UPnPDevice
     Q_PROPERTY(QString title READ title NOTIFY titleChanged)
     Q_PROPERTY(QString position READ position NOTIFY positionChanged)
     Q_PROPERTY(bool available READ available NOTIFY availableChanged)
+    Q_PROPERTY(bool canMute READ canMute NOTIFY canMuteChanged)
+    Q_PROPERTY(bool canVolume READ canVolume NOTIFY canVolumeChanged)
+    Q_PROPERTY(bool mute READ mute WRITE setRemoteMute NOTIFY muteChanged)
+    Q_PROPERTY(unsigned int volume READ volume WRITE setRemoteVolume NOTIFY volumeChanged)
+    Q_PROPERTY(unsigned int maxVolume READ maxVolume NOTIFY maxVolumeChanged)
 public:
     static const char DEVICE_TYPE[];
     static const char AV_TRANSPORT_SERVICE[];
+    static const char RENDERING_CONTROL_SERVICE[];
 
     explicit UPnPRenderer();
     ~UPnPRenderer();
@@ -58,6 +64,14 @@ public:
     bool canSeek() const { return m_canSeek; }
     QString seekMode() { return m_seekMode; }
     bool available() { return not m_proxy.isEmpty(); }
+    bool canMute() const { return m_canMute; }
+    bool mute() const { return m_mute; }
+    void setRemoteMute(bool mute);
+
+    bool canVolume() const { return m_canVolume; }
+    unsigned int volume() const { return m_volume; }
+    unsigned int maxVolume() const { return m_maxVolume; }
+    void setRemoteVolume(unsigned int volume);
 
     // QML invokable functions
     Q_INVOKABLE virtual void wrapDevice(const QString &udn);
@@ -86,6 +100,11 @@ Q_SIGNALS:
     void canSeekChanged(void);
     void seekModeChanged(void);
     void availableChanged(void);
+    void canMuteChanged(void);
+    void muteChanged(void);
+    void canVolumeChanged(void);
+    void volumeChanged(void);
+    void maxVolumeChanged(void);
 
 private Q_SLOTS:
     void onProgressTimeout();
@@ -100,6 +119,11 @@ private:
     void setPosition(const QString &position);
     void setCanSeek(bool canSeek);
     void setSeekMode(const QString &seekMode);
+    void setCanMute(bool canMute);
+    void setCanVolume(bool canVolume);
+    void setMaxVolume(unsigned int maxVolume);
+    void setMute(bool mute);
+    void setVolume(unsigned int volume);
 
     static void on_get_position_info(GUPnPServiceProxy       *proxy,
                                      GUPnPServiceProxyAction *action,
@@ -129,6 +153,10 @@ private:
                                       GUPnPServiceIntrospection *introspection,
                                       const GError *error,
                                       gpointer user_data);
+    static void on_got_rc_introspection (GUPnPServiceInfo *info,
+                                         GUPnPServiceIntrospection *introspection,
+                                         const GError *error,
+                                         gpointer user_data);
 
     void on_last_change(const char *last_change);
     void unsubscribe();
@@ -136,6 +164,7 @@ private:
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
     ServiceProxy m_avTransport;
     ServiceProxy m_connectionManager;
+    ServiceProxy m_renderingControl;
     QString m_state;
     QString m_protocolInfo;
     QString m_duration;
@@ -148,6 +177,11 @@ private:
     QString m_position;
     bool m_canSeek;
     QString m_seekMode;
+    bool m_canVolume;
+    unsigned int m_volume;
+    unsigned int m_maxVolume;
+    bool m_canMute;
+    bool m_mute;
 };
 
 #endif // UPNPRENDERER_H
