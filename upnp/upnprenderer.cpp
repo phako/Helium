@@ -263,7 +263,7 @@ UPnPRenderer::UPnPRenderer()
     , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
     , m_avTransport()
     , m_connectionManager()
-    , m_state(QLatin1String("STOPPED"))
+    , m_state(QLatin1String("NO_MEDIA_PRESENT"))
     , m_protocolInfo(QLatin1String("*:*:*:*"))
     , m_duration(START_POSITION)
     , m_progressTimer()
@@ -310,7 +310,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     UPnPDevice::wrapDevice(udn);
 
     // reset to initial state
-    setState(QLatin1String("STOPPED"));
+    setState(QLatin1String("NO_MEDIA_PRESENT"));
     setProtocolInfo(QLatin1String("*:*:*:*"));
     setDuration(START_POSITION);
     setCanPause(false);
