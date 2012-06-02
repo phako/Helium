@@ -1,6 +1,8 @@
 /*
 This file is part of Helium.
 
+Copyright (C) 2011-2012 Jens Georg <mail+helium@jensge.org>
+
 Helium is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
@@ -61,6 +63,7 @@ public:
     // UPnP RPC calls
     // AVTransport:1 mandatory
     Q_INVOKABLE void setAVTransportUri(const QString& uri, const QString& metaData = QLatin1String(""));
+    Q_INVOKABLE void setUriAndPlay(const QString& uri, const QString& metaData = QLatin1String(""));
     Q_INVOKABLE void play();
     Q_INVOKABLE void stop();
     Q_INVOKABLE void seekRelative(float percent);

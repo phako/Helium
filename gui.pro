@@ -83,6 +83,7 @@ HEADERS += \
     upnp/browsemodelstack.h \
     networkcontrol.h \
     settings.h
+
 RESOURCES += \
     res.qrc
 

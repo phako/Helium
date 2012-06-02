@@ -28,11 +28,13 @@ struct SetAVTransportCall {
     QString m_uri;
     QString m_metaData;
     UPnPRenderer *m_renderer;
+    bool m_play;
 
-    SetAVTransportCall(const QString& uri, const QString &metaData, UPnPRenderer *renderer)
+    SetAVTransportCall(const QString& uri, const QString &metaData, UPnPRenderer *renderer, bool play)
         : m_uri(uri)
         , m_metaData(metaData)
-        , m_renderer(renderer) { }
+        , m_renderer(renderer)
+        , m_play(play) { }
 };
 
 static quint64 parseDurationString(const QString& duration)
@@ -438,6 +440,9 @@ void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
                                    &error,
                                    NULL);
     if (error == 0) {
+        if (call->m_play) {
+            call->m_renderer->play();
+        }
         return;
     }
 
@@ -463,7 +468,25 @@ void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData
         return;
     }
 
-    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this);
+    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this, false);
+
+    gupnp_service_proxy_begin_action(m_avTransport,
+                                     "SetAVTransportURI",
+                                     UPnPRenderer::on_set_av_transport_uri,
+                                     call,
+                                     "InstanceID", G_TYPE_STRING, "0",
+                                     "CurrentURI", G_TYPE_STRING, uri.toUtf8().constData(),
+                                     "CurrentURIMetaData", G_TYPE_STRING, metaData.toUtf8().constData(),
+                                     NULL);
+}
+
+void UPnPRenderer::setUriAndPlay(const QString& uri, const QString& metaData)
+{
+    if (m_avTransport.isEmpty()) {
+        return;
+    }
+
+    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this, true);
 
     gupnp_service_proxy_begin_action(m_avTransport,
                                      "SetAVTransportURI",

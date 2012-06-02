@@ -49,6 +49,7 @@ Item {
             }
         }
     }
+
     Item {
         id: times
         anchors.bottom: parent.bottom
