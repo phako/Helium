@@ -317,6 +317,8 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setTitle(QString());
     setPosition(START_POSITION);
     setProgress(0.0f);
+    m_avTransport.clear();
+    m_connectionManager.clear();
 
     if (m_proxy.isEmpty()) {
         return;

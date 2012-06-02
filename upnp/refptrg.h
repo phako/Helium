@@ -95,6 +95,15 @@ public:
     {
         return m_type == 0;
     }
+
+    void clear()
+    {
+        if (m_type) {
+            g_object_unref(m_type);
+            m_type = 0;
+        }
+    }
+
 private:
     void swap (RefPtrG &ref) throw ()
     {
