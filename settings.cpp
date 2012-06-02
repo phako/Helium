@@ -77,7 +77,7 @@ void Settings::setDisplayMediaArt(bool value)
 
 bool Settings::startMediaSharing(void)
 {
-    return m_configItems[START_MEDIA_SHARING];
+    return m_configItems[START_MEDIA_SHARING]->value().toBool();
 }
 
 void Settings::setStartMediaSharing(bool value)
