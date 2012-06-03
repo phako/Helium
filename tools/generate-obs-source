@@ -1,0 +1,25 @@
+#!/bin/sh
+
+SDK_DIR=/opt/QtSDK
+MADDE_DIR="${SDK_DIR}/Madde"
+MAD="${MADDE_DIR}/bin/mad"
+TARGET="harmattan_10.2011.34-1_rt1.2"
+
+dir=`dirname $0`
+source=`realpath ${dir}/..`
+cd ${source}
+
+test -e debian && rm -rf debian
+cp -r qtc_packaging/debian_harmattan debian
+
+sed --in-place -e 's,##OBS ,,g' debian/rules
+
+# Needed for dpkg-buildpacke as it wants to call make clean
+echo -e "clean:\n\techo clean" > Makefile
+
+${MAD} -t ${TARGET} \
+    dpkg-buildpackage -sa -S -uc -us \
+                     -Imoc -Iobj -Ircc -Iui -I.svn -I*.deb -I*.changes \
+                     -Iqtc_packaging -I*.pro.user* -I.git \
+                     -I.tx -Iout
+rm -rf debian

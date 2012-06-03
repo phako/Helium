@@ -1,5 +1,5 @@
 Source: helium
-Section: user/other
+Section: user/multimedia
 Priority: optional
 Maintainer: Jens Georg <mail+helium@jensge.org>
 Build-Depends: debhelper (>= 5), libqt4-dev, libgq-gconf-dev, libqtm-feedback-dev, applauncherd-dev, pkg-config, libgupnp-1.0-dev, libxml2-dev
