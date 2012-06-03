@@ -137,6 +137,10 @@ Item {
         Connections {
             target: renderer
             onStateChanged: {
+                if (renderer.state === "TRANSITIONING") {
+                    return;
+                }
+
                 var icon;
                 if (renderer.state === "PLAYING" && renderer.canPause) {
                     icon = "toolbar-mediacontrol-pause";
