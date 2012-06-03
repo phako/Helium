@@ -19,11 +19,11 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Item {
+    anchors.leftMargin: 16
+    anchors.rightMargin: 16
     Label {
         id: txtTitle
         anchors.bottom: buttons.top
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
         anchors.bottomMargin: 10
         anchors.left: parent.left
         anchors.right: parent.right
@@ -35,8 +35,6 @@ Item {
         id: progressBar
         value: renderer.progress
         width: parent.width
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
         anchors.bottom: times.top
         anchors.bottomMargin: 10
         anchors.left: parent.left
@@ -56,8 +54,6 @@ Item {
         anchors.bottomMargin: 80
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
         Text {
             text: renderer.position
             color: "white"
@@ -77,8 +73,6 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.leftMargin: 16
-        anchors.rightMargin: 16
     }
 
     Row {
