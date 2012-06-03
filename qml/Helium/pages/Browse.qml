@@ -19,7 +19,7 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 import org.jensge.UPnP 1.0
 
-import "components"
+import "../components"
 
 Page {
     property alias page: pageHeader.text

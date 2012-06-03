@@ -20,6 +20,7 @@ import com.nokia.meego 1.0
 import org.jensge.UPnP 1.0
 
 import "pages"
+import "components"
 
 PageStackWindow {
     id: appWindow

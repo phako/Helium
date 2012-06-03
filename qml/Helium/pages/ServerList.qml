@@ -18,7 +18,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
-import "components"
+import "../components"
 
 Page {
     property alias model: deviceListView.model
