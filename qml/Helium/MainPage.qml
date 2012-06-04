@@ -25,6 +25,7 @@ Page {
     property alias pageStackPlayer: pageStackPlayer
     property bool minimalToolbar: tabGroup.currentTab.currentPage === about ||
                                   tabGroup.currentTab.currentPage === settingsPage
+    property alias tabs: tabGroup
 
     tools: ToolBarLayout {
         ThemeToolIcon {

@@ -30,7 +30,7 @@ Page {
 
     Menu {
         id: itemContextMenu
-//        visualParent: tabGroup.currentTab
+        visualParent: main.tabs.currentTab
         content: MenuLayout {
             MenuItem {
                 text: qsTr("Play on current device")
