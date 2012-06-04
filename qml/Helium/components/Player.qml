@@ -21,6 +21,15 @@ import com.nokia.meego 1.0
 Item {
     anchors.leftMargin: 16
     anchors.rightMargin: 16
+
+    function updatePlayButton() {
+        if (renderer.state === "PLAYING" && renderer.canPause) {
+            btnPlayPause.baseIcon = "toolbar-mediacontrol-pause";
+        } else {
+            btnPlayPause.baseIcon = "toolbar-mediacontrol-play";
+        }
+    }
+
     Label {
         id: txtTitle
         anchors.bottom: buttons.top
@@ -104,28 +113,12 @@ Item {
         Connections {
             target: renderer
             onStateChanged: {
-                if (renderer.state === "TRANSITIONING") {
-                    return;
+                if (renderer.state !== "TRANSITIONING") {
+                    updatePlayButton();
                 }
-
-                var icon;
-                if (renderer.state === "PLAYING" && renderer.canPause) {
-                    icon = "toolbar-mediacontrol-pause";
-                } else {
-                    icon = "toolbar-mediacontrol-play";
-                }
-                btnPlayPause.baseIcon = icon;
             }
 
-            onCanPauseChanged: {
-                var icon;
-                if (renderer.state === "PLAYING" && renderer.canPause) {
-                    icon = "toolbar-mediacontrol-pause";
-                } else {
-                    icon = "toolbar-mediacontrol-play";
-                }
-                btnPlayPause.baseIcon = icon;
-            }
+            onCanPauseChanged: updatePlayButton();
         }
     }
 }
