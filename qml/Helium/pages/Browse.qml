@@ -124,7 +124,6 @@ Page {
             id: browseListView
             width: parent.width
             height: parent.height
-            spacing: 15
             cacheBuffer: parent.height + 100
             snapMode: ListView.SnapToItem
             model: browseModel
