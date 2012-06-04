@@ -742,6 +742,7 @@ void UPnPRenderer::setRemoteMute(bool mute)
         return;
     }
 
+    m_mute = mute;
     gupnp_service_proxy_begin_action(m_renderingControl,
                                      "SetMute",
                                      UPnPRenderer::on_play,
@@ -758,6 +759,7 @@ void UPnPRenderer::setRemoteVolume(unsigned int volume)
         return;
     }
 
+    m_volume = volume;
     gupnp_service_proxy_begin_action(m_renderingControl,
                                      "SetVolume",
                                      UPnPRenderer::on_play,
