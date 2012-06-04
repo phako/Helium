@@ -1,3 +1,15 @@
+helium (0.5.0) unstable; urgency=low
+
+  * Restart the network connection when user taps on refresh
+  * Update included gupnp-av
+  * Several layer interaction fixes
+  * Player volume control
+  * Add option to enable on-device media sharing if available
+  * Add settings page
+  * Lot of code simplification
+
+ -- Jens Georg <mail+helium@jensge.org>  Mon, 04 Jun 2012 21:18:50 +0200
+
 helium (0.4.0) unstable; urgency=low
    * Fix leaks
    * Improve player controls
