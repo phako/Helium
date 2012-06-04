@@ -1,4 +1,11 @@
 #!/bin/sh
-/usr/bin/aegis-exec -s -u user /usr/bin/gconftool --recursive-unset /apps/ControlPanel/Helium
+
+set -e
+
+case "$1" in
+    remove)
+        /usr/bin/aegis-exec -s -u user /usr/bin/gconftool --recursive-unset /apps/ControlPanel/Helium
+    ;;
+esac
 
 exit 0
