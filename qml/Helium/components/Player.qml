@@ -79,10 +79,10 @@ Item {
         id: buttons
         anchors.bottom: progressBar.top
         anchors.horizontalCenter: parent.horizontalCenter
-        ToolIcon {
+        ThemeToolIcon {
             enabled: renderer.state !== "PLAYING" || (renderer.state === "PLAYING" && renderer.canPause)
             id: btnPlayPause
-            iconId: "toolbar-mediacontrol-play" + (enabled ? "" : "-dimmed")
+            baseIcon: "toolbar-mediacontrol-play"
             onClicked: {
                 if (renderer.state === "PLAYING") {
                     renderer.pause();
@@ -92,10 +92,10 @@ Item {
             }
         }
 
-        ToolIcon {
+        ThemeToolIcon {
             enabled: renderer.state !== "STOPPED"
             id: btnStop
-            iconId: "toolbar-mediacontrol-stop" + (enabled ? "" : "-dimmed")
+            baseIcon: "toolbar-mediacontrol-stop"
             onClicked: {
                 renderer.stop();
             }
@@ -114,10 +114,7 @@ Item {
                 } else {
                     icon = "toolbar-mediacontrol-play";
                 }
-                if (!btnPlayPause.enabled) {
-                    icon += "-dimmed";
-                }
-                btnPlayPause.iconId = icon;
+                btnPlayPause.baseIcon = icon;
             }
 
             onCanPauseChanged: {
@@ -127,10 +124,7 @@ Item {
                 } else {
                     icon = "toolbar-mediacontrol-play";
                 }
-                if (!btnPlayPause.enabled) {
-                    icon += "-dimmed";
-                }
-                btnPlayPause.iconId = icon;
+                btnPlayPause.baseIcon = icon;
             }
         }
     }

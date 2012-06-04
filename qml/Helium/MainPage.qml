@@ -18,6 +18,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 import QtQuick 1.1
 import com.nokia.meego 1.0
 
+import "components"
+
 Page {
     property alias pageStackBrowse: pageStackBrowse
     property alias pageStackPlayer: pageStackPlayer
@@ -25,9 +27,9 @@ Page {
                                   tabGroup.currentTab.currentPage === settingsPage
 
     tools: ToolBarLayout {
-        ToolIcon {
+        ThemeToolIcon {
             enabled: tabGroup.currentTab.depth > 1
-            iconId: enabled ? "toolbar-back" : "toolbar-back-dimmed"
+            baseIcon: "toolbar-back"
             onClicked: {
                 if (minimalToolbar) {
                     tabGroup.currentTab.pop();
