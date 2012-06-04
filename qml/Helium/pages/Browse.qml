@@ -24,6 +24,12 @@ import "../components"
 Page {
     property alias page: pageHeader.text
 
+    function setUri(r) {
+        var uri = browseListView.currentItem.myModel.uri;
+        var metadata = browseListView.currentItem.myModel.metadata;
+        r.setUriAndPlay(uri, metadata);
+    }
+
     RendererSheet {
         id: rendererSheet
     }
@@ -35,23 +41,13 @@ Page {
             MenuItem {
                 text: qsTr("Play on current device")
                 enabled: renderer.available
-                onClicked: {
-                    var uri = browseListView.currentItem.myModel.uri;
-                    var metadata = browseListView.currentItem.myModel.metadata;
-                    renderer.setUriAndPlay(uri, metadata);
-                }
+                onClicked: setUri(renderer)
             }
 
             MenuItem {
                 Connections {
                     target: rendererSheet
-                    onAccepted: {
-                        var tmpRenderer = rendererModel.getDevice(rendererSheet.currentIndex);
-
-                        var uri = browseListView.currentItem.myModel.uri;
-                        var metadata = browseListView.currentItem.myModel.metadata;
-                        tmpRenderer.setUriAndPlay (uri, metadata);
-                    }
+                    onAccepted: setUri(rendererModel.getDevice(rendererSheet.currentIndex));
                 }
 
                 text: qsTr("Play on other device...")
