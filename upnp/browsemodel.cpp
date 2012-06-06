@@ -280,7 +280,7 @@ static QString generateMetaData(GUPnPDIDLLiteObject *object)
     GList *resources, *it;
 
     // produce minimal DIDL
-    RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new ("en"));
+    RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new (NULL));
     GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
     const char *title = gupnp_didl_lite_object_get_title(object);
 
