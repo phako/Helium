@@ -136,6 +136,10 @@ private:
                         GUPnPServiceProxyAction *action,
                         gpointer                 user_data);
 
+    static void on_pause(GUPnPServiceProxy       *proxy,
+                         GUPnPServiceProxyAction *action,
+                         gpointer                 user_data);
+
     static void on_stop(GUPnPServiceProxy       *proxy,
                         GUPnPServiceProxyAction *action,
                         gpointer                 user_data);

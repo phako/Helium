@@ -666,6 +666,27 @@ void UPnPRenderer::on_play (GUPnPServiceProxy       *proxy,
     }
 }
 
+void UPnPRenderer::on_pause (GUPnPServiceProxy       *proxy,
+                             GUPnPServiceProxyAction *action,
+                             gpointer                 user_data)
+{
+    UPnPRenderer *self = static_cast<UPnPRenderer*>(user_data);
+    GError *error = 0;
+
+    // needed to free the action
+    gupnp_service_proxy_end_action(proxy,
+                                   action,
+                                   &error,
+                                   NULL);
+    if (error != 0) {
+        if (error->code == 602 || error->code == 401) {
+            // Not implemented
+            self->setCanPause(false);
+        }
+        g_error_free(error);
+    }
+}
+
 void UPnPRenderer::play()
 {
     if (m_avTransport.isEmpty() || m_state == QLatin1String("PLAYING")) {
@@ -703,7 +724,7 @@ void UPnPRenderer::pause()
 
     gupnp_service_proxy_begin_action(m_avTransport,
                                      "Pause",
-                                     UPnPRenderer::on_play,
+                                     UPnPRenderer::on_pause,
                                      this,
                                      "InstanceID", G_TYPE_STRING, "0",
                                      NULL);
