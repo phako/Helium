@@ -53,7 +53,9 @@ SOURCES += main.cpp \
     upnp/browsemodelstack.cpp \
     upnp/browsemodel.cpp \
     networkcontrol.cpp \
-    settings.cpp
+    settings.cpp \
+    upnp/serviceproxycall.cpp \
+    upnp/serviceproxy.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -82,7 +84,10 @@ HEADERS += \
     upnp/refptrg.h \
     upnp/browsemodelstack.h \
     networkcontrol.h \
-    settings.h
+    settings.h \
+    upnp/serviceproxy_p.h \
+    upnp/serviceproxycall.h \
+    upnp/serviceproxy.h
 
 RESOURCES += \
     res.qrc
