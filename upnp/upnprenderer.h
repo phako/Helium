@@ -167,9 +167,9 @@ private:
     void unsubscribe();
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
-    ServiceProxy m_avTransport;
-    ServiceProxy m_connectionManager;
-    ServiceProxy m_renderingControl;
+    GServiceProxy m_avTransport;
+    GServiceProxy m_connectionManager;
+    GServiceProxy m_renderingControl;
     QString m_state;
     QString m_protocolInfo;
     QString m_duration;

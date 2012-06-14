@@ -50,8 +50,8 @@ public:
 private Q_SLOTS:
     void startBrowsing();
 private:
-    ServiceProxy              m_contentDirectory;
-    ServiceProxy              m_connectionManager;
+    GServiceProxy              m_contentDirectory;
+    GServiceProxy              m_connectionManager;
     QString                   m_protocolInfo;
     QHash<SortOrder, QString> m_sortCriteria;
     QList<BrowseTask*>        m_tasks;

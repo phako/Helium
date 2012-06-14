@@ -23,6 +23,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "gupnp-av/gupnp-av.h"
 
 #include "refptrg.h"
+#include "serviceproxy.h"
+#include "serviceproxycall.h"
 
 typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
 
@@ -45,7 +47,7 @@ public:
         BrowseRoleMetaData
     };
 
-    explicit BrowseModel(const ServiceProxy &proxy = ServiceProxy(),
+    explicit BrowseModel(const GServiceProxy &proxy = GServiceProxy(),
                          const QString      &id = QLatin1String("0"),
                          const QString      &sortCriteria = QLatin1String(""),
                          const QString      &protocolInfo = QLatin1String("*:*:*:*"),
@@ -86,7 +88,7 @@ public Q_SLOTS:
     QString formatTime(long duration);
 private Q_SLOTS:
     void onStartBrowse();
-    void onBrowseDone(QByteArray result, uint number_returned, uint total_matches);
+    void onCallReady();
     void setBusy(bool busy) {
         if (m_busy != busy) {
             m_busy = busy;
@@ -104,11 +106,6 @@ private Q_SLOTS:
 private:
     static BrowseModel m_empty;
 
-
-    static void on_browse(GUPnPServiceProxy       *proxy,
-                          GUPnPServiceProxyAction *action,
-                          gpointer                 user_data);
-
     static void on_didl_object(GUPnPDIDLLiteParser *parser,
                                GUPnPDIDLLiteObject *item,
                                gpointer             user_data);
@@ -116,7 +113,7 @@ private:
     QString getCompatibleUri(int index, const QString& protocolInfo) const;
 
     QList<DIDLLiteObject>    m_data;
-    ServiceProxy             m_contentDirectory;
+    QScopedPointer<ServiceProxy> m_contentDirectory;
     QString                  m_id;
     guint                    m_currentOffset;
     bool                     m_busy;
@@ -125,6 +122,8 @@ private:
     QString                  m_sortCriteria;
     QString                  m_protocolInfo;
     int                      m_lastIndex;
+    QString                  m_container;
+    QList<ServiceProxyCall *> m_pendingCalls;
 };
 
 #endif // BROWSEMODEL_H

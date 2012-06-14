@@ -23,6 +23,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "browsemodel.h"
 #include "upnpdevicemodel.h"
+#include "glib-utils.h"
 
 const int BROWSE_SLICE = 100;
 const char DEFAULT_FILTER[] = "res@size,res@duration,res@resolution,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album";
@@ -36,21 +37,21 @@ const char CONTAINER_PREFIX[] = "object.container";
 
 BrowseModel BrowseModel::m_empty;
 
-BrowseModel::BrowseModel(const ServiceProxy &proxy,
+BrowseModel::BrowseModel(const GServiceProxy &proxy,
                          const QString      &id,
                          const QString      &sortCriteria,
                          const QString      &protocolInfo,
                          QObject            *parent)
     : QAbstractListModel(parent)
-    , m_contentDirectory(proxy)
+    , m_contentDirectory(ServiceProxy::wrap(proxy))
     , m_id(id)
     , m_currentOffset(0)
     , m_busy(true)
     , m_done(false)
-    , m_action(0)
     , m_sortCriteria(sortCriteria)
     , m_protocolInfo(protocolInfo)
     , m_lastIndex(-1)
+    , m_pendingCalls()
 {
     QHash<int, QByteArray> roles;
 
@@ -69,8 +70,10 @@ BrowseModel::BrowseModel(const ServiceProxy &proxy,
 
 BrowseModel::~BrowseModel()
 {
-    if (m_action != 0) {
-        gupnp_service_proxy_cancel_action (m_contentDirectory, m_action);
+    while (m_pendingCalls.size() > 0) {
+        auto call = m_pendingCalls.takeFirst();
+        call->deleteLater();
+        call->cancel();
     }
 }
 
@@ -387,91 +390,69 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
 
 void BrowseModel::onStartBrowse()
 {
-    if (m_contentDirectory.isEmpty()) {
+    if (m_contentDirectory.isNull()) {
         return;
     }
 
     qDebug () << "Starting to browse" << m_id;
-    m_action = gupnp_service_proxy_begin_action(m_contentDirectory,
-                                                "Browse",
-                                                BrowseModel::on_browse,
-                                                this,
-                                                "ObjectID", G_TYPE_STRING, m_id.toUtf8().constData(),
-                                                "BrowseFlag", G_TYPE_STRING, "BrowseDirectChildren",
-                                                "Filter", G_TYPE_STRING, DEFAULT_FILTER,
-                                                "StartingIndex", G_TYPE_UINT, m_currentOffset,
-                                                "RequestedCount", G_TYPE_UINT, BROWSE_SLICE,
-                                                "SortCriteria", G_TYPE_STRING, m_sortCriteria.toUtf8().constData(),
-                                                NULL);
+    m_pendingCalls << m_contentDirectory->call(QLatin1String("Browse"),
+                                               QLatin1String("ObjectID"), m_id,
+                                               QLatin1String("BrowseFlag"), QLatin1String("BrowseDirectChildren"),
+                                               QLatin1String("Filter"), QLatin1String(DEFAULT_FILTER),
+                                               QLatin1String("StartingIndex"), m_currentOffset,
+                                               QLatin1String("RequestedCount"), BROWSE_SLICE,
+                                               QLatin1String("SortCriteria"), m_sortCriteria);
+    connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onCallReady()));
+    m_pendingCalls.last()->run();
 }
 
-void BrowseModel::on_browse(GUPnPServiceProxy       *proxy,
-                            GUPnPServiceProxyAction *action,
-                            gpointer                 user_data)
+void BrowseModel::onCallReady()
 {
-    GError *error = 0;
-    guint number_returned;
-    guint total_matches;
-    char *result = 0;
-    BrowseModel *model = reinterpret_cast<BrowseModel *>(user_data);
+    QScopedPointer<ServiceProxyCall, ScopedPointerLater<ServiceProxyCall> > call(qobject_cast<ServiceProxyCall *>(sender()));
+    if (call.isNull()) {
+        return;
+    }
 
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   "Result", G_TYPE_STRING, &result,
-                                   "NumberReturned", G_TYPE_UINT, &number_returned,
-                                   "TotalMatches", G_TYPE_UINT, &total_matches,
-                                   NULL);
-    QMetaObject::invokeMethod(model, "setBusy", Qt::QueuedConnection,
-                              Q_ARG(bool, false));
-    ScopedGPointer scopedResult(result);
-    model->m_action = 0;
-    if (error != 0) {
-        QString message = QString::fromUtf8(error->message);
-        QMetaObject::invokeMethod(model, "error", Qt::QueuedConnection,
-                                  Q_ARG(int, error->code),
-                                  Q_ARG(QString, message));
-        qDebug() << "Browsing failed:" << error->message;
-        g_error_free(error);
+    m_pendingCalls.removeOne(call.data());
+
+    call->finalize(QStringList() << QLatin1String("Result")
+                                 << QLatin1String("NumberReturned")
+                                 << QLatin1String("TotalMatches"));
+    setBusy(false);
+
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
 
         return;
     }
 
-    if (number_returned == 0) {
-        QMetaObject::invokeMethod(model, "setDone", Qt::QueuedConnection,
-                                  Q_ARG(bool, true));
+    unsigned int numberReturned = call->get(QLatin1String("NumberReturned")).toUInt();
+    if (numberReturned == 0) {
+        setDone(true);
+
         return;
     }
 
-    QMetaObject::invokeMethod(model, "onBrowseDone", Qt::QueuedConnection,
-                              Q_ARG(QByteArray, QByteArray::fromRawData(scopedResult.take(), strlen(result))),
-                              Q_ARG(uint, number_returned),
-                              Q_ARG(uint, total_matches));
-}
-
-void BrowseModel::onBrowseDone(QByteArray result, uint number_returned, uint total_matches)
-{
     DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new());
     beginInsertRows(QModelIndex(),
-                           m_data.count(),
-                           m_data.count() + number_returned - 1);
+                    m_data.count(),
+                    m_data.count() + numberReturned - 1);
     g_signal_connect (G_OBJECT(parser),
                       "object-available",
                       G_CALLBACK(BrowseModel::on_didl_object),
                       this);
 
+    qDebug() << call->get(QLatin1String("Result")).toString();
+
     GError *error = 0;
-    gupnp_didl_lite_parser_parse_didl(parser, result.constData(), &error);
+    gupnp_didl_lite_parser_parse_didl(parser, call->get(QLatin1String("Result")).toString().toUtf8().constData(), &error);
 
     endInsertRows();
 
-    if (not result.isNull()) {
-        g_free(const_cast<char *>(result.constData()));
-        result.setRawData(0, 0);
-    }
+    m_currentOffset += numberReturned;
 
-    m_currentOffset += number_returned;
-    if (total_matches > 0 && m_currentOffset < total_matches) {
+    unsigned int totalMatches = call->get(QLatin1String("TotalMatches")).toUInt();
+    if (totalMatches > 0 && m_currentOffset < totalMatches) {
         QTimer::singleShot(0, this, SLOT(onStartBrowse()));
     } else {
         setDone(true);
