@@ -316,35 +316,7 @@ UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy *service,
             qDebug() << "Failed to parse last change" << error->message;
             g_error_free(error);
         }
-    } else if (service == renderer->m_renderingControl.data()) {
-        char *mute_str = 0, *volume_str = 0;
-        gboolean mute;
-        unsigned int volume;
-
-        if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
-                                                       0,
-                                                       g_value_get_string(value),
-                                                       &error,
-                                                       "Mute", G_TYPE_STRING, &mute_str,
-                                                       "Mute", G_TYPE_BOOLEAN, &mute,
-                                                       "Volume", G_TYPE_STRING, &volume_str,
-                                                       "Volume", G_TYPE_UINT, &volume,
-                                                       NULL)) {
-            if (mute_str != 0) {
-                renderer->setMute(mute == TRUE);
-                g_free(mute_str);
-            }
-
-            if (volume_str != 0) {
-                renderer->setVolume(volume);
-                g_free(volume_str);
-            }
-        } else {
-            qDebug() << "Failed to parse last change" << error->message;
-            g_error_free(error);
-        }
     }
-
 }
 
 UPnPRenderer::UPnPRenderer()
@@ -352,6 +324,7 @@ UPnPRenderer::UPnPRenderer()
     , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
     , m_avTransport()
     , m_connectionManager()
+    , m_renderingControl(0)
     , m_state(QLatin1String("NO_MEDIA_PRESENT"))
     , m_protocolInfo(QLatin1String("*:*:*:*"))
     , m_duration(START_POSITION)
@@ -361,8 +334,43 @@ UPnPRenderer::UPnPRenderer()
     , m_position(START_POSITION)
     , m_canSeek(false)
     , m_seekMode(QLatin1String(""))
+    , m_pendingCalls()
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
+}
+
+void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
+{
+    Q_UNUSED(name);
+
+    qDebug() << value.toString();
+    char *mute_str = 0, *volume_str = 0;
+    gboolean mute;
+    unsigned int volume;
+    GError *error = 0;
+
+    if (gupnp_last_change_parser_parse_last_change(m_lastChangeParser,
+                                                   0,
+                                                   value.toString().toUtf8().constData(),
+                                                   &error,
+                                                   "Mute", G_TYPE_STRING, &mute_str,
+                                                   "Mute", G_TYPE_BOOLEAN, &mute,
+                                                   "Volume", G_TYPE_STRING, &volume_str,
+                                                   "Volume", G_TYPE_UINT, &volume,
+                                                   NULL)) {
+        if (mute_str != 0) {
+            setMute(mute == TRUE);
+            g_free(mute_str);
+        }
+
+        if (volume_str != 0) {
+            setVolume(volume);
+            g_free(volume_str);
+        }
+    } else {
+        qDebug() << "Failed to parse last change" << error->message;
+        g_error_free(error);
+    }
 }
 
 void UPnPRenderer::onProgressTimeout()
@@ -375,17 +383,31 @@ void UPnPRenderer::onProgressTimeout()
                                      NULL);
 }
 
-void UPnPRenderer::unsubscribe()
+void UPnPRenderer::onServiceProxyCallReady()
 {
-    gupnp_service_proxy_set_subscribed(m_avTransport, FALSE);
-    if (m_canMute || m_canVolume) {
-        gupnp_service_proxy_set_subscribed(m_renderingControl, FALSE);
-        gupnp_service_proxy_remove_notify(m_renderingControl,
-                                          "LastChange",
-                                          UPnPRenderer::on_transport_state_changed,
-                                          this);
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
+
+    if (call == 0) {
+        return;
     }
 
+    m_pendingCalls.removeOne(call);
+    call->deleteLater();
+
+    call->finalize();
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
+    }
+}
+
+void UPnPRenderer::unsubscribe()
+{
+    if (m_renderingControl->subscribed()) {
+        m_renderingControl->setSubscribed(false);
+        m_renderingControl->removeNotify(QLatin1String("LastChange"));
+    }
+
+    gupnp_service_proxy_set_subscribed(m_avTransport, FALSE);
     gupnp_service_proxy_remove_notify(m_avTransport,
                                       "LastChange",
                                       UPnPRenderer::on_transport_state_changed,
@@ -417,7 +439,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setProgress(0.0f);
     m_avTransport.clear();
     m_connectionManager.clear();
-    m_renderingControl.clear();
+    m_renderingControl.reset(0);
 
     if (m_proxy.isEmpty()) {
         return;
@@ -426,7 +448,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
 
     m_avTransport = getService(UPnPRenderer::AV_TRANSPORT_SERVICE);
     m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
-    m_renderingControl = getService(UPnPRenderer::RENDERING_CONTROL_SERVICE);
+    m_renderingControl.reset(ServiceProxy::wrap(getService(UPnPRenderer::RENDERING_CONTROL_SERVICE).data()));
     gupnp_service_proxy_add_notify(m_avTransport,
                                    "LastChange", G_TYPE_STRING,
                                    UPnPRenderer::on_transport_state_changed,
@@ -523,40 +545,31 @@ void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
         g_object_unref(introspection);
     }
 
-    gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(self->m_renderingControl),
-                                               UPnPRenderer::on_got_rc_introspection,
-                                               self);
+    self->connect(self->m_renderingControl.data(), SIGNAL(introspectionReady()), SLOT(onRenderinControlIntrospectionReady()));
+    self->m_renderingControl->introspect();
 }
 
-void UPnPRenderer::on_got_rc_introspection (GUPnPServiceInfo *info,
-                                            GUPnPServiceIntrospection *introspection,
-                                             const GError *error,
-                                             gpointer user_data)
+void UPnPRenderer::onRenderinControlIntrospectionReady()
 {
-    Q_UNUSED(info)
+    ServiceIntrospection *introspection = m_renderingControl->introspection();
 
-    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
-    if (error != 0) {
-        self->propagateError(error);
-    } else {
-        bool canMute = gupnp_service_introspection_get_action(introspection, "SetMute") != NULL;
-        self->setCanMute(canMute);
-
-        bool canVolume = gupnp_service_introspection_get_action(introspection, "SetVolume") != NULL;
-        self->setCanVolume(canVolume);
-
-        if (canMute || canVolume) {
-            gupnp_service_proxy_add_notify(self->m_renderingControl, "LastChange", G_TYPE_STRING, UPnPRenderer::on_transport_state_changed, self);
-            gupnp_service_proxy_set_subscribed(self->m_renderingControl, TRUE);
+    qDebug() << "Got introspection!";
+    setCanMute(introspection->hasAction(QLatin1String("SetMute")));
+    setCanVolume(introspection->hasAction(QLatin1String("SetVolume")));
+    if (canVolume()) {
+        auto maxVolume = introspection->variable(QLatin1String("Volume")).maximum();
+        if (not maxVolume.isNull()) {
+            setMaxVolume(maxVolume.toUInt());
         }
-
-        const GUPnPServiceStateVariableInfo *volumeInfo = gupnp_service_introspection_get_state_variable(introspection, "Volume");
-        self->setMaxVolume(g_value_get_uint(&(volumeInfo->maximum)));
-
-        g_object_unref(introspection);
     }
 
-    QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
+    if (canMute() || canVolume()) {
+        m_renderingControl->addNotify(QLatin1String("LastChange"));
+        connect(m_renderingControl.data(), SIGNAL(notify(QString, QVariant)), SLOT(onLastChange(QString,QVariant)));
+        m_renderingControl->setSubscribed(true);
+    }
+
+    Q_EMIT ready();
 }
 
 void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
@@ -770,34 +783,34 @@ QString UPnPRenderer::getRelativeTime(float percent)
 
 void UPnPRenderer::setRemoteMute(bool mute)
 {
-    if (not canMute() || m_renderingControl.isEmpty() || mute == m_mute) {
+    if (not canMute() || m_renderingControl.isNull() || mute == m_mute) {
         return;
     }
 
     m_mute = mute;
-    gupnp_service_proxy_begin_action(m_renderingControl,
-                                     "SetMute",
-                                     UPnPRenderer::on_play,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "Channel", G_TYPE_STRING, "Master",
-                                     "DesiredMute", G_TYPE_BOOLEAN, mute ? TRUE : FALSE,
-                                     NULL);
+    m_pendingCalls << m_renderingControl->call(QLatin1String("SetMute"),
+                                               QLatin1String("InstanceID"), QLatin1String("0"),
+                                               QLatin1String("Channel"), QLatin1String("Master"),
+                                               QLatin1String("DesiredMute"), mute);
+    handleLastCall();
 }
 
 void UPnPRenderer::setRemoteVolume(unsigned int volume)
 {
-    if (not canVolume() || m_renderingControl.isEmpty() || volume == m_volume) {
+    if (not canVolume() || m_renderingControl.isNull() || volume == m_volume) {
         return;
     }
 
     m_volume = volume;
-    gupnp_service_proxy_begin_action(m_renderingControl,
-                                     "SetVolume",
-                                     UPnPRenderer::on_play,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "Channel", G_TYPE_STRING, "Master",
-                                     "DesiredVolume", G_TYPE_UINT, volume,
-                                     NULL);
+    m_pendingCalls << m_renderingControl->call(QLatin1String("SetVolume"),
+                                               QLatin1String("InstanceID"), QLatin1String("0"),
+                                               QLatin1String("Channel"), QLatin1String("Master"),
+                                               QLatin1String("DesiredVolume"), volume);
+    handleLastCall();
+}
+
+void UPnPRenderer::handleLastCall(const char *slot)
+{
+    connect(m_pendingCalls.last(), SIGNAL(ready()), slot);
+    m_pendingCalls.last()->run();
 }

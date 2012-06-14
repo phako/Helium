@@ -22,9 +22,11 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QTimer>
+#include <QtCore/QList>
 
 #include "gupnp-av/gupnp-av.h"
 
+#include "serviceproxy.h"
 #include "upnpdevice.h"
 
 class UPnPRenderer : public UPnPDevice
@@ -109,6 +111,10 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onProgressTimeout();
+    void onLastChange(const QString &name, const QVariant &value);
+    void onServiceProxyCallReady();
+    void onRenderinControlIntrospectionReady();
+
 private:
     // private property setters
     void setState(const QString &state);
@@ -158,18 +164,15 @@ private:
                                       GUPnPServiceIntrospection *introspection,
                                       const GError *error,
                                       gpointer user_data);
-    static void on_got_rc_introspection (GUPnPServiceInfo *info,
-                                         GUPnPServiceIntrospection *introspection,
-                                         const GError *error,
-                                         gpointer user_data);
 
     void on_last_change(const char *last_change);
     void unsubscribe();
+    void handleLastCall(const char *slot = SLOT(onServiceProxyCallReady()));
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
     GServiceProxy m_avTransport;
     GServiceProxy m_connectionManager;
-    GServiceProxy m_renderingControl;
+    QScopedPointer<ServiceProxy> m_renderingControl;
     QString m_state;
     QString m_protocolInfo;
     QString m_duration;
@@ -187,6 +190,7 @@ private:
     unsigned int m_maxVolume;
     bool m_canMute;
     bool m_mute;
+    QList<ServiceProxyCall *> m_pendingCalls;
 };
 
 #endif // UPNPRENDERER_H
