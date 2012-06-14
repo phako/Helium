@@ -1,4 +1,5 @@
 TARGET=Helium
+QMAKE_CXXFLAGS += -std=gnu++0x
 # Add more folders to ship with the application, here
 folder_01.source = qml/Helium
 folder_01.target = qml
@@ -55,7 +56,8 @@ SOURCES += main.cpp \
     networkcontrol.cpp \
     settings.cpp \
     upnp/serviceproxycall.cpp \
-    upnp/serviceproxy.cpp
+    upnp/serviceproxy.cpp \
+    upnp/serviceintrospection.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -87,7 +89,9 @@ HEADERS += \
     settings.h \
     upnp/serviceproxy_p.h \
     upnp/serviceproxycall.h \
-    upnp/serviceproxy.h
+    upnp/serviceproxy.h \
+    upnp/serviceintrospection.h \
+    upnp/serviceintrospection_p.h
 
 RESOURCES += \
     res.qrc

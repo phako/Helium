@@ -25,6 +25,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QVariant>
 
 #include "serviceproxycall.h"
+#include "serviceintrospection.h"
 
 class ServiceProxyPrivate;
 class ServiceProxy : public QObject
@@ -52,10 +53,14 @@ public:
     bool subscribed(void) const;
     bool isNull(void) const;
 
+    void introspect(void);
+    ServiceIntrospection *introspection(void);
+
     static ServiceProxy *wrap(GUPnPServiceProxy *proxy);
 
 Q_SIGNALS:
     void notify(const QString &variable, const QVariant &value);
+    void introspectionReady(void);
 
 private:
     explicit ServiceProxy(QObject *parent = 0);

@@ -17,12 +17,14 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libgupnp/gupnp.h>
 
+#include <QtCore/QDebug>
 #include <QtCore/QStringList>
 #include <QtCore/QVariantList>
 
 #include "refptrg.h"
 #include "serviceproxy.h"
 #include "serviceproxy_p.h"
+#include "serviceintrospection_p.h"
 
 /*!
  * \brief Callback for gupnp_service_proxy_add_notify().
@@ -46,6 +48,37 @@ void ServiceProxyPrivate::onNotify(GUPnPServiceProxy *proxy, const char *variabl
                               Qt::QueuedConnection,
                               Q_ARG(QString, var),
                               Q_ARG(QVariant, val));
+}
+
+/*!
+ * \brief Call-back for gupnp_service_info_get_introspection_async
+ * \param info Associcated GUPnPServiceInfo
+ * \param introspection an instance of GUPnPServiceIntrospection
+ * \param error GError, 0 on success.
+ * \param user_data Pointer to a ServiceProxyPrivate object.
+ */
+void ServiceProxyPrivate::onIntrospection(GUPnPServiceInfo *info, GUPnPServiceIntrospection *introspection, const GError *error, gpointer user_data)
+{
+    ServiceProxyPrivate *self = static_cast<ServiceProxyPrivate *>(user_data);
+    Q_UNUSED(info);
+
+    self->m_introspection = new ServiceIntrospection();
+    self->m_introspection->d_ptr->m_introspection = RefPtrG<GUPnPServiceIntrospection>::wrap(introspection);
+
+    QMetaObject::invokeMethod(self->q_ptr, "introspectionReady", Qt::QueuedConnection);
+}
+
+/*!
+ * \brief Get the service's introspection object
+ * \return a ServiceIntrospection object or 0 if introspectionReady() has not
+ * yet been emitted.
+ * \sa introspect(),introspectionReady()
+ */
+ServiceIntrospection *ServiceProxy::introspection()
+{
+    Q_D(ServiceProxy);
+
+    return d->m_introspection;
 }
 
 /*!
@@ -199,6 +232,28 @@ bool ServiceProxy::isNull(void) const
     Q_D (const ServiceProxy);
 
     return d->m_proxy.isEmpty();
+}
+
+/*!
+ * \brief Start asynchronous service introspection.
+ *
+ * Once the introspeciton is ready, the introspectionReady() signal is
+ * emitted. The introspection object is available after signal emission using
+ * introspection().
+ *
+ * \sa introspection(), introspectionReady()
+ */
+void ServiceProxy::introspect(void)
+{
+    Q_D(ServiceProxy);
+
+    if (d->m_introspection != 0) {
+        Q_EMIT introspectionReady();
+    } else {
+        gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(d->m_proxy),
+                                                   ServiceProxyPrivate::onIntrospection,
+                                                   d);
+    }
 }
 
 ServiceProxy *ServiceProxy::wrap(GUPnPServiceProxy *proxy)

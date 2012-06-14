@@ -29,14 +29,17 @@ struct ServiceProxyPrivate
     ServiceProxyPrivate(ServiceProxy      *parent,
                         GUPnPServiceProxy *proxy)
         : q_ptr(parent)
-        , m_proxy(proxy) {}
+        , m_proxy(proxy)
+        , m_introspection(0) {}
     ~ServiceProxyPrivate() { /* do nothing */  }
 
     static void onNotify(GUPnPServiceProxy *proxy, const char *variable, GValue *value, gpointer user_data);
+    static void onIntrospection(GUPnPServiceInfo *info, GUPnPServiceIntrospection *introspection, const GError *error, gpointer user_data);
 
     ServiceProxy * const q_ptr;
     Q_DECLARE_PUBLIC(ServiceProxy)
     GServiceProxy m_proxy;
+    ServiceIntrospection * m_introspection;
 };
 
 #endif // SERVICEPROXY_P_H
