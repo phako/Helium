@@ -165,6 +165,8 @@ void ServiceProxyCall::cancel(void)
 
     gupnp_service_proxy_cancel_action (d->m_proxy, d->m_action);
     d->m_lastError = g_error_new_literal(G_IO_ERROR, G_IO_ERROR_CANCELLED, "Action cancelled by user");
+    d->m_action = 0;
+
     Q_EMIT ready();
 }
 
@@ -182,6 +184,12 @@ void ServiceProxyCall::cancel(void)
 void ServiceProxyCall::finalize(const QStringList &params)
 {
     Q_D(ServiceProxyCall);
+
+    if (d->m_action == 0) {
+        // finalize called, cancel() called or not started yet
+        return;
+    }
+
     GList *outNames = 0, *outTypes = 0, *outValues = 0;
 
     Q_FOREACH(const QString &name, params) {
