@@ -39,6 +39,17 @@ struct ScopedPointerDestroyHelperGFree
 typedef QScopedPointer<char, ScopedPointerDestroyHelperGFree<char> > ScopedGPointer;
 
 template<typename C>
+struct ScopedPointerLater
+{
+    static inline void cleanup(C *pointer) {
+        if (pointer != 0) {
+            pointer->deleteLater();
+        }
+    }
+};
+typedef QScopedPointer<QObject, ScopedPointerLater<QObject> > ScopedLaterPointer;
+
+template<typename C>
 struct ScopedPointerDestroyHelperGList
 {
     static inline void cleanup(C *pointer)

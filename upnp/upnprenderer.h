@@ -113,7 +113,11 @@ private Q_SLOTS:
     void onProgressTimeout();
     void onLastChange(const QString &name, const QVariant &value);
     void onServiceProxyCallReady();
-    void onRenderinControlIntrospectionReady();
+    void onRenderingControlIntrospectionReady();
+    void onAVTransportIntrospectionReady();
+    void onGetPositionInfoReady();
+    void onPause();
+    void onSetAVTransportUri();
 
 private:
     // private property setters
@@ -132,45 +136,19 @@ private:
     void setMute(bool mute);
     void setVolume(unsigned int volume);
 
-    static void on_get_position_info(GUPnPServiceProxy       *proxy,
-                                     GUPnPServiceProxyAction *action,
-                                     gpointer                 user_data);
-    static void on_set_av_transport_uri(GUPnPServiceProxy       *proxy,
-                                        GUPnPServiceProxyAction *action,
-                                        gpointer                 user_data);
+    void stop(ServiceProxyCall *next);
+    void setAVTransportUri(const QString &uri, const QString &metaData, ServiceProxyCall *next);
 
-    static void on_play(GUPnPServiceProxy       *proxy,
-                        GUPnPServiceProxyAction *action,
-                        gpointer                 user_data);
-
-    static void on_pause(GUPnPServiceProxy       *proxy,
-                         GUPnPServiceProxyAction *action,
-                         gpointer                 user_data);
-
-    static void on_stop(GUPnPServiceProxy       *proxy,
-                        GUPnPServiceProxyAction *action,
-                        gpointer                 user_data);
 
     static void on_get_protocol_info(GUPnPServiceProxy       *proxy,
                                      GUPnPServiceProxyAction *action,
                                      gpointer                 user_data);
 
-    static void on_transport_state_changed(GUPnPServiceProxy */*service*/,
-                                           const char        */*variable*/,
-                                           GValue            *value,
-                                           gpointer           user_data);
-
-    static void on_got_introspection (GUPnPServiceInfo *info,
-                                      GUPnPServiceIntrospection *introspection,
-                                      const GError *error,
-                                      gpointer user_data);
-
-    void on_last_change(const char *last_change);
     void unsubscribe();
     void handleLastCall(const char *slot = SLOT(onServiceProxyCallReady()));
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
-    GServiceProxy m_avTransport;
+    QScopedPointer<ServiceProxy> m_avTransport;
     GServiceProxy m_connectionManager;
     QScopedPointer<ServiceProxy> m_renderingControl;
     QString m_state;

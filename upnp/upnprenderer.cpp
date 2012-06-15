@@ -24,19 +24,6 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 const QString START_POSITION = QLatin1String("0:00:00");
 
-struct SetAVTransportCall {
-    QString m_uri;
-    QString m_metaData;
-    UPnPRenderer *m_renderer;
-    bool m_play;
-
-    SetAVTransportCall(const QString& uri, const QString &metaData, UPnPRenderer *renderer, bool play)
-        : m_uri(uri)
-        , m_metaData(metaData)
-        , m_renderer(renderer)
-        , m_play(play) { }
-};
-
 static quint64 parseDurationString(const QString& duration)
 {
     quint64 seconds = 0;
@@ -235,90 +222,6 @@ on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gp
     *object = GUPNP_DIDL_LITE_OBJECT(g_object_ref(item));
 }
 
-void
-UPnPRenderer::on_transport_state_changed (GUPnPServiceProxy *service,
-                                          const char        */*variable*/,
-                                          GValue            *value,
-                                          gpointer           user_data)
-{
-    UPnPRenderer *renderer = reinterpret_cast<UPnPRenderer*>(user_data);
-    GError *error = 0;
-
-    qDebug() << g_value_get_string(value);
-    if (service == renderer->m_avTransport.data()) {
-        char *state_name = 0;
-        char *track_duration = 0;
-        char *track_uri = 0;
-        char *track_meta_data = 0;
-        char *av_transport_meta_data = 0;
-        const char *meta_data = 0;
-
-        if (gupnp_last_change_parser_parse_last_change(renderer->m_lastChangeParser,
-                                                       0,
-                                                       g_value_get_string(value),
-                                                       &error,
-                                                       "TransportState", G_TYPE_STRING, &state_name,
-                                                       "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
-                                                       "CurrentTrackURI", G_TYPE_STRING, &track_uri,
-                                                       "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
-                                                       "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
-                                                       NULL)) {
-            if (state_name != 0) {
-                renderer->setState(QString::fromUtf8(state_name));
-
-                g_free(state_name);
-            }
-
-            if (track_duration != 0) {
-                renderer->setDuration(QString::fromUtf8(track_duration));
-
-                g_free(track_duration);
-            }
-
-            if (track_meta_data != 0) {
-                meta_data = track_meta_data;
-            } else if (av_transport_meta_data != 0) {
-                meta_data = av_transport_meta_data;
-            }
-
-            if (meta_data != 0) {
-                DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
-                GError *error = 0;
-                GUPnPDIDLLiteObject *object = 0;
-
-                g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
-
-                if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
-                    if (object != 0) {
-                        renderer->setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
-                    }
-                }
-
-                if (object != 0) {
-                    g_object_unref(object);
-                }
-            }
-
-            if (track_meta_data != 0) {
-                g_free(track_meta_data);
-            }
-
-            if (av_transport_meta_data != 0) {
-                g_free(av_transport_meta_data);
-            }
-
-            if (renderer->m_currentTitle.isEmpty() && track_uri != 0) {
-                renderer->setTitle(QString::fromUtf8(track_uri));
-
-                g_free(track_uri);
-            }
-        } else {
-            qDebug() << "Failed to parse last change" << error->message;
-            g_error_free(error);
-        }
-    }
-}
-
 UPnPRenderer::UPnPRenderer()
     : UPnPDevice()
     , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
@@ -344,43 +247,114 @@ void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
     Q_UNUSED(name);
 
     qDebug() << value.toString();
-    char *mute_str = 0, *volume_str = 0;
-    gboolean mute;
-    unsigned int volume;
     GError *error = 0;
 
-    if (gupnp_last_change_parser_parse_last_change(m_lastChangeParser,
-                                                   0,
-                                                   value.toString().toUtf8().constData(),
-                                                   &error,
-                                                   "Mute", G_TYPE_STRING, &mute_str,
-                                                   "Mute", G_TYPE_BOOLEAN, &mute,
-                                                   "Volume", G_TYPE_STRING, &volume_str,
-                                                   "Volume", G_TYPE_UINT, &volume,
-                                                   NULL)) {
-        if (mute_str != 0) {
-            setMute(mute == TRUE);
-            g_free(mute_str);
-        }
+    if (sender() == m_renderingControl.data()) {
+        char *mute_str = 0, *volume_str = 0;
+        gboolean mute;
+        unsigned int volume;
 
-        if (volume_str != 0) {
-            setVolume(volume);
-            g_free(volume_str);
+        if (gupnp_last_change_parser_parse_last_change(m_lastChangeParser,
+                                                       0,
+                                                       value.toString().toUtf8().constData(),
+                                                       &error,
+                                                       "Mute", G_TYPE_STRING, &mute_str,
+                                                       "Mute", G_TYPE_BOOLEAN, &mute,
+                                                       "Volume", G_TYPE_STRING, &volume_str,
+                                                       "Volume", G_TYPE_UINT, &volume,
+                                                       NULL)) {
+            if (mute_str != 0) {
+                setMute(mute == TRUE);
+                g_free(mute_str);
+            }
+
+            if (volume_str != 0) {
+                setVolume(volume);
+                g_free(volume_str);
+            }
+        } else {
+            qDebug() << "Failed to parse last change" << error->message;
+            g_error_free(error);
         }
-    } else {
-        qDebug() << "Failed to parse last change" << error->message;
-        g_error_free(error);
+    } else if (sender() == m_avTransport.data()){
+        char *state_name = 0;
+        char *track_duration = 0;
+        char *track_uri = 0;
+        char *track_meta_data = 0;
+        char *av_transport_meta_data = 0;
+        const char *meta_data = 0;
+
+        if (gupnp_last_change_parser_parse_last_change(m_lastChangeParser,
+                                                       0,
+                                                       value.toString().toUtf8().constData(),
+                                                       &error,
+                                                       "TransportState", G_TYPE_STRING, &state_name,
+                                                       "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
+                                                       "CurrentTrackURI", G_TYPE_STRING, &track_uri,
+                                                       "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
+                                                       "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
+                                                       NULL)) {
+            if (state_name != 0) {
+                setState(QString::fromUtf8(state_name));
+
+                g_free(state_name);
+            }
+
+            if (track_duration != 0) {
+                setDuration(QString::fromUtf8(track_duration));
+
+                g_free(track_duration);
+            }
+
+            if (track_meta_data != 0) {
+                meta_data = track_meta_data;
+            } else if (av_transport_meta_data != 0) {
+                meta_data = av_transport_meta_data;
+            }
+
+            if (meta_data != 0) {
+                DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
+                GError *error = 0;
+                GUPnPDIDLLiteObject *object = 0;
+
+                g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
+
+                if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
+                    if (object != 0) {
+                        setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
+                    }
+                }
+
+                if (object != 0) {
+                    g_object_unref(object);
+                }
+            }
+
+            if (track_meta_data != 0) {
+                g_free(track_meta_data);
+            }
+
+            if (av_transport_meta_data != 0) {
+                g_free(av_transport_meta_data);
+            }
+
+            if (m_currentTitle.isEmpty() && track_uri != 0) {
+                setTitle(QString::fromUtf8(track_uri));
+
+                g_free(track_uri);
+            }
+        } else {
+            qDebug() << "Failed to parse last change" << error->message;
+            g_error_free(error);
+        }
     }
 }
 
 void UPnPRenderer::onProgressTimeout()
 {
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "GetPositionInfo",
-                                     UPnPRenderer::on_get_position_info,
-                                     this,
-                                     "InstanceID", G_TYPE_UINT, 0,
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("GetPositionInfo"),
+                                          QLatin1String("InstanceID"), 0);
+    handleLastCall(SLOT(onGetPositionInfoReady()));
 }
 
 void UPnPRenderer::onServiceProxyCallReady()
@@ -402,16 +376,17 @@ void UPnPRenderer::onServiceProxyCallReady()
 
 void UPnPRenderer::unsubscribe()
 {
+    static const QString LAST_CHANGE = QLatin1String("LastChange");
+
     if (m_renderingControl->subscribed()) {
         m_renderingControl->setSubscribed(false);
-        m_renderingControl->removeNotify(QLatin1String("LastChange"));
+        m_renderingControl->removeNotify(LAST_CHANGE);
+        m_renderingControl->disconnect(this, SLOT(onLastChange(QString,QVariant)));
     }
 
-    gupnp_service_proxy_set_subscribed(m_avTransport, FALSE);
-    gupnp_service_proxy_remove_notify(m_avTransport,
-                                      "LastChange",
-                                      UPnPRenderer::on_transport_state_changed,
-                                      this);
+    m_avTransport->setSubscribed(false);
+    m_avTransport->removeNotify(LAST_CHANGE);
+    m_avTransport->disconnect(this, SLOT(onLastChange(QString,QVariant)));
 }
 
 UPnPRenderer::~UPnPRenderer()
@@ -437,7 +412,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setTitle(QString());
     setPosition(START_POSITION);
     setProgress(0.0f);
-    m_avTransport.clear();
+    m_avTransport.reset(0);
     m_connectionManager.clear();
     m_renderingControl.reset(0);
 
@@ -446,15 +421,14 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     }
 
 
-    m_avTransport = getService(UPnPRenderer::AV_TRANSPORT_SERVICE);
+    m_avTransport.reset(ServiceProxy::wrap(getService(UPnPRenderer::AV_TRANSPORT_SERVICE).data()));
     m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
     m_renderingControl.reset(ServiceProxy::wrap(getService(UPnPRenderer::RENDERING_CONTROL_SERVICE).data()));
-    gupnp_service_proxy_add_notify(m_avTransport,
-                                   "LastChange", G_TYPE_STRING,
-                                   UPnPRenderer::on_transport_state_changed,
-                                   this);
 
-    gupnp_service_proxy_set_subscribed(m_avTransport, TRUE);
+    m_avTransport->addNotify(QLatin1String("LastChange"));
+    m_avTransport->setSubscribed(true);
+    connect(m_avTransport.data(), SIGNAL(notify(QString,QVariant)), SLOT(onLastChange(QString,QVariant)));
+
     gupnp_service_proxy_begin_action(m_connectionManager,
                                      "GetProtocolInfo",
                                      UPnPRenderer::on_get_protocol_info,
@@ -462,26 +436,22 @@ void UPnPRenderer::wrapDevice(const QString &udn)
                                      NULL);
 }
 
-void UPnPRenderer::on_get_position_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+
+void UPnPRenderer::onGetPositionInfoReady()
 {
-    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
-    GError *error = 0;
-    char *rel_time = 0;
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
+    call->deleteLater();
 
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   "RelTime", G_TYPE_STRING, &rel_time,
-                                   NULL);
-
-    if (error != 0) {
-        self->propagateError(error);
+    call->finalize(QStringList() << QLatin1String("RelTime"));
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
 
         return;
     }
 
-    self->setPosition(QString::fromUtf8(rel_time));
-    self->setProgress((double) parseDurationString(QString::fromUtf8(rel_time)) / (double) self->m_durationInSeconds);
+    QString relTime = call->get(QLatin1String("RelTime")).toString();
+    setPosition(relTime);
+    setProgress((double) parseDurationString(relTime) / (double) m_durationInSeconds);
 }
 
 void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
@@ -505,51 +475,35 @@ void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServicePr
     }
 
     self->setProtocolInfo(QString::fromUtf8(protocol_info));
-    gupnp_service_info_get_introspection_async(GUPNP_SERVICE_INFO(self->m_avTransport),
-                                               UPnPRenderer::on_got_introspection,
-                                               self);
+    self->connect(self->m_avTransport.data(), SIGNAL(introspectionReady()), SLOT(onAVTransportIntrospectionReady()));
+    self->m_avTransport->introspect();
+
     if (protocol_info != 0) {
         g_free(protocol_info);
     }
 }
 
-void UPnPRenderer::on_got_introspection (GUPnPServiceInfo *info,
-                                         GUPnPServiceIntrospection *introspection,
-                                         const GError *error,
-                                         gpointer user_data)
+void UPnPRenderer::onAVTransportIntrospectionReady()
 {
-    Q_UNUSED(info)
+    auto introspection = m_avTransport->introspection();
+    // TODO: Handle error
+    setCanPause(introspection->hasAction(QLatin1String("Pause")));
+    auto seekModeInfo = introspection->variable(QLatin1String("A_ARG_TYPE_SeekMode"));
+    Q_FOREACH(QString seekMode, seekModeInfo.allowedValues()) {
+        if (seekMode == QLatin1String("ABS_TIME") ||
+            seekMode == QLatin1String("REL_TIME")) {
+            setCanSeek(true);
+            setSeekMode(seekMode);
 
-    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
-    if (error != 0) {
-        self->propagateError(error);
-    } else {
-        bool canPause = gupnp_service_introspection_get_action(introspection, "Pause") != NULL;
-        self->setCanPause(canPause);
-
-        // check supported seek types
-        const GUPnPServiceStateVariableInfo *seekModeInfo =
-            gupnp_service_introspection_get_state_variable(introspection, "A_ARG_TYPE_SeekMode");
-        GList *it = seekModeInfo->allowed_values;
-        while (it != 0) {
-            if (strcmp ((const char *)it->data, "REL_TIME") == 0 ||
-                strcmp ((const char *)it->data, "ABS_TIME") == 0) {
-                self->setCanSeek(true);
-                self->setSeekMode(QString::fromLatin1((const char *)it->data));
-
-                break;
-            }
-            it = it->next;
+            break;
         }
-
-        g_object_unref(introspection);
     }
 
-    self->connect(self->m_renderingControl.data(), SIGNAL(introspectionReady()), SLOT(onRenderinControlIntrospectionReady()));
-    self->m_renderingControl->introspect();
+    connect(m_renderingControl.data(), SIGNAL(introspectionReady()), SLOT(onRenderingControlIntrospectionReady()));
+    m_renderingControl->introspect();
 }
 
-void UPnPRenderer::onRenderinControlIntrospectionReady()
+void UPnPRenderer::onRenderingControlIntrospectionReady()
 {
     ServiceIntrospection *introspection = m_renderingControl->introspection();
 
@@ -572,175 +526,127 @@ void UPnPRenderer::onRenderinControlIntrospectionReady()
     Q_EMIT ready();
 }
 
-void UPnPRenderer::on_set_av_transport_uri (GUPnPServiceProxy       *proxy,
-                                            GUPnPServiceProxyAction *action,
-                                            gpointer                 user_data)
+void UPnPRenderer::onSetAVTransportUri()
 {
-    QScopedPointer<SetAVTransportCall> call(static_cast<SetAVTransportCall*>(user_data));
-    GError *error = 0;
-    // needed to free the action
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   NULL);
-    if (error == 0) {
-        if (call->m_play) {
-            call->m_renderer->play();
+    auto f = qobject_cast<ServiceProxyCall *>(sender());
+    QScopedPointer<ServiceProxyCall, ScopedPointerLater<ServiceProxyCall> > call(f);
+
+    if (call.isNull()) {
+        return;
+    }
+
+    call->finalize();
+    m_pendingCalls.removeOne(call.data());
+
+    if (call->hasError()) {
+        if (call->errorCode() == 705) {
+            // Transport locked. Call Stop and try again
+            // Do not delete call as we chained up
+            stop(call.take());
+        } else {
+            Q_EMIT error(call->errorCode(), call->errorMessage());
         }
-        return;
-    }
-
-    // "Transport locked". Call Stop() and try again.
-    if (error->code == 705) {
-        gupnp_service_proxy_begin_action(call->m_renderer->m_avTransport,
-                                         "Stop",
-                                         UPnPRenderer::on_stop,
-                                         call.take(),
-                                         "InstanceID", G_TYPE_STRING, "0",
-                                         NULL);
-        g_error_free (error);
 
         return;
     }
 
-    call->m_renderer->propagateError(error);
+    if (call->next() != 0) {
+        m_pendingCalls << call->next();
+        handleLastCall();
+    }
 }
+
 
 void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData)
 {
-    if (m_avTransport.isEmpty()) {
+    setAVTransportUri(uri, metaData, 0);
+}
+
+void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData, ServiceProxyCall *next)
+{
+    if (m_avTransport.isNull()) {
         return;
     }
 
-    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this, false);
-
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "SetAVTransportURI",
-                                     UPnPRenderer::on_set_av_transport_uri,
-                                     call,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "CurrentURI", G_TYPE_STRING, uri.toUtf8().constData(),
-                                     "CurrentURIMetaData", G_TYPE_STRING, metaData.toUtf8().constData(),
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("SetAVTransportURI"),
+                                          QLatin1String("InstanceID"), QLatin1String("0"),
+                                          QLatin1String("CurrentURI"), uri,
+                                          QLatin1String("CurrentURIMetaData"), metaData);
+    m_pendingCalls.last()->setNext(next);
+    handleLastCall(SLOT(onSetAVTransportUri()));
 }
 
 void UPnPRenderer::setUriAndPlay(const QString& uri, const QString& metaData)
 {
-    if (m_avTransport.isEmpty()) {
+    if (m_avTransport.isNull()) {
         return;
     }
 
-    SetAVTransportCall *call = new SetAVTransportCall (uri, metaData, this, true);
-
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "SetAVTransportURI",
-                                     UPnPRenderer::on_set_av_transport_uri,
-                                     call,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "CurrentURI", G_TYPE_STRING, uri.toUtf8().constData(),
-                                     "CurrentURIMetaData", G_TYPE_STRING, metaData.toUtf8().constData(),
-                                     NULL);
+    auto playCall = m_avTransport->call(QLatin1String("Play"),
+                                        QLatin1String("InstanceID"), QLatin1String("0"),
+                                        QLatin1String("Speed"), QLatin1String("1"));
+    setAVTransportUri(uri, metaData, playCall);
 }
 
-void UPnPRenderer::on_stop (GUPnPServiceProxy       *proxy,
-                            GUPnPServiceProxyAction *action,
-                            gpointer                 user_data)
+void UPnPRenderer::onPause ()
 {
-    QScopedPointer<SetAVTransportCall> call(static_cast<SetAVTransportCall*>(user_data));
-    GError *error = 0;
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
 
-    // needed to free the action
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   NULL);
-    if (error != 0) {
-        call->m_renderer->propagateError(error);
+    if (call == 0) {
+        return;
+    }
+    call->deleteLater();
+    m_pendingCalls.removeOne(call);
+    call->finalize();
 
+    if (not call->hasError()) {
         return;
     }
 
-    call->m_renderer->setAVTransportUri(call->m_uri, call->m_metaData);
-}
-
-void UPnPRenderer::on_play (GUPnPServiceProxy       *proxy,
-                            GUPnPServiceProxyAction *action,
-                            gpointer                 /*user_data*/)
-{
-    GError *error = 0;
-
-    // needed to free the action
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   NULL);
-    if (error != 0) {
-        g_error_free (error);
-    }
-}
-
-void UPnPRenderer::on_pause (GUPnPServiceProxy       *proxy,
-                             GUPnPServiceProxyAction *action,
-                             gpointer                 user_data)
-{
-    UPnPRenderer *self = static_cast<UPnPRenderer*>(user_data);
-    GError *error = 0;
-
-    // needed to free the action
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   NULL);
-    if (error != 0) {
-        if (error->code == 602 || error->code == 401) {
-            // Not implemented
-            self->setCanPause(false);
-        }
-        g_error_free(error);
+    if (call->errorCode() == 602 || call->errorCode() == 401) {
+        qDebug() << "Device does not implement pause";
+        setCanPause(false);
     }
 }
 
 void UPnPRenderer::play()
 {
-    if (m_avTransport.isEmpty() || m_state == QLatin1String("PLAYING")) {
+    if (m_avTransport.isNull() || m_state == QLatin1String("PLAYING")) {
         return;
     }
 
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "Play",
-                                     UPnPRenderer::on_play,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "Speed", G_TYPE_STRING, "1",
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("Play"),
+                                          QLatin1String("InstanceID"), QLatin1String("0"),
+                                          QLatin1String("Speed"), QLatin1String("1"));
+    handleLastCall();
 }
 
 void UPnPRenderer::stop()
 {
-    if (m_avTransport.isEmpty() || m_state == QLatin1String("STOPPED")) {
+    stop(0);
+}
+
+void UPnPRenderer::stop(ServiceProxyCall *next)
+{
+    if (m_avTransport.isNull() || m_state == QLatin1String("STOPPED")) {
         return;
     }
 
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "Stop",
-                                     UPnPRenderer::on_play,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("Stop"),
+                                          QLatin1String("InstanceID"), QLatin1String("0"));
+    m_pendingCalls.last()->setNext(next);
+    handleLastCall();
 }
 
 void UPnPRenderer::pause()
 {
-    if (m_state == QLatin1String("PAUSED_PLAYBACK")) {
+    if (m_avTransport.isNull() || m_state == QLatin1String("PAUSED_PLAYBACK")) {
         return;
     }
 
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "Pause",
-                                     UPnPRenderer::on_pause,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("Pause"),
+                                          QLatin1String("InstanceID"), QLatin1String("0"));
+    handleLastCall(SLOT(onPause()));
 }
 
 void UPnPRenderer::seekRelative(float percent)
@@ -751,14 +657,11 @@ void UPnPRenderer::seekRelative(float percent)
     
     QString target = getRelativeTime(percent);
 
-    gupnp_service_proxy_begin_action(m_avTransport,
-                                     "Seek",
-                                     UPnPRenderer::on_play,
-                                     this,
-                                     "InstanceID", G_TYPE_STRING, "0",
-                                     "Unit", G_TYPE_STRING, m_seekMode.toUtf8().constData(),
-                                     "Target", G_TYPE_STRING, target.toUtf8().constData(),
-                                     NULL);
+    m_pendingCalls << m_avTransport->call(QLatin1String("Seek"),
+                                          QLatin1String("InstanceID"), QLatin1String("0"),
+                                          QLatin1String("Unit"), m_seekMode,
+                                          QLatin1String("Target"), target);
+    handleLastCall();
 }
 
 QString UPnPRenderer::getRelativeTime(float percent)
