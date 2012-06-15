@@ -97,7 +97,7 @@ void UPnPRenderer::setProtocolInfo(const QString &protocolInfo)
 
     m_protocolInfo = protocolInfo;
 
-    QMetaObject::invokeMethod(this, "protocolInfoChanged", Qt::QueuedConnection);
+    Q_EMIT protocolInfoChanged();
 }
 
 void UPnPRenderer::setTitle(const QString& uri)
@@ -420,7 +420,7 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     setPosition(START_POSITION);
     setProgress(0.0f);
     m_avTransport.reset(0);
-    m_connectionManager.clear();
+    m_connectionManager.reset(0);
     m_renderingControl.reset(0);
 
     if (m_proxy.isEmpty()) {
@@ -429,27 +429,29 @@ void UPnPRenderer::wrapDevice(const QString &udn)
 
 
     m_avTransport.reset(ServiceProxy::wrap(getService(UPnPRenderer::AV_TRANSPORT_SERVICE).data()));
-    m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
+    m_connectionManager.reset(ServiceProxy::wrap(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE).data()));
     m_renderingControl.reset(ServiceProxy::wrap(getService(UPnPRenderer::RENDERING_CONTROL_SERVICE).data()));
 
     m_avTransport->addNotify(QLatin1String("LastChange"));
     m_avTransport->setSubscribed(true);
     connect(m_avTransport.data(), SIGNAL(notify(QString,QVariant)), SLOT(onLastChange(QString,QVariant)));
 
-    gupnp_service_proxy_begin_action(m_connectionManager,
-                                     "GetProtocolInfo",
-                                     UPnPRenderer::on_get_protocol_info,
-                                     this,
-                                     NULL);
+    m_pendingCalls << m_connectionManager->call(QLatin1String("GetProtocolInfo"));
+    handleLastCall(SLOT(onGetProtocolInfo()));
 }
 
 
 void UPnPRenderer::onGetPositionInfoReady()
 {
     ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
-    call->deleteLater();
+
+    if (call == 0) {
+        return;
+    }
 
     call->finalize(QStringList() << QLatin1String("RelTime"));
+    call->deleteLater();
+
     if (call->hasError()) {
         Q_EMIT error(call->errorCode(), call->errorMessage());
 
@@ -461,33 +463,29 @@ void UPnPRenderer::onGetPositionInfoReady()
     setProgress((double) parseDurationString(relTime) / (double) m_durationInSeconds);
 }
 
-void UPnPRenderer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+void UPnPRenderer::onGetProtocolInfo()
 {
-    UPnPRenderer *self = reinterpret_cast<UPnPRenderer*>(user_data);
-    char *protocol_info = 0;
-    GError *error = 0;
+    auto call = qobject_cast<ServiceProxyCall *>(sender());
 
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   "Sink", G_TYPE_STRING, &protocol_info,
-                                   NULL);
-    if (error != 0) {
-        if (protocol_info != 0) {
-            g_free(protocol_info);
-        }
-
-        protocol_info = 0;
-        self->propagateError(error);
+    if (call == 0) {
+        return;
     }
 
-    self->setProtocolInfo(QString::fromUtf8(protocol_info));
-    self->connect(self->m_avTransport.data(), SIGNAL(introspectionReady()), SLOT(onAVTransportIntrospectionReady()));
-    self->m_avTransport->introspect();
+    call->finalize(QStringList() << QLatin1String("Sink"));
+    call->deleteLater();
 
-    if (protocol_info != 0) {
-        g_free(protocol_info);
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
+
+        return;
     }
+
+    if (call->get(QLatin1String("Sink")).isValid()) {
+        setProtocolInfo(call->get(QLatin1String("Sink")).toString());
+    }
+
+    connect(m_avTransport.data(), SIGNAL(introspectionReady()), SLOT(onAVTransportIntrospectionReady()));
+    m_avTransport->introspect();
 }
 
 void UPnPRenderer::onAVTransportIntrospectionReady()

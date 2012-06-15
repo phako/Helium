@@ -118,6 +118,7 @@ private Q_SLOTS:
     void onGetPositionInfoReady();
     void onPause();
     void onSetAVTransportUri();
+    void onGetProtocolInfo();
 
 private:
     // private property setters
@@ -139,17 +140,12 @@ private:
     void stop(ServiceProxyCall *next);
     void setAVTransportUri(const QString &uri, const QString &metaData, ServiceProxyCall *next);
 
-
-    static void on_get_protocol_info(GUPnPServiceProxy       *proxy,
-                                     GUPnPServiceProxyAction *action,
-                                     gpointer                 user_data);
-
     void unsubscribe();
     void handleLastCall(const char *slot = SLOT(onServiceProxyCallReady()));
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
     QScopedPointer<ServiceProxy> m_avTransport;
-    GServiceProxy m_connectionManager;
+    QScopedPointer<ServiceProxy> m_connectionManager;
     QScopedPointer<ServiceProxy> m_renderingControl;
     QString m_state;
     QString m_protocolInfo;
