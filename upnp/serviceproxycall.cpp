@@ -51,6 +51,7 @@ struct ServiceProxyCallPrivate
     QVariantList m_values;
     GError *m_lastError;
     QMap<QString, QVariant> m_results;
+    ServiceProxyCall *m_next;
 };
 
 ServiceProxyCallPrivate::ServiceProxyCallPrivate(ServiceProxyCall   *parent,
@@ -66,6 +67,7 @@ ServiceProxyCallPrivate::ServiceProxyCallPrivate(ServiceProxyCall   *parent,
     , m_values(values)
     , m_lastError(0)
     , m_results()
+    , m_next(0)
 {
 }
 
@@ -78,6 +80,8 @@ ServiceProxyCallPrivate::~ServiceProxyCallPrivate()
     if (m_proxy != 0) {
         g_object_unref(m_proxy);
     }
+
+    delete m_next;
 }
 
 void ServiceProxyCallPrivate::onAction(GUPnPServiceProxy       *proxy,
@@ -166,6 +170,8 @@ void ServiceProxyCall::run(void)
         inValues = g_list_append(inValues, (gpointer)gvalue);
     }
     QGListFullScopedPointer values(inValues);
+    g_error_free(d->m_lastError);
+    d->m_lastError = 0;
 
     d->m_action = gupnp_service_proxy_begin_action_list(d->m_proxy,
                                                         d->m_actionName.toUtf8().constData(),
@@ -272,4 +278,33 @@ QVariant ServiceProxyCall::get(const QString &key) const
     Q_D(const ServiceProxyCall);
 
     return d->m_results[key];
+}
+
+/*!
+ * \brief Get the next prepared ServiceProxyCall.
+ *
+ * \sa netNext()
+ * \return 0 if there is no next call, a pointer to the next call otherwise.
+ */
+ServiceProxyCall *ServiceProxyCall::next() const
+{
+    Q_D(const ServiceProxyCall);
+
+    return d->m_next;
+}
+
+/*!
+ * \brief Set the next call in a call chain.
+ *
+ * Sometimes it is useful to make several calls in a row. The next call pointer
+ * can be used to save a prepared next call. Note that the chain is not
+ * executed automatically, you need to run the call yourself.
+ *
+ * \param next the next proxy call in line.
+ */
+void ServiceProxyCall::setNext(ServiceProxyCall *next)
+{
+    Q_D(ServiceProxyCall);
+
+    d->m_next = next;
 }

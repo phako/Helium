@@ -42,6 +42,9 @@ public:
     bool hasError(void) const;
     int errorCode(void) const;
     QString errorMessage(void) const;
+    ServiceProxyCall *next(void) const;
+    void setNext(ServiceProxyCall *next);
+
 Q_SIGNALS:
     void ready(void);
 
