@@ -371,6 +371,12 @@ void UPnPRenderer::onServiceProxyCallReady()
     call->finalize();
     if (call->hasError()) {
         Q_EMIT error(call->errorCode(), call->errorMessage());
+    } else {
+        if (call->next() != 0) {
+            m_pendingCalls << call->next();
+            call->setNext(0);
+            handleLastCall();
+        }
     }
 }
 
@@ -552,6 +558,9 @@ void UPnPRenderer::onSetAVTransportUri()
 
     if (call->next() != 0) {
         m_pendingCalls << call->next();
+
+        // prevent call's destructor from clearing next
+        call->setNext(0);
         handleLastCall();
     }
 }

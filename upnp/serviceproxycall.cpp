@@ -170,8 +170,11 @@ void ServiceProxyCall::run(void)
         inValues = g_list_append(inValues, (gpointer)gvalue);
     }
     QGListFullScopedPointer values(inValues);
-    g_error_free(d->m_lastError);
-    d->m_lastError = 0;
+
+    if (d->m_lastError != 0) {
+        g_error_free(d->m_lastError);
+        d->m_lastError = 0;
+    }
 
     d->m_action = gupnp_service_proxy_begin_action_list(d->m_proxy,
                                                         d->m_actionName.toUtf8().constData(),
