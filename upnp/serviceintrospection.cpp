@@ -70,6 +70,11 @@ ServiceProxyStateVariable ServiceIntrospection::variable(const QString &varName)
     auto stateVar = gupnp_service_introspection_get_state_variable(d->m_introspection, varName.toUtf8().constData());
     if (stateVar != 0) {
         var.m_maximum = QVariant::fromValue(g_value_get_uint(&(stateVar->maximum)));
+        auto it = stateVar->allowed_values;
+        while (it != 0) {
+            var.m_allowedValues << QString::fromUtf8((const char *)it->data);
+            it = it->next;
+        }
     }
 
     return var;

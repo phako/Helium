@@ -19,13 +19,16 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #define SERVICEINTROSPECTION_H
 
 #include <QtCore/QObject>
+#include <QtCore/QStringList>
 #include <QtCore/QVariant>
 
 struct ServiceProxyStateVariable {
     // Fill with the rest once we need it
-    QVariant maximum() { return m_maximum; }
+    QVariant maximum() const { return m_maximum; }
+    QStringList allowedValues() const { return m_allowedValues; }
 
     QVariant m_maximum;
+    QStringList m_allowedValues;
 };
 
 class ServiceProxyPrivate;
