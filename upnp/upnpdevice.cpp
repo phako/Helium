@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "glib-utils.h"
+
 #include "upnpdevice.h"
 #include "upnpmediaserver.h"
 #include "upnprenderer.h"

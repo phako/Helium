@@ -57,7 +57,8 @@ SOURCES += main.cpp \
     settings.cpp \
     upnp/serviceproxycall.cpp \
     upnp/serviceproxy.cpp \
-    upnp/serviceintrospection.cpp
+    upnp/serviceintrospection.cpp \
+    upnp/glib-utils.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -91,7 +92,8 @@ HEADERS += \
     upnp/serviceproxycall.h \
     upnp/serviceproxy.h \
     upnp/serviceintrospection.h \
-    upnp/serviceintrospection_p.h
+    upnp/serviceintrospection_p.h \
+    upnp/glib-utils.h
 
 RESOURCES += \
     res.qrc

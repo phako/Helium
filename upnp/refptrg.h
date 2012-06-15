@@ -24,54 +24,6 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <gupnp-av/gupnp-av.h>
 
 #include <QDebug>
-#include <QScopedPointer>
-
-template<typename C>
-struct ScopedPointerDestroyHelperGFree
-{
-    static inline void cleanup(C *pointer)
-    {
-        if (pointer != 0) {
-            g_free ((gpointer)pointer);
-        }
-    }
-};
-typedef QScopedPointer<char, ScopedPointerDestroyHelperGFree<char> > ScopedGPointer;
-
-template<typename C>
-struct ScopedPointerLater
-{
-    static inline void cleanup(C *pointer) {
-        if (pointer != 0) {
-            pointer->deleteLater();
-        }
-    }
-};
-typedef QScopedPointer<QObject, ScopedPointerLater<QObject> > ScopedLaterPointer;
-
-template<typename C>
-struct ScopedPointerDestroyHelperGList
-{
-    static inline void cleanup(C *pointer)
-    {
-        if (pointer != 0) {
-            g_list_free(pointer);
-        }
-    }
-};
-typedef QScopedPointer<GList, ScopedPointerDestroyHelperGList<GList> > QGListScopedPointer;
-
-template<typename C>
-struct ScopedPointerDestroyHelperGListFull
-{
-    static inline void cleanup(C *pointer)
-    {
-        if (pointer != 0) {
-            g_list_free_full(pointer, g_free);
-        }
-    }
-};
-typedef QScopedPointer<GList, ScopedPointerDestroyHelperGListFull<GList> > QGListFullScopedPointer;
 
 /**
  * Keep a reference on a GObject in the current scope using RAII

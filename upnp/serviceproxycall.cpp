@@ -21,6 +21,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QMap>
 
 #include "refptrg.h"
+#include "glib-utils.h"
 #include "serviceproxycall.h"
 #include "serviceproxy.h"
 #include "serviceproxy_p.h"
@@ -132,41 +133,7 @@ void ServiceProxyCall::run(void)
     QGListFullScopedPointer names(inNames);
 
     Q_FOREACH(QVariant value, d->m_values) {
-        GValue *gvalue = g_new0(GValue, 1);
-        switch (value.type()) {
-        case QVariant::Bool:
-            g_value_init(gvalue, G_TYPE_BOOLEAN);
-            g_value_set_boolean(gvalue, value.toBool() ? TRUE : FALSE);
-            break;
-        case QVariant::UInt:
-            g_value_init(gvalue, G_TYPE_UINT);
-            g_value_set_uint(gvalue, value.toUInt());
-            break;
-        case QVariant::Int:
-            g_value_init(gvalue, G_TYPE_INT);
-            g_value_set_int(gvalue, value.toInt());
-            break;
-        case QVariant::LongLong:
-            g_value_init(gvalue, G_TYPE_INT64);
-            g_value_set_int64(gvalue, value.toLongLong());
-            break;
-        case QVariant::ULongLong:
-            g_value_init(gvalue, G_TYPE_UINT64);
-            g_value_set_int64(gvalue, value.toULongLong());
-            break;
-        case QVariant::Double:
-            g_value_init(gvalue, G_TYPE_DOUBLE);
-            g_value_set_double(gvalue, value.toDouble());
-            break;
-        case QVariant::String:
-            g_value_init(gvalue, G_TYPE_STRING);
-            g_value_set_string(gvalue, value.toString().toUtf8().constData());
-            break;
-        default:
-            // do nothing - probably assert or whatever
-            break;
-        }
-
+        auto gvalue = qVariantToGValue(value);
         inValues = g_list_append(inValues, (gpointer)gvalue);
     }
     QGListFullScopedPointer values(inValues);

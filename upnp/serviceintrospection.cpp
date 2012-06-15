@@ -18,6 +18,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <libgupnp/gupnp.h>
 
 #include "refptrg.h"
+#include "glib-utils.h"
 #include "serviceintrospection.h"
 #include "serviceintrospection_p.h"
 
@@ -69,7 +70,7 @@ ServiceProxyStateVariable ServiceIntrospection::variable(const QString &varName)
 
     auto stateVar = gupnp_service_introspection_get_state_variable(d->m_introspection, varName.toUtf8().constData());
     if (stateVar != 0) {
-        var.m_maximum = QVariant::fromValue(g_value_get_uint(&(stateVar->maximum)));
+        var.m_maximum = gValueToQVariant(&(stateVar->maximum));
         auto it = stateVar->allowed_values;
         while (it != 0) {
             var.m_allowedValues << QString::fromUtf8((const char *)it->data);

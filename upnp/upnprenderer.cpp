@@ -20,6 +20,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QStringList>
 
+#include "glib-utils.h"
 #include "upnprenderer.h"
 
 const QString START_POSITION = QLatin1String("0:00:00");
