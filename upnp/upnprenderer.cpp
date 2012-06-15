@@ -62,7 +62,7 @@ void UPnPRenderer::setState(const QString &state)
         setPosition(START_POSITION);
     }
 
-    QMetaObject::invokeMethod(this, "stateChanged", Qt::QueuedConnection);
+    Q_EMIT stateChanged();
 }
 
 void UPnPRenderer::setDuration(const QString& trackDuration)
@@ -74,7 +74,7 @@ void UPnPRenderer::setDuration(const QString& trackDuration)
     m_duration = trackDuration;
     m_durationInSeconds = parseDurationString(m_duration);
 
-    QMetaObject::invokeMethod(this, "durationChanged", Qt::QueuedConnection);
+    Q_EMIT durationChanged();
 }
 
 void UPnPRenderer::setProgress(float progress)
@@ -85,7 +85,7 @@ void UPnPRenderer::setProgress(float progress)
 
     m_progress = progress;
 
-    QMetaObject::invokeMethod(this, "progressChanged", Qt::QueuedConnection);
+    Q_EMIT progressChanged();
 }
 
 void UPnPRenderer::setProtocolInfo(const QString &protocolInfo)
@@ -107,7 +107,7 @@ void UPnPRenderer::setTitle(const QString& uri)
 
     m_currentTitle = uri;
 
-    QMetaObject::invokeMethod(this, "titleChanged", Qt::QueuedConnection);
+    Q_EMIT titleChanged();
 }
 
 void UPnPRenderer::setCanPause(bool canPause)
@@ -118,7 +118,7 @@ void UPnPRenderer::setCanPause(bool canPause)
 
     m_canPause = canPause;
 
-    QMetaObject::invokeMethod(this, "canPauseChanged", Qt::QueuedConnection);
+    Q_EMIT canPauseChanged();
 }
 
 void UPnPRenderer::setPosition(const QString &position)
@@ -129,7 +129,7 @@ void UPnPRenderer::setPosition(const QString &position)
 
     m_position = position;
 
-    QMetaObject::invokeMethod(this, "positionChanged", Qt::QueuedConnection);
+    Q_EMIT positionChanged();
 }
 
 void UPnPRenderer::setCanSeek(bool canSeek)
@@ -140,7 +140,7 @@ void UPnPRenderer::setCanSeek(bool canSeek)
 
     m_canSeek = canSeek;
 
-    QMetaObject::invokeMethod(this, "canSeekChanged", Qt::QueuedConnection);
+    Q_EMIT canSeekChanged();
 }
 
 void UPnPRenderer::setSeekMode(const QString &seekMode)
@@ -151,7 +151,7 @@ void UPnPRenderer::setSeekMode(const QString &seekMode)
 
     m_seekMode = seekMode;
 
-    QMetaObject::invokeMethod(this, "seekModeChanged", Qt::QueuedConnection);
+    Q_EMIT seekModeChanged();
 }
 
 void UPnPRenderer::setMute(bool mute)
@@ -162,7 +162,7 @@ void UPnPRenderer::setMute(bool mute)
 
     m_mute = mute;
 
-    QMetaObject::invokeMethod(this, "muteChanged", Qt::QueuedConnection);
+    Q_EMIT muteChanged();
 }
 
 void UPnPRenderer::setVolume(unsigned int volume)
@@ -173,7 +173,7 @@ void UPnPRenderer::setVolume(unsigned int volume)
 
     m_volume = volume;
 
-    QMetaObject::invokeMethod(this, "volumeChanged", Qt::QueuedConnection);
+    Q_EMIT volumeChanged();
 }
 
 void UPnPRenderer::setMaxVolume(unsigned int maxVolume)
@@ -184,7 +184,7 @@ void UPnPRenderer::setMaxVolume(unsigned int maxVolume)
 
     m_maxVolume = maxVolume;
 
-    QMetaObject::invokeMethod(this, "maxVolumeChanged", Qt::QueuedConnection);
+    Q_EMIT maxVolumeChanged();
 }
 
 void UPnPRenderer::setCanMute(bool canMute)
@@ -195,7 +195,7 @@ void UPnPRenderer::setCanMute(bool canMute)
 
     m_canMute = canMute;
 
-    QMetaObject::invokeMethod(this, "canMuteChanged", Qt::QueuedConnection);
+    Q_EMIT canMuteChanged();
 }
 
 void UPnPRenderer::setCanVolume(bool canVolume)
@@ -206,7 +206,7 @@ void UPnPRenderer::setCanVolume(bool canVolume)
 
     m_canVolume = canVolume;
 
-    QMetaObject::invokeMethod(this, "canVolumeChanged", Qt::QueuedConnection);
+    Q_EMIT canVolumeChanged();
 }
 
 static void
