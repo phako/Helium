@@ -49,30 +49,28 @@ UPnPMediaServer::~UPnPMediaServer()
     qDeleteAll(m_tasks);
 }
 
-void UPnPMediaServer::on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+void UPnPMediaServer::onGetProtocolInfo()
 {
-    UPnPMediaServer *self = reinterpret_cast<UPnPMediaServer*>(user_data);
-    char *protocol_info = 0;
-    GError *error = 0;
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
 
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   "Source", G_TYPE_STRING, &protocol_info,
-                                   NULL);
-    if (error != 0) {
-        qWarning() << "Failed to get sort capabilites:" << error->message;
-        g_error_free(error);
-
-        self->m_protocolInfo = QLatin1String("");
-    } else {
-        self->m_protocolInfo = QString::fromUtf8(protocol_info);
-        g_free(protocol_info);
+    if (call == 0) {
+        return;
     }
 
-    if (self->isReady()) {
-        // QTBUG-24571
-        QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
+    call->deleteLater();
+    m_pendingCalls.removeOne(call);
+    call->finalize(QStringList() << QLatin1String("Source"));
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
+        m_protocolInfo = QLatin1String("");
+
+        return;
+    }
+
+    m_protocolInfo = call->get(QLatin1String("Source")).toString();
+
+    if (isReady()) {
+        Q_EMIT ready();
     }
 }
 
@@ -134,15 +132,13 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
 {
     UPnPDevice::wrapDevice(udn);
     m_contentDirectory.reset(ServiceProxy::wrap(getService(UPnPMediaServer::CONTENT_DIRECTORY_SERVICE).data()));
-    m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
+    m_connectionManager.reset(ServiceProxy::wrap(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE).data()));
 
     // Get information on the device we need later on
-    if (not m_connectionManager.isEmpty()) {
-        gupnp_service_proxy_begin_action(m_connectionManager,
-                                         "GetProtocolInfo",
-                                         UPnPMediaServer::on_get_protocol_info,
-                                         this,
-                                         NULL);
+    if (not m_connectionManager.isNull() && not m_connectionManager->isNull()) {
+        m_pendingCalls << m_connectionManager->call(QLatin1String("GetProtocolInfo"));
+        connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onGetProtocolInfo()));
+        m_pendingCalls.last()->run();
     }
 
     if (m_contentDirectory && not m_contentDirectory->isNull()) {

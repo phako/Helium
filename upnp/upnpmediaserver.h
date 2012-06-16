@@ -52,15 +52,14 @@ public:
 private Q_SLOTS:
     void startBrowsing();
     void onGetSortCapabilities();
+    void onGetProtocolInfo();
 private:
     std::shared_ptr<ServiceProxy> m_contentDirectory;
-    GServiceProxy             m_connectionManager;
+    QScopedPointer<ServiceProxy>  m_connectionManager;
     QString                   m_protocolInfo;
     QHash<SortOrder, QString> m_sortCriteria;
     QList<BrowseTask*>        m_tasks;
     QList<ServiceProxyCall *> m_pendingCalls;
-
-    static void on_get_protocol_info(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data);
 
     bool isReady();
     void setupSortCriterias(const QString &caps);
