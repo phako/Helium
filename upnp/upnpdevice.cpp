@@ -70,7 +70,9 @@ QString UPnPDevice::friendlyName(void) const
         return QString();
     }
 
-    return QString::fromUtf8(gupnp_device_info_get_friendly_name(GUPNP_DEVICE_INFO(m_proxy)));
+    ScopedGPointer name(gupnp_device_info_get_friendly_name(GUPNP_DEVICE_INFO(m_proxy)));
+
+    return QString::fromUtf8(name.data());
 }
 
 QUrl UPnPDevice::getIcon (GUPnPDeviceProxy *proxy)
