@@ -37,13 +37,13 @@ const char CONTAINER_PREFIX[] = "object.container";
 
 BrowseModel BrowseModel::m_empty;
 
-BrowseModel::BrowseModel(const GServiceProxy &proxy,
-                         const QString      &id,
-                         const QString      &sortCriteria,
-                         const QString      &protocolInfo,
-                         QObject            *parent)
+BrowseModel::BrowseModel(std::shared_ptr<ServiceProxy> proxy,
+                         const QString  &id,
+                         const QString  &sortCriteria,
+                         const QString  &protocolInfo,
+                         QObject        *parent)
     : QAbstractListModel(parent)
-    , m_contentDirectory(ServiceProxy::wrap(proxy))
+    , m_contentDirectory(proxy)
     , m_id(id)
     , m_currentOffset(0)
     , m_busy(true)
@@ -390,7 +390,7 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
 
 void BrowseModel::onStartBrowse()
 {
-    if (m_contentDirectory.isNull()) {
+    if (not m_contentDirectory || m_contentDirectory->isNull()) {
         return;
     }
 

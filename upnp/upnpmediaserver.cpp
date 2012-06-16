@@ -40,6 +40,7 @@ UPnPMediaServer::UPnPMediaServer()
     , m_protocolInfo()
     , m_sortCriteria()
     , m_tasks()
+    , m_pendingCalls()
 {
 }
 
@@ -80,31 +81,26 @@ bool UPnPMediaServer::isReady()
     return (not m_sortCriteria.isEmpty() && not m_protocolInfo.isNull());
 }
 
-void UPnPMediaServer::on_get_sort_capabilities(GUPnPServiceProxy *proxy, GUPnPServiceProxyAction *action, gpointer user_data)
+void UPnPMediaServer::onGetSortCapabilities()
 {
-    UPnPMediaServer *self = reinterpret_cast<UPnPMediaServer*>(user_data);
-    char *sort_caps;
-    GError *error = 0;
-
-    gupnp_service_proxy_end_action(proxy,
-                                   action,
-                                   &error,
-                                   "SortCaps", G_TYPE_STRING, &sort_caps,
-                                   NULL);
-    if (error != 0) {
-        qWarning() << "Failed to get sort capabilites:" << error->message;
-        g_error_free(error);
-
-        self->setupSortCriterias(QLatin1String(""));
-    } else {
-        self->setupSortCriterias(QString::fromUtf8(sort_caps));
-
-        g_free (sort_caps);
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
+    if (call == 0) {
+        return;
     }
 
-    if (self->isReady()) {
-        // QTBUG-24571
-        QMetaObject::invokeMethod(self, "ready", Qt::QueuedConnection);
+    m_pendingCalls.removeOne(call);
+    call->deleteLater();
+    call->finalize(QStringList() << QLatin1String("SortCaps"));
+    if (call->hasError()) {
+        qDebug() << "Failed to retrieve sort caps" << call->errorMessage();
+        setupSortCriterias(QLatin1String(""));
+
+        return;
+    }
+
+    setupSortCriterias(call->get(QLatin1String("SortCaps")).toString());
+    if (isReady()) {
+        Q_EMIT ready();
     }
 }
 
@@ -137,7 +133,7 @@ void UPnPMediaServer::setupSortCriterias(const QString &caps)
 void UPnPMediaServer::wrapDevice(const QString &udn)
 {
     UPnPDevice::wrapDevice(udn);
-    m_contentDirectory = getService(UPnPMediaServer::CONTENT_DIRECTORY_SERVICE);
+    m_contentDirectory.reset(ServiceProxy::wrap(getService(UPnPMediaServer::CONTENT_DIRECTORY_SERVICE).data()));
     m_connectionManager = getService(UPnPDevice::CONNECTION_MANAGER_SERVICE);
 
     // Get information on the device we need later on
@@ -149,12 +145,10 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
                                          NULL);
     }
 
-    if (not m_contentDirectory.isEmpty()) {
-        gupnp_service_proxy_begin_action(m_contentDirectory,
-                                         "GetSortCapabilities",
-                                         UPnPMediaServer::on_get_sort_capabilities,
-                                         this,
-                                         NULL);
+    if (m_contentDirectory && not m_contentDirectory->isNull()) {
+        m_pendingCalls << m_contentDirectory->call(QLatin1String("GetSortCapabilities"));
+        connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onGetSortCapabilities()));
+        m_pendingCalls.last()->run();
     }
 }
 
