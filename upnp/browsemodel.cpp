@@ -87,6 +87,12 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     const char *upnp_class = gupnp_didl_lite_object_get_upnp_class (object);
 
+    if (upnp_class == 0) {
+        thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-file-unknown-inverse"));
+
+        return thumbnail;
+    }
+
     if (strncmp(upnp_class, AUDIO_PREFIX, sizeof(AUDIO_PREFIX) - 1) == 0 ||
         strncmp(upnp_class, MUSIC_ALBUM_CLASS, sizeof(MUSIC_ALBUM_CLASS) - 1) == 0) {
         const char *album_art_uri = gupnp_didl_lite_object_get_album_art(object);
