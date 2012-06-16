@@ -28,6 +28,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "serviceproxy.h"
 #include "upnpdevice.h"
+#include "refptrg.h"
 
 class UPnPRenderer : public UPnPDevice
 {

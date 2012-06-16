@@ -145,15 +145,20 @@ QString UPnPDevice::type() const
     return QString::fromUtf8(gupnp_device_info_get_device_type(info));
 }
 
-GServiceProxy UPnPDevice::getService(const char *service)
+/*!
+ * \brief Get a ServiceProxy object from the device.
+ * \param service name of the service.
+ * \return A ServiceProxy object representing the service or 0.
+ */
+ServiceProxy* UPnPDevice::getService(const char *service) const
 {
-    if (not m_proxy.isEmpty()) {
-        GUPnPServiceInfo *info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO (m_proxy), service);
-
-        return GServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+    if (m_proxy.isEmpty()) {
+        return 0;
     }
 
-    return GServiceProxy ();
+    auto info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO(m_proxy), service);
+
+    return ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
 }
 
 void UPnPDevice::propagateError(GError *error)
