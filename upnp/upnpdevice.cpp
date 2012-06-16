@@ -26,6 +26,7 @@ const char UPnPDevice::CONNECTION_MANAGER_SERVICE[] = "urn:schemas-upnp-org:serv
 
 UPnPDevice::UPnPDevice()
     : QObject(0)
+    , m_pendingCalls()
     , m_proxy()
 {
     connect(UPnPDeviceModel::getDefault(), SIGNAL(deviceUnavailable(QString)),
@@ -159,4 +160,65 @@ ServiceProxy* UPnPDevice::getService(const char *service) const
     auto info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO(m_proxy), service);
 
     return ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+}
+
+/*!
+ * \brief Enqueue a call.
+ *
+ * Enqueues a call to the list of pending calls, connect the given slot to
+ * ServiceProxyCall::ready() and starts the call.
+ * \param call An ServiceProxyCall object
+ * \param slot to call upon call completion. The default slot is
+ * defaultServiceProxyCallHandler().
+ */
+void UPnPDevice::queueCall(ServiceProxyCall *call, const char *slot)
+{
+    m_pendingCalls << call;
+    connect(call, SIGNAL(ready()), slot);
+    call->run();
+}
+
+/*!
+ * \brief Remove a finished call.
+ *
+ * Finalize the call with the given argument list and remove it from the list
+ * of pending calls and mark the call for deletion if requested.
+ *
+ * \param call A ServiceProxyCall object
+ * \param args List of strings of the argument names. Default is QStringList()
+ * \param freeCall whether to free the call. Default is true.
+ */
+void UPnPDevice::unqueueCall(ServiceProxyCall *call, const QStringList &args, bool freeCall)
+{
+    m_pendingCalls.removeOne(call);
+    call->finalize(args);
+    if (freeCall) {
+        call->deleteLater();
+    }
+}
+
+/*!
+ * \brief Default service proxy call handler.
+ *
+ * Finalizes the call. If the call was successful, queue the next call if
+ * there is one.
+ * \sa unqueueCall(), queueCall()
+ */
+void UPnPDevice::defaultServiceProxyCallHandler()
+{
+    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
+
+    if (call == 0) {
+        return;
+    }
+
+    unqueueCall(call);
+
+    if (call->hasError()) {
+        Q_EMIT error(call->errorCode(), call->errorMessage());
+    } else {
+        if (call->next() != 0) {
+            queueCall(call);
+        }
+    }
 }

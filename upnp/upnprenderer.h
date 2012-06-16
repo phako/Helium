@@ -113,7 +113,6 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onProgressTimeout();
     void onLastChange(const QString &name, const QVariant &value);
-    void onServiceProxyCallReady();
     void onRenderingControlIntrospectionReady();
     void onAVTransportIntrospectionReady();
     void onGetPositionInfoReady();
@@ -142,7 +141,6 @@ private:
     void setAVTransportUri(const QString &uri, const QString &metaData, ServiceProxyCall *next);
 
     void unsubscribe();
-    void handleLastCall(const char *slot = SLOT(onServiceProxyCallReady()));
 
     RefPtrG<GUPnPLastChangeParser> m_lastChangeParser;
     QScopedPointer<ServiceProxy> m_avTransport;
@@ -165,7 +163,6 @@ private:
     unsigned int m_maxVolume;
     bool m_canMute;
     bool m_mute;
-    QList<ServiceProxyCall *> m_pendingCalls;
 };
 
 #endif // UPNPRENDERER_H

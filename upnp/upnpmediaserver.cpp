@@ -40,7 +40,6 @@ UPnPMediaServer::UPnPMediaServer()
     , m_protocolInfo()
     , m_sortCriteria()
     , m_tasks()
-    , m_pendingCalls()
 {
 }
 
@@ -57,9 +56,8 @@ void UPnPMediaServer::onGetProtocolInfo()
         return;
     }
 
-    call->deleteLater();
-    m_pendingCalls.removeOne(call);
-    call->finalize(QStringList() << QLatin1String("Source"));
+    unqueueCall(call, QStringList() << QLatin1String("Source"));
+
     if (call->hasError()) {
         Q_EMIT error(call->errorCode(), call->errorMessage());
         m_protocolInfo = QLatin1String("");
@@ -86,9 +84,7 @@ void UPnPMediaServer::onGetSortCapabilities()
         return;
     }
 
-    m_pendingCalls.removeOne(call);
-    call->deleteLater();
-    call->finalize(QStringList() << QLatin1String("SortCaps"));
+    unqueueCall(call, QStringList() << QLatin1String("SortCaps"));
     if (call->hasError()) {
         qDebug() << "Failed to retrieve sort caps" << call->errorMessage();
         setupSortCriterias(QLatin1String(""));
@@ -136,15 +132,13 @@ void UPnPMediaServer::wrapDevice(const QString &udn)
 
     // Get information on the device we need later on
     if (not m_connectionManager.isNull() && not m_connectionManager->isNull()) {
-        m_pendingCalls << m_connectionManager->call(QLatin1String("GetProtocolInfo"));
-        connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onGetProtocolInfo()));
-        m_pendingCalls.last()->run();
+        queueCall(m_connectionManager->call(QLatin1String("GetProtocolInfo")),
+                  SLOT(onGetProtocolInfo()));
     }
 
     if (m_contentDirectory && not m_contentDirectory->isNull()) {
-        m_pendingCalls << m_contentDirectory->call(QLatin1String("GetSortCapabilities"));
-        connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onGetSortCapabilities()));
-        m_pendingCalls.last()->run();
+        queueCall(m_contentDirectory->call(QLatin1String("GetSortCapabilities")),
+                  SLOT(onGetSortCapabilities()));
     }
 }
 

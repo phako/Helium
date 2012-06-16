@@ -59,7 +59,6 @@ private:
     QString                   m_protocolInfo;
     QHash<SortOrder, QString> m_sortCriteria;
     QList<BrowseTask*>        m_tasks;
-    QList<ServiceProxyCall *> m_pendingCalls;
 
     bool isReady();
     void setupSortCriterias(const QString &caps);

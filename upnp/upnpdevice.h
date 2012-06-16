@@ -20,10 +20,12 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <QObject>
 #include <QUrl>
+#include <QtCore/QStringList>
 
 #include "refptrg.h"
 
 class ServiceProxy;
+class ServiceProxyCall;
 class UPnPDevice : public QObject
 {
     Q_OBJECT
@@ -56,8 +58,14 @@ Q_SIGNALS:
 
 private Q_SLOTS:
     void onDeviceUnavailable(const QString& udn);
+    void defaultServiceProxyCallHandler();
+private:
+    QList<ServiceProxyCall *> m_pendingCalls;
 protected:
     DeviceProxy m_proxy;
+
+    void queueCall(ServiceProxyCall *call, const char *slot = SLOT(defaultServiceProxyCallHandler()));
+    void unqueueCall(ServiceProxyCall *call, const QStringList &args = QStringList(), bool freeCall = true);
 };
 
 #endif // UPNPDEVICE_H
