@@ -18,6 +18,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BROWSEMODEL_H
 #define BROWSEMODEL_H
 
+#include <memory>
+
 #include <QAbstractListModel>
 
 #include "gupnp-av/gupnp-av.h"
@@ -47,11 +49,11 @@ public:
         BrowseRoleMetaData
     };
 
-    explicit BrowseModel(const GServiceProxy &proxy = GServiceProxy(),
-                         const QString      &id = QLatin1String("0"),
-                         const QString      &sortCriteria = QLatin1String(""),
-                         const QString      &protocolInfo = QLatin1String("*:*:*:*"),
-                         QObject            *parent = 0);
+    explicit BrowseModel(std::shared_ptr<ServiceProxy> proxy = std::shared_ptr<ServiceProxy>(),
+                         const QString &id = QLatin1String("0"),
+                         const QString &sortCriteria = QLatin1String(""),
+                         const QString &protocolInfo = QLatin1String("*:*:*:*"),
+                         QObject       *parent = 0);
     ~BrowseModel();
 
     // virtual functions from QAbstractListModel
@@ -113,7 +115,7 @@ private:
     QString getCompatibleUri(int index, const QString& protocolInfo) const;
 
     QList<DIDLLiteObject>    m_data;
-    QScopedPointer<ServiceProxy> m_contentDirectory;
+    std::shared_ptr<ServiceProxy> m_contentDirectory;
     QString                  m_id;
     guint                    m_currentOffset;
     bool                     m_busy;
