@@ -132,6 +132,10 @@ static QUrl findIconForObject(GUPnPDIDLLiteObject *object)
 
     g_list_free_full(resources, g_object_unref);
 
+    if (thumbnail.isEmpty()) {
+        thumbnail.setUrl(QLatin1String("image://theme/icon-m-content-file-unknown-inverse"));
+    }
+
     return thumbnail;
 }
 
