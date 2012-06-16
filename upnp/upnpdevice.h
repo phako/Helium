@@ -18,14 +18,12 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef UPNPDEVICE_H
 #define UPNPDEVICE_H
 
-#include <libgupnp/gupnp.h>
-
 #include <QObject>
 #include <QUrl>
-#include <QMetaType>
 
 #include "refptrg.h"
 
+class ServiceProxy;
 class UPnPDevice : public QObject
 {
     Q_OBJECT
@@ -43,7 +41,7 @@ public:
     QString udn() const;
     QString type() const;
     Q_INVOKABLE virtual void wrapDevice(const QString& udn);
-    GServiceProxy getService(const char *service);
+    ServiceProxy* getService(const char *service) const;
 
     // static helper functions
     static QUrl getIcon(GUPnPDeviceProxy *proxy);

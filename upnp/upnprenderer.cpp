@@ -428,9 +428,9 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     }
 
 
-    m_avTransport.reset(ServiceProxy::wrap(getService(UPnPRenderer::AV_TRANSPORT_SERVICE).data()));
-    m_connectionManager.reset(ServiceProxy::wrap(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE).data()));
-    m_renderingControl.reset(ServiceProxy::wrap(getService(UPnPRenderer::RENDERING_CONTROL_SERVICE).data()));
+    m_avTransport.reset(getService(UPnPRenderer::AV_TRANSPORT_SERVICE));
+    m_connectionManager.reset(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE));
+    m_renderingControl.reset(getService(UPnPRenderer::RENDERING_CONTROL_SERVICE));
 
     m_avTransport->addNotify(QLatin1String("LastChange"));
     m_avTransport->setSubscribed(true);

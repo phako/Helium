@@ -131,8 +131,8 @@ void UPnPMediaServer::setupSortCriterias(const QString &caps)
 void UPnPMediaServer::wrapDevice(const QString &udn)
 {
     UPnPDevice::wrapDevice(udn);
-    m_contentDirectory.reset(ServiceProxy::wrap(getService(UPnPMediaServer::CONTENT_DIRECTORY_SERVICE).data()));
-    m_connectionManager.reset(ServiceProxy::wrap(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE).data()));
+    m_contentDirectory.reset(getService(UPnPMediaServer::CONTENT_DIRECTORY_SERVICE));
+    m_connectionManager.reset(getService(UPnPDevice::CONNECTION_MANAGER_SERVICE));
 
     // Get information on the device we need later on
     if (not m_connectionManager.isNull() && not m_connectionManager->isNull()) {
