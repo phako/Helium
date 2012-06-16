@@ -238,7 +238,6 @@ UPnPRenderer::UPnPRenderer()
     , m_position(START_POSITION)
     , m_canSeek(false)
     , m_seekMode(QLatin1String(""))
-    , m_pendingCalls()
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
 }
@@ -353,32 +352,9 @@ void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
 
 void UPnPRenderer::onProgressTimeout()
 {
-    m_pendingCalls << m_avTransport->call(QLatin1String("GetPositionInfo"),
-                                          QLatin1String("InstanceID"), 0);
-    handleLastCall(SLOT(onGetPositionInfoReady()));
-}
-
-void UPnPRenderer::onServiceProxyCallReady()
-{
-    ServiceProxyCall *call = qobject_cast<ServiceProxyCall *>(sender());
-
-    if (call == 0) {
-        return;
-    }
-
-    m_pendingCalls.removeOne(call);
-    call->deleteLater();
-
-    call->finalize();
-    if (call->hasError()) {
-        Q_EMIT error(call->errorCode(), call->errorMessage());
-    } else {
-        if (call->next() != 0) {
-            m_pendingCalls << call->next();
-            call->setNext(0);
-            handleLastCall();
-        }
-    }
+    queueCall(m_avTransport->call(QLatin1String("GetPositionInfo"),
+                                  QLatin1String("InstanceID"), 0),
+              SLOT(onGetPositionInfoReady()));
 }
 
 void UPnPRenderer::unsubscribe()
@@ -436,8 +412,8 @@ void UPnPRenderer::wrapDevice(const QString &udn)
     m_avTransport->setSubscribed(true);
     connect(m_avTransport.data(), SIGNAL(notify(QString,QVariant)), SLOT(onLastChange(QString,QVariant)));
 
-    m_pendingCalls << m_connectionManager->call(QLatin1String("GetProtocolInfo"));
-    handleLastCall(SLOT(onGetProtocolInfo()));
+    queueCall(m_connectionManager->call(QLatin1String("GetProtocolInfo")),
+              SLOT(onGetProtocolInfo()));
 }
 
 
@@ -540,8 +516,7 @@ void UPnPRenderer::onSetAVTransportUri()
         return;
     }
 
-    call->finalize();
-    m_pendingCalls.removeOne(call.data());
+    unqueueCall(call.data(), QStringList(), false);
 
     if (call->hasError()) {
         if (call->errorCode() == 705) {
@@ -556,11 +531,10 @@ void UPnPRenderer::onSetAVTransportUri()
     }
 
     if (call->next() != 0) {
-        m_pendingCalls << call->next();
-
         // prevent call's destructor from clearing next
+        auto next = call->next();
         call->setNext(0);
-        handleLastCall();
+        queueCall(next);
     }
 }
 
@@ -576,12 +550,12 @@ void UPnPRenderer::setAVTransportUri(const QString &uri, const QString &metaData
         return;
     }
 
-    m_pendingCalls << m_avTransport->call(QLatin1String("SetAVTransportURI"),
-                                          QLatin1String("InstanceID"), QLatin1String("0"),
-                                          QLatin1String("CurrentURI"), uri,
-                                          QLatin1String("CurrentURIMetaData"), metaData);
-    m_pendingCalls.last()->setNext(next);
-    handleLastCall(SLOT(onSetAVTransportUri()));
+    auto call = m_avTransport->call(QLatin1String("SetAVTransportURI"),
+                                    QLatin1String("InstanceID"), QLatin1String("0"),
+                                    QLatin1String("CurrentURI"), uri,
+                                    QLatin1String("CurrentURIMetaData"), metaData);
+    call->setNext(next);
+    queueCall(call, SLOT(onSetAVTransportUri()));
 }
 
 void UPnPRenderer::setUriAndPlay(const QString& uri, const QString& metaData)
@@ -603,9 +577,8 @@ void UPnPRenderer::onPause ()
     if (call == 0) {
         return;
     }
-    call->deleteLater();
-    m_pendingCalls.removeOne(call);
-    call->finalize();
+
+    unqueueCall(call);
 
     if (not call->hasError()) {
         return;
@@ -623,10 +596,9 @@ void UPnPRenderer::play()
         return;
     }
 
-    m_pendingCalls << m_avTransport->call(QLatin1String("Play"),
-                                          QLatin1String("InstanceID"), QLatin1String("0"),
-                                          QLatin1String("Speed"), QLatin1String("1"));
-    handleLastCall();
+    queueCall(m_avTransport->call(QLatin1String("Play"),
+                                  QLatin1String("InstanceID"), QLatin1String("0"),
+                                  QLatin1String("Speed"), QLatin1String("1")));
 }
 
 void UPnPRenderer::stop()
@@ -640,10 +612,10 @@ void UPnPRenderer::stop(ServiceProxyCall *next)
         return;
     }
 
-    m_pendingCalls << m_avTransport->call(QLatin1String("Stop"),
-                                          QLatin1String("InstanceID"), QLatin1String("0"));
-    m_pendingCalls.last()->setNext(next);
-    handleLastCall();
+    auto call = m_avTransport->call(QLatin1String("Stop"),
+                                    QLatin1String("InstanceID"), QLatin1String("0"));
+    call->setNext(next);
+    queueCall(call);
 }
 
 void UPnPRenderer::pause()
@@ -652,9 +624,9 @@ void UPnPRenderer::pause()
         return;
     }
 
-    m_pendingCalls << m_avTransport->call(QLatin1String("Pause"),
-                                          QLatin1String("InstanceID"), QLatin1String("0"));
-    handleLastCall(SLOT(onPause()));
+    queueCall(m_avTransport->call(QLatin1String("Pause"),
+                                  QLatin1String("InstanceID"), QLatin1String("0")),
+              SLOT(onPause()));
 }
 
 void UPnPRenderer::seekRelative(float percent)
@@ -665,11 +637,10 @@ void UPnPRenderer::seekRelative(float percent)
     
     QString target = getRelativeTime(percent);
 
-    m_pendingCalls << m_avTransport->call(QLatin1String("Seek"),
-                                          QLatin1String("InstanceID"), QLatin1String("0"),
-                                          QLatin1String("Unit"), m_seekMode,
-                                          QLatin1String("Target"), target);
-    handleLastCall();
+    queueCall(m_avTransport->call(QLatin1String("Seek"),
+                                  QLatin1String("InstanceID"), QLatin1String("0"),
+                                  QLatin1String("Unit"), m_seekMode,
+                                  QLatin1String("Target"), target));
 }
 
 QString UPnPRenderer::getRelativeTime(float percent)
@@ -699,11 +670,10 @@ void UPnPRenderer::setRemoteMute(bool mute)
     }
 
     m_mute = mute;
-    m_pendingCalls << m_renderingControl->call(QLatin1String("SetMute"),
-                                               QLatin1String("InstanceID"), QLatin1String("0"),
-                                               QLatin1String("Channel"), QLatin1String("Master"),
-                                               QLatin1String("DesiredMute"), mute);
-    handleLastCall();
+    queueCall(m_renderingControl->call(QLatin1String("SetMute"),
+                                       QLatin1String("InstanceID"), QLatin1String("0"),
+                                       QLatin1String("Channel"), QLatin1String("Master"),
+                                       QLatin1String("DesiredMute"), mute));
 }
 
 void UPnPRenderer::setRemoteVolume(unsigned int volume)
@@ -713,15 +683,8 @@ void UPnPRenderer::setRemoteVolume(unsigned int volume)
     }
 
     m_volume = volume;
-    m_pendingCalls << m_renderingControl->call(QLatin1String("SetVolume"),
-                                               QLatin1String("InstanceID"), QLatin1String("0"),
-                                               QLatin1String("Channel"), QLatin1String("Master"),
-                                               QLatin1String("DesiredVolume"), volume);
-    handleLastCall();
-}
-
-void UPnPRenderer::handleLastCall(const char *slot)
-{
-    connect(m_pendingCalls.last(), SIGNAL(ready()), slot);
-    m_pendingCalls.last()->run();
+    queueCall(m_renderingControl->call(QLatin1String("SetVolume"),
+                                       QLatin1String("InstanceID"), QLatin1String("0"),
+                                       QLatin1String("Channel"), QLatin1String("Master"),
+                                       QLatin1String("DesiredVolume"), volume));
 }
