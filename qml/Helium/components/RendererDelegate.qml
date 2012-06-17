@@ -20,7 +20,7 @@ import com.nokia.meego 1.0
 
 Item {
     id: listItem
-    height: 128
+    height: 88
     width: parent.width
     property real detailOpacity: 0.0
 
