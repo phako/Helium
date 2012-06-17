@@ -83,6 +83,7 @@ public:
     Q_INVOKABLE void play();
     Q_INVOKABLE void stop();
     Q_INVOKABLE void seekRelative(float percent);
+    Q_INVOKABLE QString getRelativeTime(float percent);
 
     // AVTransport:1 optional
     Q_INVOKABLE void pause();

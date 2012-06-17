@@ -19,6 +19,7 @@ import QtQuick 1.1
 import com.nokia.meego 1.0
 
 Item {
+    height: muteButton.height
     ImageToggleButton {
         id: muteButton
         checked: renderer.mute

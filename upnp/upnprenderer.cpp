@@ -735,17 +735,8 @@ void UPnPRenderer::seekRelative(float percent)
     if (not canSeek()) {
         return;
     }
-
-    quint64 position = percent * m_durationInSeconds;
-
-    int hours = position / 3600;
-    position %= 3600;
-    int minutes = position / 60;
-    int seconds = position % 60;
-
-    QString target = QString::fromLatin1("%1:%2:%3").arg(hours)
-                                                    .arg(minutes, 2, 10, QLatin1Char('0'))
-                                                    .arg(seconds, 2, 10, QLatin1Char('0'));
+    
+    QString target = getRelativeTime(percent);
 
     gupnp_service_proxy_begin_action(m_avTransport,
                                      "Seek",
@@ -755,6 +746,26 @@ void UPnPRenderer::seekRelative(float percent)
                                      "Unit", G_TYPE_STRING, m_seekMode.toUtf8().constData(),
                                      "Target", G_TYPE_STRING, target.toUtf8().constData(),
                                      NULL);
+}
+
+QString UPnPRenderer::getRelativeTime(float percent)
+{
+    if (percent < 0.0) {
+        percent = 0.0;
+    } else if (percent > 1.0) {
+        percent = 1.0;
+    }
+
+    quint64 position = percent * m_durationInSeconds;
+
+    int hours = position / 3600;
+    position %= 3600;
+    int minutes = position / 60;
+    int seconds = position % 60;
+
+    return QString::fromLatin1("%1:%2:%3").arg(hours)
+                                          .arg(minutes, 2, 10, QLatin1Char('0'))
+                                          .arg(seconds, 2, 10, QLatin1Char('0'));
 }
 
 void UPnPRenderer::setRemoteMute(bool mute)

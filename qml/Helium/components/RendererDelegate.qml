@@ -73,7 +73,7 @@ Item {
             name: "DetailedPlayer"
             AnchorChanges { target: mainText; anchors.top: listItem.top; anchors.verticalCenter: undefined }
             AnchorChanges { target: imgIcon; anchors.top: listItem.top; anchors.verticalCenter: undefined }
-            PropertyChanges { target: listItem; height: 268; detailOpacity: 1.0 }
+            PropertyChanges { target: listItem; height: 288; detailOpacity: 1.0 }
         },
 
         State {
