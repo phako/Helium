@@ -22,8 +22,6 @@ import "../components"
 import ".."
 
 Page {
-    anchors.margins: 10
-
     Flickable {
         id: flckContent
         clip: true
