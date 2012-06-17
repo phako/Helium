@@ -27,6 +27,28 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "serviceintrospection_p.h"
 
 /*!
+ * \class ServiceProxy
+ * \brief Proxy class for a remote UPnP service
+ *
+ * Proxy class to send commands to a remote service. connect to remote
+ * event notifications and introspect the remote service.
+ *
+ * An ansynchronous remote call is done by call(). This prepares a
+ * ServiceProxyCall object.
+ *
+ * Connecting to a remote event is a two-step process:
+ * Fist, adding the notification with addNotify(). Second, reception of
+ * events has to be enabled with setSubsribed(). With this two-step process
+ * it's possible to suspend notification without unsubscribing
+ *
+ * The remote service's introspection information is available using
+ * introspection(). This introspeciton is only available on demand and needs
+ * to be requested using introspect(). Once the introspection is done,
+ * ServiceProxy emits the introspectionReady() signal. After this signal
+ * introspection() will return a ServiceIntrospeciton object.
+ */
+
+/*!
  * \brief Callback for gupnp_service_proxy_add_notify().
  *        Takes the variable and translates it to the notify
  * \sa ServiceProxy::addNotify(), ServiceProxy::removeNotify(), ServiceProxy::subscribed(), ServiceProxy::setSubscribed()
