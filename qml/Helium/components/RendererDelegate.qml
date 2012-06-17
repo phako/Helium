@@ -66,8 +66,6 @@ Item {
             listItem.ListView.view.currentIndex = index;
             renderer.wrapDevice(rendererModel.get(index));
         }
-
-        onPressAndHold: renderer.stop();
     }
 
     states: [
