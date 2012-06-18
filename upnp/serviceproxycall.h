@@ -44,6 +44,7 @@ public:
     QString errorMessage(void) const;
     ServiceProxyCall *next(void) const;
     void setNext(ServiceProxyCall *next);
+    bool cancelled(void) const;
 
 Q_SIGNALS:
     void ready(void);

@@ -174,6 +174,17 @@ void ServiceProxyCall::cancel(void)
     Q_EMIT ready();
 }
 
+/*!
+ * \brief Check if a call was cancelled.
+ * \return true if the call was previously cancelled (by cancel()), false otherwise.
+ */
+bool ServiceProxyCall::cancelled(void) const
+{
+    Q_D(const ServiceProxyCall);
+
+    return (d != 0 && hasError() && errorCode() == G_IO_ERROR_CANCELLED);
+}
+
 #define _ADD_ARG(arg) \
     do { \
         if (not (arg).isEmpty()) { \
