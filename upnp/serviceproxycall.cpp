@@ -136,7 +136,6 @@ void ServiceProxyCall::run(void)
         auto gvalue = qVariantToGValue(value);
         inValues = g_list_append(inValues, (gpointer)gvalue);
     }
-    QGListFullScopedPointer values(inValues);
 
     if (d->m_lastError != 0) {
         g_error_free(d->m_lastError);
@@ -151,7 +150,12 @@ void ServiceProxyCall::run(void)
                                                         d);
 
     names.reset();
-    values.reset();
+    auto it = inValues;
+    while (it != 0) {
+        g_value_reset((GValue *)it->data);
+        g_free(it->data);
+        it = it->next;
+    }
 }
 
 void ServiceProxyCall::cancel(void)
