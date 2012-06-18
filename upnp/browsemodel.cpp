@@ -415,6 +415,10 @@ void BrowseModel::onCallReady()
 
     m_pendingCalls.removeOne(call.data());
 
+    if (call->cancelled()) {
+        return;
+    }
+
     call->finalize(QStringList() << QLatin1String("Result")
                                  << QLatin1String("NumberReturned")
                                  << QLatin1String("TotalMatches"));
