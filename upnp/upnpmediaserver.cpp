@@ -61,14 +61,9 @@ void UPnPMediaServer::onGetProtocolInfo()
 
     m_protocolInfo = call->get(QLatin1String("Source")).toString();
 
-    if (isReady()) {
+    if (not callsPending()) {
         Q_EMIT ready();
     }
-}
-
-bool UPnPMediaServer::isReady()
-{
-    return (not m_sortCriteria.isEmpty() && not m_protocolInfo.isNull());
 }
 
 void UPnPMediaServer::onGetSortCapabilities()
@@ -87,7 +82,7 @@ void UPnPMediaServer::onGetSortCapabilities()
     }
 
     setupSortCriterias(call->get(QLatin1String("SortCaps")).toString());
-    if (isReady()) {
+    if (not callsPending()) {
         Q_EMIT ready();
     }
 }
@@ -151,7 +146,7 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass, const 
 
     // Browse empty model to trigger busy indicator
     BrowseModelStack::getDefault().push(&BrowseModel::empty());
-    if (isReady()) {
+    if (not callsPending()) {
         QTimer::singleShot(0, this, SLOT(startBrowsing()));
     } else {
         connect(this, SIGNAL(ready()), SLOT(startBrowsing()));

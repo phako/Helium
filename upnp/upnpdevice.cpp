@@ -222,3 +222,12 @@ void UPnPDevice::defaultServiceProxyCallHandler()
         }
     }
 }
+
+/*!
+ * \brief Check if any remote calls are pending.
+ * \return true if there are unfinished calls, false otherwise.
+ */
+bool UPnPDevice::callsPending(void) const
+{
+    return not m_pendingCalls.empty();
+}
