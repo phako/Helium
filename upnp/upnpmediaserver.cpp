@@ -15,13 +15,18 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "upnpmediaserver.h"
-#include "browsemodel.h"
 
 #include <QDebug>
 #include <QtDeclarative>
 
+#include "browsemodel.h"
 #include "browsemodelstack.h"
+#include "upnpmediaserver.h"
+#include "serviceproxy.h"
+#include "serviceproxycall.h"
+
+const int BROWSE_SLICE = 100;
+const QString BROWSE_DEFAULT_FILTER = QLatin1String("res@size,res@duration,res@resolution,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album");
 
 const char UPnPMediaServer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaServer:";
 const char UPnPMediaServer::CONTENT_DIRECTORY_SERVICE[] = "urn:schemas-upnp-org:service:ContentDirectory";
@@ -33,13 +38,11 @@ UPnPMediaServer::UPnPMediaServer()
     , m_connectionManager()
     , m_protocolInfo()
     , m_sortCriteria()
-    , m_tasks()
 {
 }
 
 UPnPMediaServer::~UPnPMediaServer()
 {
-    qDeleteAll(m_tasks);
 }
 
 void UPnPMediaServer::onGetProtocolInfo()
@@ -138,10 +141,15 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass, const 
         sortOrder = SORT_MUSIC_ALUBM;
     }
 
-    auto model = new BrowseModel(m_contentDirectory,
-                                 id,
-                                 m_sortCriteria[sortOrder],
-                                 protocolInfo);
+    auto call = m_contentDirectory->call(QLatin1String("Browse"),
+                                         QLatin1String("ObjectID"), id,
+                                         QLatin1String("BrowseFlag"), QLatin1String("BrowseDirectChildren"),
+                                         QLatin1String("Filter"), BROWSE_DEFAULT_FILTER,
+                                         QLatin1String("StartingIndex"), 0,
+                                         QLatin1String("RequestedCount"), BROWSE_SLICE,
+                                         QLatin1String("SortCriteria"), m_sortCriteria[sortOrder]);
+
+    auto model = new BrowseModel(call, protocolInfo);
     connect(model, SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
     BrowseModelStack::getDefault().push(model);
 

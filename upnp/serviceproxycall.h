@@ -19,6 +19,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #define SERVICEPROXYCALL_H
 
 #include <QtCore/QObject>
+#include <QtCore/QPair>
 #include <QtCore/QStringList>
 #include <QtCore/QVariantList>
 
@@ -37,6 +38,8 @@ public:
 
     void finalize(const QStringList &params = QStringList());
 
+    QVariant arg(const QString &name) const;
+    void setArg(const QString &arg, const QVariant &value);
     QVariant get(const QString &key) const;
 
     bool hasError(void) const;
