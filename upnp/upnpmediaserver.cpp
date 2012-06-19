@@ -142,32 +142,12 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass, const 
                                  id,
                                  m_sortCriteria[sortOrder],
                                  protocolInfo);
-    m_tasks << model;
-
-    // Browse empty model to trigger busy indicator
-    BrowseModelStack::getDefault().push(&BrowseModel::empty());
-    if (not callsPending()) {
-        QTimer::singleShot(0, this, SLOT(startBrowsing()));
-    } else {
-        connect(this, SIGNAL(ready()), SLOT(startBrowsing()));
-    }
-}
-
-void UPnPMediaServer::startBrowsing()
-{
-    disconnect(this, SLOT(startBrowsing()));
-
-    qDebug() << "startBrowsing called";
-    auto model = m_tasks.takeFirst();
-
-    // and remove that model again
-    BrowseModelStack::getDefault().pop();
+    connect(model, SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
     BrowseModelStack::getDefault().push(model);
-    QTimer::singleShot(0, model, SLOT(onStartBrowse()));
-    connect(model,SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));
 
-    // not very likely, but let's check it anyway
-    if (m_tasks.count() > 0) {
-        QTimer::singleShot(0, this, SLOT(startBrowsing()));
+    if (not callsPending()) {
+        model->refresh();
+    } else {
+        connect(this, SIGNAL(ready()), model, SLOT(refresh()));
     }
 }
