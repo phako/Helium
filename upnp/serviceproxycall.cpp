@@ -273,6 +273,30 @@ QVariant ServiceProxyCall::get(const QString &key) const
     return d->m_results[key];
 }
 
+QVariant ServiceProxyCall::arg(const QString &arg) const
+{
+    Q_D(const ServiceProxyCall);
+
+    int pos = d->m_names.indexOf(arg);
+    if (pos >= d->m_values.size()) {
+        return QVariant();
+    }
+
+    return d->m_values.at(pos);
+}
+
+void ServiceProxyCall::setArg(const QString &arg, const QVariant &value)
+{
+    Q_D(ServiceProxyCall);
+
+    int pos = d->m_names.indexOf(arg);
+    if (pos >= d->m_values.size()) {
+        return;
+    }
+
+    d->m_values.replace(pos,value);
+}
+
 /*!
  * \brief Get the next prepared ServiceProxyCall.
  *

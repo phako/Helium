@@ -18,15 +18,12 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef UPNPMEDIASERVER_H
 #define UPNPMEDIASERVER_H
 
-#include <memory>
-
 #include <QObject>
 #include <QtCore/QScopedPointer>
 
-#include "browsemodel.h"
 #include "upnpdevice.h"
-#include "serviceproxycall.h"
 
+class ServiceProxy;
 class UPnPMediaServer : public UPnPDevice
 {
     Q_OBJECT
@@ -52,11 +49,10 @@ private Q_SLOTS:
     void onGetSortCapabilities();
     void onGetProtocolInfo();
 private:
-    std::shared_ptr<ServiceProxy> m_contentDirectory;
-    QScopedPointer<ServiceProxy>  m_connectionManager;
+    QScopedPointer<ServiceProxy> m_contentDirectory;
+    QScopedPointer<ServiceProxy> m_connectionManager;
     QString                   m_protocolInfo;
     QHash<SortOrder, QString> m_sortCriteria;
-    QList<BrowseModel*>        m_tasks;
 
     bool isReady();
     void setupSortCriterias(const QString &caps);

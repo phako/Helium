@@ -24,9 +24,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "browsemodel.h"
 #include "upnpdevicemodel.h"
 #include "glib-utils.h"
+#include "serviceproxycall.h"
 
-const int BROWSE_SLICE = 100;
-const char DEFAULT_FILTER[] = "res@size,res@duration,res@resolution,dc:title,upnp:class,@id,upnp:albumArtURI,upnp:artist,upnp:album";
 const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
 const char VIDEO_PREFIX[] = "object.item.videoItem";
@@ -37,21 +36,16 @@ const char CONTAINER_PREFIX[] = "object.container";
 
 BrowseModel BrowseModel::m_empty;
 
-BrowseModel::BrowseModel(std::shared_ptr<ServiceProxy> proxy,
-                         const QString  &id,
-                         const QString  &sortCriteria,
+BrowseModel::BrowseModel(ServiceProxyCall *call,
                          const QString  &protocolInfo,
                          QObject        *parent)
     : QAbstractListModel(parent)
-    , m_contentDirectory(proxy)
-    , m_id(id)
     , m_currentOffset(0)
     , m_busy(true)
     , m_done(false)
-    , m_sortCriteria(sortCriteria)
     , m_protocolInfo(protocolInfo)
     , m_lastIndex(-1)
-    , m_pendingCalls()
+    , m_call(call)
 {
     QHash<int, QByteArray> roles;
 
@@ -66,14 +60,16 @@ BrowseModel::BrowseModel(std::shared_ptr<ServiceProxy> proxy,
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
+    if (m_call != 0) {
+        connect(m_call, SIGNAL(ready()), SLOT(onCallReady()));
+    }
 }
 
 BrowseModel::~BrowseModel()
 {
-    while (m_pendingCalls.size() > 0) {
-        auto call = m_pendingCalls.takeFirst();
-        call->deleteLater();
-        call->cancel();
+    if (m_call != 0) {
+        m_call->cancel();
+        m_call->deleteLater();
     }
 }
 
@@ -388,32 +384,12 @@ void BrowseModel::on_didl_object (GUPnPDIDLLiteParser *parser,
     model->m_data.append(DIDLLiteObject(object));
 }
 
-void BrowseModel::onStartBrowse()
-{
-    if (not m_contentDirectory || m_contentDirectory->isNull()) {
-        return;
-    }
-
-    qDebug () << "Starting to browse" << m_id;
-    m_pendingCalls << m_contentDirectory->call(QLatin1String("Browse"),
-                                               QLatin1String("ObjectID"), m_id,
-                                               QLatin1String("BrowseFlag"), QLatin1String("BrowseDirectChildren"),
-                                               QLatin1String("Filter"), QLatin1String(DEFAULT_FILTER),
-                                               QLatin1String("StartingIndex"), m_currentOffset,
-                                               QLatin1String("RequestedCount"), BROWSE_SLICE,
-                                               QLatin1String("SortCriteria"), m_sortCriteria);
-    connect(m_pendingCalls.last(), SIGNAL(ready()), SLOT(onCallReady()));
-    m_pendingCalls.last()->run();
-}
-
 void BrowseModel::onCallReady()
 {
-    QScopedPointer<ServiceProxyCall, ScopedPointerLater<ServiceProxyCall> > call(qobject_cast<ServiceProxyCall *>(sender()));
-    if (call.isNull()) {
+    auto call = qobject_cast<ServiceProxyCall *>(sender());
+    if (call == 0) {
         return;
     }
-
-    m_pendingCalls.removeOne(call.data());
 
     if (call->cancelled()) {
         return;
@@ -457,7 +433,8 @@ void BrowseModel::onCallReady()
 
     unsigned int totalMatches = call->get(QLatin1String("TotalMatches")).toUInt();
     if (totalMatches > 0 && m_currentOffset < totalMatches) {
-        QTimer::singleShot(0, this, SLOT(onStartBrowse()));
+        m_call->setArg(QLatin1String("StartingIndex"), m_currentOffset);
+        m_call->run();
     } else {
         setDone(true);
     }
@@ -469,7 +446,9 @@ void BrowseModel::refresh() {
     setBusy(true);
     m_currentOffset = 0;
     m_data.clear();
-    QTimer::singleShot(0, this, SLOT(onStartBrowse()));
+    qDebug () << "Starting to browse" << m_call->arg(QLatin1String("ObjectID"));
+    m_call->setArg(QLatin1String("StartingIndex"), m_currentOffset);
+    m_call->run();
     endResetModel();
 }
 

@@ -18,18 +18,15 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BROWSEMODEL_H
 #define BROWSEMODEL_H
 
-#include <memory>
-
 #include <QAbstractListModel>
 
 #include "gupnp-av/gupnp-av.h"
 
 #include "refptrg.h"
-#include "serviceproxy.h"
-#include "serviceproxycall.h"
 
 typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
 
+class ServiceProxyCall;
 class BrowseModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -49,9 +46,7 @@ public:
         BrowseRoleMetaData
     };
 
-    explicit BrowseModel(std::shared_ptr<ServiceProxy> proxy = std::shared_ptr<ServiceProxy>(),
-                         const QString &id = QLatin1String("0"),
-                         const QString &sortCriteria = QLatin1String(""),
+    explicit BrowseModel(ServiceProxyCall *call = 0,
                          const QString &protocolInfo = QLatin1String("*:*:*:*"),
                          QObject       *parent = 0);
     ~BrowseModel();
@@ -89,7 +84,6 @@ public Q_SLOTS:
     // Uh, ugly, but there seems no way to call static funcitons from QML
     QString formatTime(long duration);
 private Q_SLOTS:
-    void onStartBrowse();
     void onCallReady();
     void setBusy(bool busy) {
         if (m_busy != busy) {
@@ -115,17 +109,12 @@ private:
     QString getCompatibleUri(int index, const QString& protocolInfo) const;
 
     QList<DIDLLiteObject>    m_data;
-    std::shared_ptr<ServiceProxy> m_contentDirectory;
-    QString                  m_id;
     guint                    m_currentOffset;
     bool                     m_busy;
     bool                     m_done;
-    GUPnPServiceProxyAction *m_action;
-    QString                  m_sortCriteria;
     QString                  m_protocolInfo;
     int                      m_lastIndex;
-    QString                  m_container;
-    QList<ServiceProxyCall *> m_pendingCalls;
+    ServiceProxyCall * m_call;
 };
 
 #endif // BROWSEMODEL_H
