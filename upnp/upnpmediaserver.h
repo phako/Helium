@@ -49,7 +49,6 @@ public:
                             const QString &protocolInfo = QLatin1String(""));
 
 private Q_SLOTS:
-    void startBrowsing();
     void onGetSortCapabilities();
     void onGetProtocolInfo();
 private:
