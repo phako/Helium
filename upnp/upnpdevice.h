@@ -66,6 +66,7 @@ protected:
 
     void queueCall(ServiceProxyCall *call, const char *slot = SLOT(defaultServiceProxyCallHandler()));
     void unqueueCall(ServiceProxyCall *call, const QStringList &args = QStringList(), bool freeCall = true);
+    bool callsPending(void) const;
 };
 
 #endif // UPNPDEVICE_H
