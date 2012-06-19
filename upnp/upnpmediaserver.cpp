@@ -27,12 +27,6 @@ const char UPnPMediaServer::DEVICE_TYPE[] = "urn:schemas-upnp-org:device:MediaSe
 const char UPnPMediaServer::CONTENT_DIRECTORY_SERVICE[] = "urn:schemas-upnp-org:service:ContentDirectory";
 const QLatin1String MUSIC_ALBUM_CLASS = QLatin1String("object.container.album.musicAlbum");
 
-struct BrowseTask {
-    QString                     containerId;
-    UPnPMediaServer::SortOrder  sortOrder;
-    QString                     protocolInfo;
-};
-
 UPnPMediaServer::UPnPMediaServer()
     : UPnPDevice()
     , m_contentDirectory()
@@ -149,11 +143,11 @@ void UPnPMediaServer::browse(const QString &id, const QString &upnpClass, const 
         sortOrder = SORT_MUSIC_ALUBM;
     }
 
-    BrowseTask *task = new BrowseTask;
-    task->containerId = id;
-    task->sortOrder = sortOrder;
-    task->protocolInfo = protocolInfo;
-    m_tasks << task;
+    auto model = new BrowseModel(m_contentDirectory,
+                                 id,
+                                 m_sortCriteria[sortOrder],
+                                 protocolInfo);
+    m_tasks << model;
 
     // Browse empty model to trigger busy indicator
     BrowseModelStack::getDefault().push(&BrowseModel::empty());
@@ -169,14 +163,10 @@ void UPnPMediaServer::startBrowsing()
     disconnect(this, SLOT(startBrowsing()));
 
     qDebug() << "startBrowsing called";
-    QScopedPointer<BrowseTask> task(m_tasks.takeFirst());
+    auto model = m_tasks.takeFirst();
 
     // and remove that model again
     BrowseModelStack::getDefault().pop();
-    BrowseModel *model = new BrowseModel(m_contentDirectory,
-                                         task->containerId,
-                                         m_sortCriteria[task->sortOrder],
-                                         task->protocolInfo);
     BrowseModelStack::getDefault().push(model);
     QTimer::singleShot(0, model, SLOT(onStartBrowse()));
     connect(model,SIGNAL(error(int, QString)), SIGNAL(error(int,QString)));

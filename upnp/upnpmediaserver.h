@@ -27,7 +27,6 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpdevice.h"
 #include "serviceproxycall.h"
 
-class BrowseTask;
 class UPnPMediaServer : public UPnPDevice
 {
     Q_OBJECT
@@ -58,7 +57,7 @@ private:
     QScopedPointer<ServiceProxy>  m_connectionManager;
     QString                   m_protocolInfo;
     QHash<SortOrder, QString> m_sortCriteria;
-    QList<BrowseTask*>        m_tasks;
+    QList<BrowseModel*>        m_tasks;
 
     bool isReady();
     void setupSortCriterias(const QString &caps);
