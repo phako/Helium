@@ -101,7 +101,6 @@ private:
     C *m_type;
 };
 
-typedef RefPtrG<GUPnPServiceProxy> GServiceProxy;
 typedef RefPtrG<GUPnPDeviceProxy> DeviceProxy;
 typedef RefPtrG<GUPnPDIDLLiteParser> DIDLLiteParser;
 

@@ -28,6 +28,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "serviceintrospection.h"
 
 class ServiceProxyPrivate;
+class UPnPDevice;
 class ServiceProxy : public QObject
 {
     Q_OBJECT
@@ -56,8 +57,6 @@ public:
     void introspect(void);
     ServiceIntrospection *introspection(void);
 
-    static ServiceProxy *wrap(GUPnPServiceProxy *proxy);
-
 Q_SIGNALS:
     void notify(const QString &variable, const QVariant &value);
     void introspectionReady(void);
@@ -67,6 +66,7 @@ private:
     ServiceProxyPrivate * const d_ptr;
     Q_DECLARE_PRIVATE(ServiceProxy)
     friend class ServiceProxyCall;
+    friend class UPnPDevice;
 };
 
 #endif // SERVICEPROXY_H

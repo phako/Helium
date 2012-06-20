@@ -38,7 +38,7 @@ struct ServiceProxyPrivate
 
     ServiceProxy * const q_ptr;
     Q_DECLARE_PUBLIC(ServiceProxy)
-    GServiceProxy m_proxy;
+    RefPtrG<GUPnPServiceProxy> m_proxy;
     ServiceIntrospection * m_introspection;
 };
 

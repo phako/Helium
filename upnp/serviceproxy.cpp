@@ -277,13 +277,3 @@ void ServiceProxy::introspect(void)
                                                    d);
     }
 }
-
-ServiceProxy *ServiceProxy::wrap(GUPnPServiceProxy *proxy)
-{
-    ServiceProxy *p = new ServiceProxy;
-    if (proxy != 0) {
-        p->d_ptr->m_proxy = GServiceProxy::wrap(GUPNP_SERVICE_PROXY(g_object_ref(proxy)));
-    }
-
-    return p;
-}

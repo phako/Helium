@@ -21,6 +21,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpmediaserver.h"
 #include "upnprenderer.h"
 #include "upnpdevicemodel.h"
+#include "serviceproxy_p.h"
 
 const char UPnPDevice::CONNECTION_MANAGER_SERVICE[] = "urn:schemas-upnp-org:service:ConnectionManager";
 
@@ -157,9 +158,12 @@ ServiceProxy* UPnPDevice::getService(const char *service) const
         return 0;
     }
 
-    auto info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO(m_proxy), service);
 
-    return ServiceProxy::wrap(GUPNP_SERVICE_PROXY(info));
+    auto info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO(m_proxy), service);
+    auto p = new ServiceProxy;
+    p->d_ptr->m_proxy = RefPtrG<GUPnPServiceProxy>::wrap(GUPNP_SERVICE_PROXY(info));
+
+    return p;
 }
 
 /*!
