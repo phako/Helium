@@ -361,15 +361,17 @@ void UPnPRenderer::unsubscribe()
 {
     static const QString LAST_CHANGE = QLatin1String("LastChange");
 
-    if (m_renderingControl->subscribed()) {
+    if (not m_renderingControl.isNull() && m_renderingControl->subscribed()) {
         m_renderingControl->setSubscribed(false);
         m_renderingControl->removeNotify(LAST_CHANGE);
         m_renderingControl->disconnect(this, SLOT(onLastChange(QString,QVariant)));
     }
 
-    m_avTransport->setSubscribed(false);
-    m_avTransport->removeNotify(LAST_CHANGE);
-    m_avTransport->disconnect(this, SLOT(onLastChange(QString,QVariant)));
+    if (not m_avTransport.isNull()) {
+        m_avTransport->setSubscribed(false);
+        m_avTransport->removeNotify(LAST_CHANGE);
+        m_avTransport->disconnect(this, SLOT(onLastChange(QString,QVariant)));
+    }
 }
 
 UPnPRenderer::~UPnPRenderer()
