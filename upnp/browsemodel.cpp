@@ -62,6 +62,7 @@ BrowseModel::BrowseModel(ServiceProxyCall *call,
     qDebug() << "Created browse model";
     if (m_call != 0) {
         connect(m_call, SIGNAL(ready()), SLOT(onCallReady()));
+        m_call->setParent(this);
     }
 }
 
@@ -69,7 +70,6 @@ BrowseModel::~BrowseModel()
 {
     if (m_call != 0) {
         m_call->cancel();
-        m_call->deleteLater();
     }
 }
 
