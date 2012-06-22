@@ -99,9 +99,45 @@ Page {
     }
 
     Rectangle {
+        id: searchEntryBack
+        state: "disabled"
         color: "black"
         anchors.top: pageHeader.bottom
-        anchors.topMargin: 10
+        anchors.left: parent.left
+        anchors.right: parent.right
+        z: 1
+
+        SearchEntry {
+            id: searchEntry
+            anchors.centerIn: parent
+            width: parent.width - 10
+        }
+
+        states : [
+            State {
+                name: "enabled"
+                PropertyChanges { target: searchEntryBack; height: searchEntry.height + 10; opacity: 1.0; z: 1}
+                AnchorChanges { target: listViewBack; anchors.top: searchEntryBack.bottom }
+            },
+            State {
+                name: "disabled"
+                PropertyChanges { target: searchEntryBack; height: 0; opacity: 0.0; z: pageHeader.z - 1}
+                AnchorChanges { target: listViewBack; anchors.top: pageHeader.bottom }
+            }
+        ]
+
+        transitions: Transition {
+            ParallelAnimation {
+                NumberAnimation { duration: 300; properties: "opacity,height" }
+                AnchorAnimation {}
+            }
+        }
+    }
+
+    Rectangle {
+        id: listViewBack
+        color: "black"
+        anchors.top: pageHeader.bottom
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
@@ -125,6 +161,31 @@ Page {
             model: browseModel
             currentIndex: browseModel.lastIndex
             highlightMoveSpeed: -1
+
+            Timer {
+                id: timer
+                interval: 1000
+                repeat: false
+                running: false
+
+                onTriggered: {
+                    if (browseListView.contentY < 0) {
+                        searchEntryBack.state = "enabled"
+                    }
+                }
+            }
+
+            onMovementStarted: {
+                if (contentY <= 0) {
+                    timer.start()
+                }
+            }
+
+            // Clear search entry
+            onModelChanged: {
+                searchEntryBack.state = "disabled"
+                searchEntry.text = ""
+            }
 
             delegate: BrowseDelegate {
                 mainText: model.title
@@ -175,5 +236,6 @@ Page {
         id: pageHeader
         busy: !browseModel.busy && !browseModel.done
         onClicked: browseModel.refresh()
+        z: 40
     }
 }
