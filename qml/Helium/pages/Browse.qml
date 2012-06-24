@@ -111,6 +111,7 @@ Page {
             id: searchEntry
             anchors.centerIn: parent
             width: parent.width - 10
+            onTextChanged: browseModel.setFilterFixedString(text)
         }
 
         states : [
