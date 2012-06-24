@@ -22,7 +22,10 @@ TextField {
     id: cmpSearchEntry
     placeholderText: qsTr("Filter...")
     platformStyle: TextFieldStyle { paddingRight: button.width }
-    onTextChanged: {
+    onTextChanged: updateIcon()
+    inputMethodHints: Qt.ImhNoPredictiveText
+
+    function updateIcon() {
         if (text === "") {
             button.source = "image://theme/icon-m-common-search"
         } else {
@@ -38,7 +41,7 @@ TextField {
         MouseArea {
             anchors.fill: parent
             onClicked: {
-                cmpSearchEntry.text = ""
+                text = ""
             }
         }
     }
