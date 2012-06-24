@@ -18,16 +18,11 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef BROWSEMODEL_H
 #define BROWSEMODEL_H
 
-#include <QAbstractListModel>
+#include <QtGui/QSortFilterProxyModel>
 
-#include "gupnp-av/gupnp-av.h"
-
-#include "refptrg.h"
-
-typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
-
+class BrowseModelPrivate;
 class ServiceProxyCall;
-class BrowseModel : public QAbstractListModel
+class BrowseModel : public QSortFilterProxyModel
 {
     Q_OBJECT
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
@@ -35,38 +30,22 @@ class BrowseModel : public QAbstractListModel
     Q_PROPERTY(QString protocolInfo READ protocolInfo WRITE setProtocolInfo NOTIFY protocolInfoChanged)
     Q_PROPERTY(int lastIndex READ lastIndex WRITE setLastIndex NOTIFY lastIndexChanged)
 public:
-    enum BrowseRoles {
-        BrowseRoleTitle = Qt::DisplayRole,
-        BrowseRoleId = Qt::UserRole + 1,
-        BrowseRoleUPnPClass,
-        BrowseRoleIcon,
-        BrowseRoleURI,
-        BrowseRoleType,
-        BrowseRoleDetail,
-        BrowseRoleMetaData
-    };
-
     explicit BrowseModel(ServiceProxyCall *call = 0,
                          const QString &protocolInfo = QLatin1String("*:*:*:*"),
                          QObject       *parent = 0);
-    ~BrowseModel();
 
-    // virtual functions from QAbstractListModel
-    int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    QVariant data(const QModelIndex &index, int role) const;
+    static BrowseModel &empty();
+    Q_INVOKABLE void refresh();
 
     // property getters
-    bool busy() const { return m_busy; }
-    bool done() const { return m_done; }
-    QString protocolInfo() const { return m_protocolInfo; }
-    int lastIndex() const { return m_lastIndex; }
+    bool busy() const;
+    bool done() const;
+    QString protocolInfo() const;
+    int lastIndex() const;
 
     // property setters
-    void setProtocolInfo(const QString& protocolInfo);
+    void setProtocolInfo(const QString &protocolInfo);
     void setLastIndex(int index);
-
-    // static functions
-    static BrowseModel &empty() { return m_empty; }
 
 Q_SIGNALS:
     // property signals
@@ -75,46 +54,12 @@ Q_SIGNALS:
     void protocolInfoChanged();
     void lastIndexChanged();
 
-    void error(int code, const QString& message);
+    void error(int code, const QString &message);
+
 public Q_SLOTS:
-
-    // QML callable functions
-    void refresh();
-
-    // Uh, ugly, but there seems no way to call static funcitons from QML
-    QString formatTime(long duration);
-private Q_SLOTS:
-    void onCallReady();
-    void setBusy(bool busy) {
-        if (m_busy != busy) {
-            m_busy = busy;
-            Q_EMIT busyChanged();
-        }
-    }
-
-    void setDone(bool done) {
-        if (m_done != done) {
-            m_done = done;
-            Q_EMIT doneChanged();
-        }
-    }
-
 private:
-    static BrowseModel m_empty;
-
-    static void on_didl_object(GUPnPDIDLLiteParser *parser,
-                               GUPnPDIDLLiteObject *item,
-                               gpointer             user_data);
-
-    QString getCompatibleUri(int index, const QString& protocolInfo) const;
-
-    QList<DIDLLiteObject>    m_data;
-    guint                    m_currentOffset;
-    bool                     m_busy;
-    bool                     m_done;
-    QString                  m_protocolInfo;
-    int                      m_lastIndex;
-    ServiceProxyCall * m_call;
+    BrowseModelPrivate * const d_ptr;
+    Q_DECLARE_PRIVATE(BrowseModel)
 };
 
 #endif // BROWSEMODEL_H

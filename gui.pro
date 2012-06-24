@@ -52,13 +52,14 @@ SOURCES += main.cpp \
     upnp/upnpservermodel.cpp \
     upnp/upnprenderermodel.cpp \
     upnp/browsemodelstack.cpp \
-    upnp/browsemodel.cpp \
     networkcontrol.cpp \
     settings.cpp \
     upnp/serviceproxycall.cpp \
     upnp/serviceproxy.cpp \
     upnp/serviceintrospection.cpp \
-    upnp/glib-utils.cpp
+    upnp/glib-utils.cpp \
+    upnp/browsemodel_p.cpp \
+    upnp/browsemodel.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -83,7 +84,6 @@ HEADERS += \
     upnp/upnpdevicemodel.h \
     upnp/upnpservermodel.h \
     upnp/upnprenderermodel.h \
-    upnp/browsemodel.h \
     upnp/refptrg.h \
     upnp/browsemodelstack.h \
     networkcontrol.h \
@@ -93,7 +93,9 @@ HEADERS += \
     upnp/serviceproxy.h \
     upnp/serviceintrospection.h \
     upnp/serviceintrospection_p.h \
-    upnp/glib-utils.h
+    upnp/glib-utils.h \
+    upnp/browsemodel_p.h \
+    upnp/browsemodel.h
 
 RESOURCES += \
     res.qrc
