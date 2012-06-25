@@ -36,8 +36,13 @@ BrowseModelStack &BrowseModelStack::getDefault()
 
 void BrowseModelStack::push(BrowseModel *model)
 {
-    m_stack.append(model);
     rootContext->setContextProperty(QLatin1String("browseModel"), model);
+
+    // clear filter when navigating away
+    if (not m_stack.isEmpty()) {
+        m_stack.last()->setFilterFixedString(QString());
+    }
+    m_stack.append(model);
 }
 
 void BrowseModelStack::pop()
