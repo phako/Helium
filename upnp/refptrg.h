@@ -77,6 +77,17 @@ public:
         return *this;
     }
 
+    RefPtrG &operator=(C* other) {
+        if (m_type != other) {
+            if (m_type != 0) {
+                g_object_unref(m_type);
+            }
+            m_type = (C *)g_object_ref(other);
+        }
+
+        return *this;
+    }
+
     bool isEmpty() const
     {
         return m_type == 0;

@@ -214,9 +214,9 @@ static void
 on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gpointer user_data)
 {
     Q_UNUSED(parser)
-    GUPnPDIDLLiteObject **object = static_cast<GUPnPDIDLLiteObject **>(user_data);
+    RefPtrG<GUPnPDIDLLiteObject> *object = static_cast<RefPtrG<GUPnPDIDLLiteObject> *>(user_data);
 
-    if (*object != 0) {
+    if (not object->isEmpty()) {
         return;
     }
 
@@ -315,18 +315,17 @@ void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
             if (meta_data != 0) {
                 DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
                 GError *error = 0;
-                GUPnPDIDLLiteObject *object = 0;
+                RefPtrG<GUPnPDIDLLiteObject> object;
 
                 g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
 
                 if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
-                    if (object != 0) {
+                    if (not object.isEmpty()) {
                         setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
                     }
-                }
-
-                if (object != 0) {
-                    g_object_unref(object);
+                } else {
+                    qDebug() << "Failed to parse LastChange" << error->message;
+                    g_error_free(error);
                 }
             }
 
