@@ -24,9 +24,11 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "refptrg.h"
 
+#include "settings.h"
 typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
 
 class ServiceProxyCall;
+class BrowseModel;
 class BrowseModelPrivate : public QAbstractListModel
 {
     Q_OBJECT
@@ -43,12 +45,13 @@ public:
         BrowseRoleURI,
         BrowseRoleType,
         BrowseRoleDetail,
-        BrowseRoleMetaData
+        BrowseRoleMetaData,
+        BrowseRoleFilter
     };
 
     explicit BrowseModelPrivate(ServiceProxyCall *call = 0,
                                 const QString &protocolInfo = QLatin1String("*:*:*:*"),
-                                QObject       *parent = 0);
+                                BrowseModel *parent = 0);
     ~BrowseModelPrivate();
 
     // virtual functions from QAbstractListModel
@@ -96,6 +99,8 @@ private Q_SLOTS:
         }
     }
 
+    void onFilterInDetailsChanged();
+
 private:
     static BrowseModelPrivate m_empty;
 
@@ -112,6 +117,9 @@ private:
     QString                  m_protocolInfo;
     int                      m_lastIndex;
     ServiceProxyCall * m_call;
+    Settings m_settings;
+    BrowseModel *q_ptr;
+    Q_DECLARE_PUBLIC(BrowseModel)
 };
 
 #endif // BROWSEMODELPRIVATE_H

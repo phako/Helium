@@ -31,6 +31,7 @@ class Settings : public QObject
     Q_PROPERTY(bool startMediaSharing READ startMediaSharing WRITE setStartMediaSharing NOTIFY startMediaSharingChanged)
     Q_PROPERTY(bool mediaSharingAvailable READ mediaSharingAvailable NOTIFY mediaSharingAvailableChanged)
     Q_PROPERTY(bool showDevicePopUp READ showDevicePopUp WRITE setShowDevicePopUp NOTIFY showDevicePopUpChanged)
+    Q_PROPERTY(bool filterInDetails READ filterInDetails WRITE setFilterInDetails NOTIFY filterInDetailsChanged)
 public:
     static const QString RYGEL_DBUS_IFACE;
 
@@ -51,12 +52,16 @@ public:
     bool showDevicePopUp(void);
     void setShowDevicePopUp(bool value);
 
+    bool filterInDetails(void);
+    void setFilterInDetails(bool value);
+
 Q_SIGNALS:
     void displayDeviceIconsChanged(void);
     void displayMediaArtChanged(void);
     void startMediaSharingChanged(void);
     void mediaSharingAvailableChanged(void);
     void showDevicePopUpChanged(void);
+    void filterInDetailsChanged(void);
 
 public Q_SLOTS:
 private:

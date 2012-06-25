@@ -38,9 +38,7 @@ Page {
             width: parent.width
             spacing: 24
 
-            Separator {
-                text: qsTr("Display")
-            }
+            Separator { text: qsTr("Display") }
 
             LabelledSwitch {
                 text: qsTr("Show device icons")
@@ -58,6 +56,23 @@ Page {
                 text: qsTr("Show Device pop-up on long press")
                 checked: settings.showDevicePopUp;
                 onCheckedChanged: settings.showDevicePopUp = checked;
+            }
+
+            Separator { text: qsTr("Filtering") }
+
+            ButtonRow {
+                checkedButton: settings.filterInDetails ? btnFilterAll : btnFilterTitleOnly
+                Button {
+                    id: btnFilterTitleOnly
+                    text: qsTr("Title only")
+                    onCheckedChanged: settings.filterInDetails = !checked
+                }
+
+                Button {
+                    id: btnFilterAll
+                    text: qsTr("All details")
+                    onCheckedChanged: settings.filterInDetails = checked
+                }
             }
 
             Separator { text: qsTr("Sharing") }

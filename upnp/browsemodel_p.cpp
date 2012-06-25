@@ -21,6 +21,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTimer>
 #include <QUrl>
 
+#include "browsemodel.h"
 #include "browsemodel_p.h"
 #include "upnpdevicemodel.h"
 #include "glib-utils.h"
@@ -35,8 +36,8 @@ const char GENRE_CLASS[] = "object.container.genre.musicGenre";
 const char CONTAINER_PREFIX[] = "object.container";
 
 BrowseModelPrivate::BrowseModelPrivate(ServiceProxyCall *call,
-                         const QString  &protocolInfo,
-                         QObject        *parent)
+                                       const QString  &protocolInfo,
+                                       BrowseModel *parent)
     : QAbstractListModel(parent)
     , m_currentOffset(0)
     , m_busy(true)
@@ -44,6 +45,8 @@ BrowseModelPrivate::BrowseModelPrivate(ServiceProxyCall *call,
     , m_protocolInfo(protocolInfo)
     , m_lastIndex(-1)
     , m_call(call)
+    , m_settings()
+    , q_ptr(parent)
 {
     QHash<int, QByteArray> roles;
 
@@ -55,6 +58,7 @@ BrowseModelPrivate::BrowseModelPrivate(ServiceProxyCall *call,
     roles[BrowseRoleDetail] = "detail";
     roles[BrowseRoleURI] = "uri";
     roles[BrowseRoleMetaData] = "metadata";
+    roles[BrowseRoleFilter] = "filter";
     setRoleNames(roles);
 
     qDebug() << "Created browse model";
@@ -62,6 +66,8 @@ BrowseModelPrivate::BrowseModelPrivate(ServiceProxyCall *call,
         connect(m_call, SIGNAL(ready()), SLOT(onCallReady()));
         m_call->setParent(this);
     }
+
+    connect(&m_settings, SIGNAL(filterInDetailsChanged()), SLOT(onFilterInDetailsChanged()));
 }
 
 BrowseModelPrivate::~BrowseModelPrivate()
@@ -182,6 +188,10 @@ static QString createDetailsForObject(GUPnPDIDLLiteObject *object)
 {
     QString result;
 
+    if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
+        return result;
+    }
+
     GList* resources = gupnp_didl_lite_object_get_resources(object);
     GList* it = resources;
 
@@ -286,6 +296,10 @@ static QString generateMetaData(GUPnPDIDLLiteObject *object)
 {
     GList *resources, *it;
 
+    if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
+        return QString();
+    }
+
     // produce minimal DIDL
     RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new (NULL));
     GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
@@ -356,17 +370,11 @@ QVariant BrowseModelPrivate::data(const QModelIndex &index, int role) const
             return QLatin1String("object");
         }
     case BrowseRoleDetail:
-        if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
-            return QString();
-        }
         return createDetailsForObject(object);
     case BrowseRoleMetaData:
-        if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
-            return QString();
-        } else {
-            return generateMetaData(object);
-        }
-        return QString();
+        return generateMetaData(object);
+    case BrowseRoleFilter:
+        return QString::fromUtf8(gupnp_didl_lite_object_get_title(object)) + createDetailsForObject(object);
     default:
         return QVariant();
     }
@@ -470,4 +478,10 @@ void BrowseModelPrivate::setLastIndex(int index)
         m_lastIndex = index;
         Q_EMIT lastIndexChanged();
     }
+}
+
+void BrowseModelPrivate::onFilterInDetailsChanged()
+{
+    Q_Q(BrowseModel);
+    q->setFilterRole(m_settings.filterInDetails() ? BrowseModelPrivate::BrowseRoleFilter : BrowseModelPrivate::BrowseRoleTitle);
 }

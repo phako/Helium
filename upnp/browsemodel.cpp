@@ -15,29 +15,37 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include <QApplication>
+
 #include "browsemodel.h"
 #include "browsemodel_p.h"
+#include "settings.h"
 
-BrowseModel empty;
+static BrowseModel* g_empty;
 
 BrowseModel::BrowseModel(ServiceProxyCall *call, const QString &protocolInfo, QObject *parent)
     : QSortFilterProxyModel(parent)
     , d_ptr(new BrowseModelPrivate(call, protocolInfo, this))
 {
-    setSourceModel(d_ptr);
-    setFilterRole(BrowseModelPrivate::BrowseRoleTitle);
+    Q_D(BrowseModel);
+    setSourceModel(d);
+    setFilterRole(d->m_settings.filterInDetails() ? BrowseModelPrivate::BrowseRoleFilter : BrowseModelPrivate::BrowseRoleTitle);
     setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    connect(d_ptr, SIGNAL(busyChanged()), SIGNAL(busyChanged()));
-    connect(d_ptr, SIGNAL(doneChanged()), SIGNAL(doneChanged()));
-    connect(d_ptr, SIGNAL(error(int,QString)), SIGNAL(error(int,QString)));
-    connect(d_ptr, SIGNAL(lastIndexChanged()), SIGNAL(lastIndexChanged()));
-    connect(d_ptr, SIGNAL(protocolInfoChanged()), SIGNAL(protocolInfoChanged()));
+    connect(d, SIGNAL(busyChanged()), SIGNAL(busyChanged()));
+    connect(d, SIGNAL(doneChanged()), SIGNAL(doneChanged()));
+    connect(d, SIGNAL(error(int,QString)), SIGNAL(error(int,QString)));
+    connect(d, SIGNAL(lastIndexChanged()), SIGNAL(lastIndexChanged()));
+    connect(d, SIGNAL(protocolInfoChanged()), SIGNAL(protocolInfoChanged()));
 }
 
 BrowseModel &BrowseModel::empty()
 {
-    return ::empty;
+    if (g_empty == 0) {
+        g_empty = new BrowseModel(0, QLatin1String("*:*:*:*"), qApp);
+    }
+
+    return *g_empty;
 }
 
 void BrowseModel::refresh()
