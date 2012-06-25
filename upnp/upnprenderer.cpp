@@ -291,7 +291,7 @@ void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
                                                        "TransportState", G_TYPE_STRING, &state_name,
                                                        "CurrentTrackDuration", G_TYPE_STRING, &track_duration,
                                                        "CurrentTrackURI", G_TYPE_STRING, &track_uri,
-                                                       "AVTransportURIMetaData", G_TYPE_STRING, &av_transport_meta_data,
+                                                       "AVTransportURIMetadata", G_TYPE_STRING, &av_transport_meta_data,
                                                        "CurrentTrackMetadata", G_TYPE_STRING, &track_meta_data,
                                                        NULL)) {
             if (state_name != 0) {
