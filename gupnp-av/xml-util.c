@@ -44,7 +44,7 @@ xml_util_get_element (xmlNode *node,
                         if (node->name == NULL)
                                 continue;
 
-                        if (!strcmp (arg, (char *) node->name))
+                        if (!g_ascii_strcasecmp (arg, (char *) node->name))
                                 break;
                 }
 
