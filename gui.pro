@@ -30,8 +30,9 @@ CONFIG += link_pkgconfig
 PKGCONFIG += gupnp-1.0 gq-gconf
 
 # include static version of gupnp-av - thanks madde :(
-SUBDIRS += gupnp-av
-LIBS += -Lgupnp-av -lgupnpav
+SUBDIRS += gupnp-av gupnp-qt4
+INCLUDEPATH += gupnp-qt4
+LIBS += -Lgupnp-qt4 -lgupnp-qt4 -Lgupnp-av -lgupnpav
 
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable
@@ -54,13 +55,8 @@ SOURCES += main.cpp \
     upnp/browsemodelstack.cpp \
     networkcontrol.cpp \
     settings.cpp \
-    upnp/serviceproxycall.cpp \
-    upnp/serviceproxy.cpp \
-    upnp/serviceintrospection.cpp \
-    upnp/glib-utils.cpp \
     upnp/browsemodel_p.cpp \
-    upnp/browsemodel.cpp \
-    upnp/didlliteparser.cpp
+    upnp/browsemodel.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -85,20 +81,11 @@ HEADERS += \
     upnp/upnpdevicemodel.h \
     upnp/upnpservermodel.h \
     upnp/upnprenderermodel.h \
-    upnp/refptrg.h \
     upnp/browsemodelstack.h \
     networkcontrol.h \
     settings.h \
-    upnp/serviceproxy_p.h \
-    upnp/serviceproxycall.h \
-    upnp/serviceproxy.h \
-    upnp/serviceintrospection.h \
-    upnp/serviceintrospection_p.h \
-    upnp/glib-utils.h \
     upnp/browsemodel_p.h \
-    upnp/browsemodel.h \
-    upnp/didlliteparser.h \
-    upnp/didlliteparser_p.h
+    upnp/browsemodel.h
 
 RESOURCES += \
     res.qrc

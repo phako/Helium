@@ -18,10 +18,11 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DIDLLITEPARSER_H
 #define DIDLLITEPARSER_H
 
+#include "gupnp-av/gupnp-didl-lite-object.h"
+
 #include <QObject>
 
 #include "refptrg.h"
-#include "gupnp-av/gupnp-didl-lite-object.h"
 
 typedef RefPtrG<GUPnPDIDLLiteObject> DIDLLiteObject;
 typedef QList<DIDLLiteObject> DIDLLiteObjectList;

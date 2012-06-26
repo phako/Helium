@@ -41,6 +41,8 @@ QDeclarativeContext *rootContext;
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
     g_type_init ();
+
+    // Used in GUPnP User-Agent
     g_set_application_name("Helium");
 
     // QML glue
