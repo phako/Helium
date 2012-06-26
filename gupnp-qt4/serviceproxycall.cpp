@@ -26,8 +26,9 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "serviceproxy.h"
 #include "serviceproxy_p.h"
 
-struct ServiceProxyCallPrivate
+class ServiceProxyCallPrivate
 {
+public:
     ServiceProxyCallPrivate(ServiceProxyCall *parent,
                             GUPnPServiceProxy *proxy,
                             const QString     &action,

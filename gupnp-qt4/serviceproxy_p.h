@@ -24,8 +24,9 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "refptrg.h"
 
-struct ServiceProxyPrivate
+class ServiceProxyPrivate
 {
+public:
     ServiceProxyPrivate(ServiceProxy      *parent,
                         GUPnPServiceProxy *proxy)
         : q_ptr(parent)
