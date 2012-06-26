@@ -64,11 +64,12 @@ Sheet {
         }
 
         Component.onCompleted: currentIndex = -1
+
+        ScrollDecorator {
+            flickableItem: rendererListView
+        }
     }
 
-    ScrollDecorator {
-        flickableItem: rendererListView
-    }
 
     Component.onCompleted: {
         // ugly hack; Later versions of QML Sheet have a acceptButton property
