@@ -69,18 +69,18 @@ void BrowseModel::setProtocolInfo(const QString &protocolInfo)
     d->setProtocolInfo(protocolInfo);
 }
 
-void BrowseModel::setLastIndex(int index)
+void BrowseModel::setLastIndex(int idx)
 {
     Q_D(BrowseModel);
 
-    d->setLastIndex(index);
+    d->setLastIndex(mapToSource(index(idx, 0)).row());
 }
 
 int BrowseModel::lastIndex() const
 {
     Q_D(const BrowseModel);
 
-    return d->lastIndex();
+    return mapFromSource(d->index(d->lastIndex(), 0)).row();
 }
 
 bool BrowseModel::done() const
