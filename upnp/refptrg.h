@@ -113,6 +113,5 @@ private:
 };
 
 typedef RefPtrG<GUPnPDeviceProxy> DeviceProxy;
-typedef RefPtrG<GUPnPDIDLLiteParser> DIDLLiteParser;
 
 #endif // SCOPEREF_H

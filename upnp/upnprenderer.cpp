@@ -22,6 +22,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include "glib-utils.h"
 #include "upnprenderer.h"
+#include "didlliteparser.h"
 
 const QString START_POSITION = QLatin1String("0:00:00");
 
@@ -210,19 +211,6 @@ void UPnPRenderer::setCanVolume(bool canVolume)
     Q_EMIT canVolumeChanged();
 }
 
-static void
-on_didl_item_available (GUPnPDIDLLiteParser *parser, GUPnPDIDLLiteItem *item, gpointer user_data)
-{
-    Q_UNUSED(parser)
-    RefPtrG<GUPnPDIDLLiteObject> *object = static_cast<RefPtrG<GUPnPDIDLLiteObject> *>(user_data);
-
-    if (not object->isEmpty()) {
-        return;
-    }
-
-    *object = GUPNP_DIDL_LITE_OBJECT(g_object_ref(item));
-}
-
 UPnPRenderer::UPnPRenderer()
     : UPnPDevice()
     , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
@@ -313,19 +301,9 @@ void UPnPRenderer::onLastChange(const QString &name, const QVariant &value)
             }
 
             if (meta_data != 0) {
-                DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new ());
-                GError *error = 0;
-                RefPtrG<GUPnPDIDLLiteObject> object;
-
-                g_signal_connect (G_OBJECT(parser), "item-available", G_CALLBACK (on_didl_item_available), &object);
-
-                if (gupnp_didl_lite_parser_parse_didl(parser, meta_data, &error)) {
-                    if (not object.isEmpty()) {
-                        setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(object)));
-                    }
-                } else {
-                    qDebug() << "Failed to parse LastChange" << error->message;
-                    g_error_free(error);
+                auto objects = DIDLLiteParser().parse(meta_data);
+                if (not objects.empty()) {
+                    setTitle(QString::fromUtf8(gupnp_didl_lite_object_get_title(objects.first())));
                 }
             }
 

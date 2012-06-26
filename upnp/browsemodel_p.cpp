@@ -26,6 +26,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "upnpdevicemodel.h"
 #include "glib-utils.h"
 #include "serviceproxycall.h"
+#include "didlliteparser.h"
 
 const char AUDIO_PREFIX[] = "object.item.audioItem";
 const char IMAGE_PREFIX[] = "object.item.imageItem";
@@ -419,20 +420,12 @@ void BrowseModelPrivate::onCallReady()
         return;
     }
 
-    DIDLLiteParser parser = DIDLLiteParser::wrap(gupnp_didl_lite_parser_new());
+    auto objects = DIDLLiteParser().parse(call->get(QLatin1String("Result")).toString());
+
     beginInsertRows(QModelIndex(),
                     m_data.count(),
                     m_data.count() + numberReturned - 1);
-    g_signal_connect (G_OBJECT(parser),
-                      "object-available",
-                      G_CALLBACK(BrowseModelPrivate::on_didl_object),
-                      this);
-
-    qDebug() << call->get(QLatin1String("Result")).toString();
-
-    GError *error = 0;
-    gupnp_didl_lite_parser_parse_didl(parser, call->get(QLatin1String("Result")).toString().toUtf8().constData(), &error);
-
+    m_data << objects;
     endInsertRows();
 
     m_currentOffset += numberReturned;

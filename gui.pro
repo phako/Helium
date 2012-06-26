@@ -59,7 +59,8 @@ SOURCES += main.cpp \
     upnp/serviceintrospection.cpp \
     upnp/glib-utils.cpp \
     upnp/browsemodel_p.cpp \
-    upnp/browsemodel.cpp
+    upnp/browsemodel.cpp \
+    upnp/didlliteparser.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -95,7 +96,9 @@ HEADERS += \
     upnp/serviceintrospection_p.h \
     upnp/glib-utils.h \
     upnp/browsemodel_p.h \
-    upnp/browsemodel.h
+    upnp/browsemodel.h \
+    upnp/didlliteparser.h \
+    upnp/didlliteparser_p.h
 
 RESOURCES += \
     res.qrc
