@@ -62,16 +62,17 @@ Page {
 
             ButtonRow {
                 anchors.horizontalCenter: parent.horizontalCenter
-                checkedButton: settings.filterInDetails ? btnFilterAll : btnFilterTitleOnly
                 Button {
                     id: btnFilterTitleOnly
                     text: qsTr("Title only")
+                    checked: !settings.filterInDetails
                     onCheckedChanged: settings.filterInDetails = !checked
                 }
 
                 Button {
                     id: btnFilterAll
                     text: qsTr("All details")
+                    checked: settings.filterInDetails
                     onCheckedChanged: settings.filterInDetails = checked
                 }
             }
