@@ -61,6 +61,7 @@ Page {
             Separator { text: qsTr("Filtering") }
 
             ButtonRow {
+                anchors.horizontalCenter: parent.horizontalCenter
                 checkedButton: settings.filterInDetails ? btnFilterAll : btnFilterTitleOnly
                 Button {
                     id: btnFilterTitleOnly
