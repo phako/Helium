@@ -64,6 +64,7 @@ ServiceProxyCallPrivate::ServiceProxyCallPrivate(ServiceProxyCall   *parent,
     : q_ptr(parent)
     , m_proxy(GUPNP_SERVICE_PROXY(g_object_ref(proxy)))
     , m_actionName(action)
+    , m_action(0)
     , m_ready(false)
     , m_names(names)
     , m_values(values)
