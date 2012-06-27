@@ -19,10 +19,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #define SETTINGS_H
 
 #include <QtCore/QObject>
-#include <QtCore/QMap>
 
-class GConfItem;
-
+class SettingsPrivate;
 class Settings : public QObject
 {
     Q_OBJECT
@@ -47,7 +45,7 @@ public:
     bool startMediaSharing(void);
     void setStartMediaSharing(bool value);
 
-    bool mediaSharingAvailable(void) { return m_sharingAvailable; }
+    bool mediaSharingAvailable(void);
 
     bool showDevicePopUp(void);
     void setShowDevicePopUp(bool value);
@@ -63,10 +61,9 @@ Q_SIGNALS:
     void showDevicePopUpChanged(void);
     void filterInDetailsChanged(void);
 
-public Q_SLOTS:
 private:
-    QMap<QString, GConfItem *> m_configItems;
-    bool m_sharingAvailable;
+    SettingsPrivate * const d_ptr;
+    Q_DECLARE_PRIVATE(Settings)
 };
 
 #endif // SETTINGS_H

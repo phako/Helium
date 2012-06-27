@@ -27,7 +27,7 @@ MOBILITY += feedback
 
 # Include GUPnP libs - do this before boostable stuff otherwise that won't work properly
 CONFIG += link_pkgconfig
-PKGCONFIG += gupnp-1.0 gq-gconf
+PKGCONFIG += gupnp-1.0
 
 # include static version of gupnp-av - thanks madde :(
 SUBDIRS += gupnp-av gupnp-qt4
@@ -54,7 +54,6 @@ SOURCES += main.cpp \
     upnp/upnprenderermodel.cpp \
     upnp/browsemodelstack.cpp \
     networkcontrol.cpp \
-    settings.cpp \
     upnp/browsemodel_p.cpp \
     upnp/browsemodel.cpp
 
@@ -91,3 +90,10 @@ RESOURCES += \
     res.qrc
 
 DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
+contains(MEEGO_EDITION, Harmattan) {
+    DEFINES += HARMATTAN
+    PKGCONFIG += gq-gconf
+    SOURCES += settings_harmattan_gconf.cpp
+} else {
+    SOURCES += settings_qsettings.cpp
+}

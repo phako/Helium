@@ -87,6 +87,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();
 
+#ifdef HARMATTAN
     if (settings.startMediaSharing()) {
         QDBusInterface fdo(QLatin1String("org.freedesktop.DBus"), QLatin1String("/"), QLatin1String("org.freedesktop.DBus"));
         bool isRunning = fdo.call(QLatin1String("NameHasOwner"), Settings::RYGEL_DBUS_IFACE).arguments().first().toBool();
@@ -96,6 +97,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
                                      QStringList() << QLatin1String("--port=57734"));
         }
     }
+#endif
 
     return app->exec();
 }
