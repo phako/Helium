@@ -104,10 +104,6 @@ private Q_SLOTS:
 private:
     static BrowseModelPrivate m_empty;
 
-    static void on_didl_object(GUPnPDIDLLiteParser *parser,
-                               GUPnPDIDLLiteObject *item,
-                               gpointer             user_data);
-
     QString getCompatibleUri(int index, const QString& protocolInfo) const;
 
     QList<DIDLLiteObject>    m_data;

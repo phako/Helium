@@ -381,16 +381,6 @@ QVariant BrowseModelPrivate::data(const QModelIndex &index, int role) const
     }
 }
 
-void BrowseModelPrivate::on_didl_object (GUPnPDIDLLiteParser *parser,
-                                  GUPnPDIDLLiteObject *object,
-                                  gpointer             user_data)
-{
-    Q_UNUSED(parser)
-
-    BrowseModelPrivate *model = reinterpret_cast<BrowseModelPrivate *>(user_data);
-    model->m_data.append(DIDLLiteObject(object));
-}
-
 void BrowseModelPrivate::onCallReady()
 {
     auto call = qobject_cast<ServiceProxyCall *>(sender());
