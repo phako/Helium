@@ -39,7 +39,19 @@ Page {
         visualParent: main.tabs.currentTab
         content: MenuLayout {
             MenuItem {
-                text: qsTr("Play on current device")
+                id: playOnRenderer
+                Connections {
+                    target: renderer
+                    onAvailableChanged: {
+                        if (renderer.available) {
+                            playOnRenderer.text=qsTr("Play on") + " " + renderer.friendlyName;
+                        } else {
+                            playOnRenderer.text = qsTr("No device selected");
+                        }
+                    }
+                }
+
+                text: qsTr("No device selected");
                 enabled: renderer.available
                 onClicked: setUri(renderer)
             }
