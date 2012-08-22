@@ -51,7 +51,7 @@ SettingsPrivate::SettingsPrivate()
     m_configItems[FILTER_IN_DETAILS] = new GConfItem(FILTER_IN_DETAILS);
 
     QDBusInterface fdo(QLatin1String("org.freedesktop.DBus"), QLatin1String("/"), QLatin1String("org.freedesktop.DBus"));
-    m_sharingAvailable = fdo.call(QLatin1String("ListActivatableNames")).arguments().first().toStringList().contains(RYGEL_DBUS_IFACE);
+    m_sharingAvailable = fdo.call(QLatin1String("ListActivatableNames")).arguments().first().toStringList().contains(Settings::RYGEL_DBUS_IFACE);
 }
 
 SettingsPrivate::~SettingsPrivate()
