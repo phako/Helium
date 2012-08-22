@@ -1,0 +1,3 @@
+[submodule "gupnp-av"]
+	path = gupnp-av
+	url = git://git.gnome.org/gupnp-av

@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <gupnp-av/gupnp-av.h>
+#include <libgupnp-av/gupnp-av.h>
 
 #include "didlliteparser.h"
 #include "didlliteparser_p.h"

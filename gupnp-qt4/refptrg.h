@@ -21,7 +21,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <glib-object.h>
 
 #include <libgupnp/gupnp.h>
-#include <gupnp-av/gupnp-av.h>
+#include <libgupnp-av/gupnp-av.h>
 
 #include <QDebug>
 

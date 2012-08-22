@@ -31,8 +31,8 @@ PKGCONFIG += gupnp-1.0
 
 # include static version of gupnp-av - thanks madde :(
 SUBDIRS += gupnp-av gupnp-qt4
-INCLUDEPATH += gupnp-qt4
-LIBS += -Lgupnp-qt4 -lgupnp-qt4 -Lgupnp-av -lgupnpav
+INCLUDEPATH += gupnp-qt4 gupnp-av
+LIBS += -Lgupnp-qt4 -lgupnp-qt4 -L. -lgupnpav
 
 # Speed up launching on MeeGo/Harmattan when using applauncherd daemon
 CONFIG += qdeclarative-boostable

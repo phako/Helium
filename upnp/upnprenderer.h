@@ -24,7 +24,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QTimer>
 #include <QtCore/QList>
 
-#include "gupnp-av/gupnp-av.h"
+#include <libgupnp-av/gupnp-av.h>
 
 #include "serviceproxy.h"
 #include "upnpdevice.h"

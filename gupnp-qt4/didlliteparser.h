@@ -18,7 +18,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef DIDLLITEPARSER_H
 #define DIDLLITEPARSER_H
 
-#include "gupnp-av/gupnp-didl-lite-object.h"
+#include <libgupnp-av/gupnp-didl-lite-object.h>
 
 #include <QObject>
 
