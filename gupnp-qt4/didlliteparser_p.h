@@ -24,6 +24,7 @@ class DIDLLiteParserPrivate : QObject {
     Q_OBJECT
 public:
     DIDLLiteParserPrivate(DIDLLiteParser *parent);
+    ~DIDLLiteParserPrivate();
 
     RefPtrG<GUPnPDIDLLiteParser> m_parser;
     DIDLLiteObjectList m_objects;
