@@ -97,3 +97,11 @@ contains(MEEGO_EDITION, Harmattan) {
 } else {
     SOURCES += settings_qsettings.cpp
 }
+
+genversion.commands = $$PWD/tools/gen-version < ${QMAKE_FILE_IN} > ${QMAKE_FILE_OUT}
+genversion.output = ${QMAKE_FILE_PATH}/${QMAKE_FILE_BASE}
+genversion.input = VERSION_SOURCES
+genversion.variable_out = HEADERS
+QMAKE_EXTRA_COMPILERS += genversion
+
+VERSION_SOURCES = version.h.in

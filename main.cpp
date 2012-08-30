@@ -34,6 +34,8 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include "networkcontrol.h"
 #include "settings.h"
 
+#include "version.h"
+
 #include <QtDeclarative>
 
 QDeclarativeContext *rootContext;
@@ -74,6 +76,8 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     effect.setIntensity(1.0);
     effect.setDuration(100);
 
+    auto version = QLatin1String (HELIUM_VERSION);
+
     QmlApplicationViewer viewer;
     rootContext = viewer.rootContext();
     rootContext->setContextProperty(QLatin1String("serverModel"), &serverModel);
@@ -83,6 +87,7 @@ Q_DECL_EXPORT int main(int argc, char *argv[])
     rootContext->setContextProperty(QLatin1String("networkControl"), &control);
     rootContext->setContextProperty(QLatin1String("feedback"), &effect);
     rootContext->setContextProperty(QLatin1String("settings"), &settings);
+    rootContext->setContextProperty(QLatin1String("VERSION"), version);
     viewer.setOrientation(QmlApplicationViewer::ScreenOrientationLockPortrait);
     viewer.setMainQmlFile(QLatin1String("qml/Helium/main.qml"));
     viewer.showExpanded();
