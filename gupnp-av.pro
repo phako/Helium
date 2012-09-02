@@ -23,7 +23,7 @@ marshal_body.variable_out = SOURCES
 QMAKE_EXTRA_COMPILERS += marshal_body
 
 # Work-around old GUPnP version on Harmattan
-contains(MEEGO_EDITION, Harmattan) {
+contains(MEEGO_EDITION, harmattan) {
     DEFINES+=GUPNP_XML_ERROR_INVALID_ATTRIBUTE=GUPNP_XML_ERROR_PARSE
 }
 

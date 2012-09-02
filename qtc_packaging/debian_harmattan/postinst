@@ -13,6 +13,8 @@ case "$1" in
         if dpkg --compare-versions "$2" lt "0.6.0"
         then
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/filter-in-details false
+            /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Debug/enabled false
+            /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=string /apps/ControlPanel/Helium/Debug/output-path "/home/user/MyDocs"
         fi
     ;;
 esac

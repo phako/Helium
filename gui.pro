@@ -55,7 +55,8 @@ SOURCES += main.cpp \
     upnp/browsemodelstack.cpp \
     networkcontrol.cpp \
     upnp/browsemodel_p.cpp \
-    upnp/browsemodel.cpp
+    upnp/browsemodel.cpp \
+    upnp/logger.cpp
 
 # Please do not modify the following two lines. Required for deployment.
 include(qmlapplicationviewer/qmlapplicationviewer.pri)
@@ -84,18 +85,22 @@ HEADERS += \
     networkcontrol.h \
     settings.h \
     upnp/browsemodel_p.h \
-    upnp/browsemodel.h
+    upnp/browsemodel.h \
+    version.h.in \
+    upnp/logger.h \
+    upnp/logger_p.h
 
 RESOURCES += \
     res.qrc
 
 DEFINES += QT_NO_CAST_FROM_ASCII QT_NO_CAST_TO_ASCII
-contains(MEEGO_EDITION, Harmattan) {
+contains(MEEGO_EDITION, harmattan) {
     DEFINES += HARMATTAN
     PKGCONFIG += gq-gconf
     SOURCES += settings_harmattan_gconf.cpp
 } else {
     SOURCES += settings_qsettings.cpp
+    HEADERS += settings_qsettings_p.h
 }
 
 genversion.commands = $$PWD/tools/gen-version < ${QMAKE_FILE_IN} > ${QMAKE_FILE_OUT}

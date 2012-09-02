@@ -23,7 +23,11 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include <QAbstractListModel>
 
+#include "settings.h"
 #include "upnpdevice.h"
+
+// Forward declarations
+class Logger;
 
 class UPnPDeviceModel : public QAbstractListModel
 {
@@ -54,6 +58,7 @@ Q_SIGNALS:
 private Q_SLOTS:
     void onDeviceUnavailable(QString udn);
     void onDeviceAvailable(void *device_info);
+    void onDebugChanged(void);
 
 private:
     static UPnPDeviceModel *instance;
@@ -76,6 +81,8 @@ private:
     QList<GUPnPControlPoint *>         m_control_points;
     QList<QString>                     m_devices;
     QHash<QString, GUPnPDeviceProxy *> m_deviceInfo;
+    QList<Logger *>                    m_loggers;
+    Settings                           m_settings;
 };
 
 #endif // UPNPDEVICELISTER_H

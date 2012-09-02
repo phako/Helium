@@ -30,6 +30,8 @@ class Settings : public QObject
     Q_PROPERTY(bool mediaSharingAvailable READ mediaSharingAvailable NOTIFY mediaSharingAvailableChanged)
     Q_PROPERTY(bool showDevicePopUp READ showDevicePopUp WRITE setShowDevicePopUp NOTIFY showDevicePopUpChanged)
     Q_PROPERTY(bool filterInDetails READ filterInDetails WRITE setFilterInDetails NOTIFY filterInDetailsChanged)
+    Q_PROPERTY(bool debug READ debug WRITE setDebug NOTIFY debugChanged)
+    Q_PROPERTY(QString debugPath READ debugPath WRITE setDebugPath NOTIFY debugPathChanged)
 public:
     static const QString RYGEL_DBUS_IFACE;
 
@@ -53,6 +55,12 @@ public:
     bool filterInDetails(void);
     void setFilterInDetails(bool value);
 
+    bool debug(void);
+    void setDebug(bool value);
+
+    QString debugPath(void);
+    void setDebugPath(const QString &path);
+
 Q_SIGNALS:
     void displayDeviceIconsChanged(void);
     void displayMediaArtChanged(void);
@@ -60,6 +68,8 @@ Q_SIGNALS:
     void mediaSharingAvailableChanged(void);
     void showDevicePopUpChanged(void);
     void filterInDetailsChanged(void);
+    void debugChanged(void);
+    void debugPathChanged(void);
 
 private:
     SettingsPrivate * const d_ptr;

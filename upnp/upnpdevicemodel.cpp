@@ -17,14 +17,17 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <libgupnp/gupnp.h>
 #include <libgssdp/gssdp.h>
+#include <libsoup/soup.h>
 
 #include <QDebug>
 
+#include "settings.h"
 #include "refptrg.h"
 
 #include "upnpdevicemodel.h"
 #include "upnprenderer.h"
 #include "upnpmediaserver.h"
+#include "logger.h"
 
 UPnPDeviceModel *UPnPDeviceModel::instance;
 
@@ -97,6 +100,11 @@ UPnPDeviceModel::on_context_available(GUPnPContextManager */*manager*/,
         return;
     }
 
+    Settings settings;
+    if (settings.debug()) {
+        model->m_loggers << new Logger(context, model);
+    }
+
     GUPnPControlPoint *cp = gupnp_control_point_new(context, GSSDP_ALL_RESOURCES);
 
     model->m_control_points << cp;
@@ -132,6 +140,17 @@ UPnPDeviceModel::on_context_unavailable(GUPnPContextManager */*manager*/,
             ++it;
         }
     }
+
+    auto logger = model->m_loggers.begin();
+    while (logger != model->m_loggers.end()) {
+        if ((*logger)->getContext() == context) {
+            (*logger)->deleteLater();
+            logger = model->m_loggers.erase(logger);
+
+        } else {
+            logger++;
+        }
+    }
 }
 
 UPnPDeviceModel *UPnPDeviceModel::getDefault()
@@ -155,6 +174,9 @@ UPnPDeviceModel::UPnPDeviceModel(QObject *parent)
   , m_ctx_manager(gupnp_context_manager_new (0, 0))
   , m_control_points()
   , m_devices()
+  , m_deviceInfo()
+  , m_loggers()
+  , m_settings()
 {
     QHash<int, QByteArray> roles;
 
@@ -163,6 +185,8 @@ UPnPDeviceModel::UPnPDeviceModel(QObject *parent)
     roles[DeviceRoleUdn] = "udn";
     roles[DeviceRoleType] = "type";
     setRoleNames(roles);
+
+    connect (&m_settings, SIGNAL(debugChanged()), SLOT(onDebugChanged()));
 
     g_signal_connect (m_ctx_manager,
                       "context-available",
@@ -237,5 +261,21 @@ void UPnPDeviceModel::refresh()
 
     Q_FOREACH(GUPnPControlPoint *cp, m_control_points) {
         gssdp_resource_browser_set_active(GSSDP_RESOURCE_BROWSER(cp), TRUE);
+    }
+}
+
+void UPnPDeviceModel::onDebugChanged()
+{
+    if (m_settings.debug()) {
+        Q_FOREACH (GUPnPControlPoint *cp, m_control_points) {
+            auto context = gupnp_control_point_get_context(cp);
+            m_loggers << new Logger(context, this);
+        }
+    } else {
+        Q_FOREACH(Logger *logger, m_loggers) {
+            logger->deleteLater();
+        }
+
+        m_loggers.clear();
     }
 }

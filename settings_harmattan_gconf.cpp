@@ -29,6 +29,7 @@ public:
     ~SettingsPrivate();
     QMap<QString, GConfItem *> m_configItems;
     bool m_sharingAvailable;
+    QStringList m_keys;
 };
 
 static const QString GCONF_PREFIX = QLatin1String("/apps/ControlPanel/Helium");
@@ -37,18 +38,25 @@ static const QString DISPLAY_MEDIA_ART = GCONF_PREFIX + QLatin1String("/Display/
 static const QString START_MEDIA_SHARING = GCONF_PREFIX + QLatin1String("/Sharing/start-media-sharing");
 static const QString SHOW_DEVICE_POPUP = GCONF_PREFIX + QLatin1String ("/Display/show-device-popup");
 static const QString FILTER_IN_DETAILS = GCONF_PREFIX + QLatin1String ("/Display/filter-in-details");
+static const QString DEBUG = GCONF_PREFIX + QLatin1String("/Debug/enabled");
+static const QString DEBUG_PATH = GCONF_PREFIX + QLatin1String("/Debug/output-path");
 
 const QString Settings::RYGEL_DBUS_IFACE = QLatin1String("org.gnome.Rygel1");
 
 SettingsPrivate::SettingsPrivate()
-    : m_configItems(),
-      m_sharingAvailable(false)
+    : m_configItems()
+    , m_sharingAvailable(false)
+    , m_keys(QStringList() << DISPLAY_DEVICE_ICONS
+                           << DISPLAY_MEDIA_ART
+                           << START_MEDIA_SHARING
+                           << SHOW_DEVICE_POPUP
+                           << FILTER_IN_DETAILS
+                           << DEBUG
+                           << DEBUG_PATH)
 {
-    m_configItems[DISPLAY_DEVICE_ICONS] = new GConfItem(DISPLAY_DEVICE_ICONS);
-    m_configItems[DISPLAY_MEDIA_ART] = new GConfItem(DISPLAY_MEDIA_ART);
-    m_configItems[START_MEDIA_SHARING] = new GConfItem(START_MEDIA_SHARING);
-    m_configItems[SHOW_DEVICE_POPUP] = new GConfItem(SHOW_DEVICE_POPUP);
-    m_configItems[FILTER_IN_DETAILS] = new GConfItem(FILTER_IN_DETAILS);
+    Q_FOREACH(const QString &key, m_keys) {
+        m_configItems[key] = new GConfItem(key);
+    }
 
     QDBusInterface fdo(QLatin1String("org.freedesktop.DBus"), QLatin1String("/"), QLatin1String("org.freedesktop.DBus"));
     m_sharingAvailable = fdo.call(QLatin1String("ListActivatableNames")).arguments().first().toStringList().contains(Settings::RYGEL_DBUS_IFACE);
@@ -72,6 +80,8 @@ Settings::Settings(QObject *parent)
     connect (d->m_configItems[START_MEDIA_SHARING], SIGNAL(valueChanged()), SIGNAL(startMediaSharingChanged()));
     connect (d->m_configItems[SHOW_DEVICE_POPUP], SIGNAL(valueChanged()), SIGNAL(showDevicePopUpChanged()));
     connect (d->m_configItems[FILTER_IN_DETAILS], SIGNAL(valueChanged()), SIGNAL(filterInDetailsChanged()));
+    connect (d->m_configItems[DEBUG], SIGNAL(valueChanged()), SIGNAL(debugChanged()));
+    connect (d->m_configItems[DEBUG_PATH], SIGNAL(valueChanged()), SIGNAL(debugPathChanged()));
 }
 
 Settings::~Settings()
@@ -155,4 +165,32 @@ void Settings::setFilterInDetails(bool value)
     Q_D(Settings);
 
     d->m_configItems[FILTER_IN_DETAILS]->set(value);
+}
+
+bool Settings::debug(void)
+{
+    Q_D(Settings);
+
+    return d->m_configItems[DEBUG]->value().toBool();
+}
+
+void Settings::setDebug(bool value)
+{
+    Q_D(Settings);
+
+    d->m_configItems[DEBUG]->set(value);
+}
+
+QString Settings::debugPath(void)
+{
+    Q_D(Settings);
+
+    return d->m_configItems[DEBUG_PATH]->value().toString();
+}
+
+void Settings::setDebugPath(const QString &value)
+{
+    Q_D(Settings);
+
+    d->m_configItems[DEBUG_PATH]->set(value);
 }

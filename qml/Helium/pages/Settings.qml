@@ -85,6 +85,48 @@ Page {
                 onCheckedChanged: settings.startMediaSharing = checked
                 enabled: settings.mediaSharingAvailable
             }
+
+            Separator { text: qsTr("Debugging") }
+
+            LabelledSwitch {
+                text: qsTr("Enable debug log")
+                checked: settings.debug
+                onCheckedChanged: settings.debug = checked
+            }
+
+            Label {
+                width: parent.width
+                anchors.leftMargin: 10
+                anchors.rightMargin: 10
+                text: qsTr("Output path for log files")
+                enabled: settings.debug
+            }
+
+            TextField {
+                anchors.left: parent.left
+                anchors.leftMargin: 40
+                anchors.right: parent.right
+                anchors.rightMargin: 10
+                text: settings.debugPath
+
+                onTextChanged: {
+                    if (!activeFocus && text !== settings.debugPath) {
+                        settings.debugPath = text
+                    }
+                }
+
+                onActiveFocusChanged: {
+                    if (!activeFocus && text !== settings.debugPath) {
+                        settings.debugPath = text;
+                    }
+                }
+
+                Keys.onReturnPressed: {
+                    if (text !== settings.debugPath) {
+                        settings.debugPath = text;
+                    }
+                }
+            }
         }
     }
 

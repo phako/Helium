@@ -15,10 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "settings.h"
 
 #include <QDebug>
+#include <QFileSystemWatcher>
 #include <QSettings>
+#include <QStringList>
+
+#include "settings.h"
+#include "settings_qsettings_p.h"
 
 #ifdef HARMATTAN
 #error Should not be reached
@@ -29,28 +33,72 @@ static const QString DISPLAY_MEDIA_ART = QLatin1String("Display/show-media-art")
 static const QString START_MEDIA_SHARING = QLatin1String("Sharing/start-media-sharing");
 static const QString SHOW_DEVICE_POPUP = QLatin1String ("Display/show-device-popup");
 static const QString FILTER_IN_DETAILS = QLatin1String ("Display/filter-in-details");
+static const QString DEBUG = QLatin1String ("Debug/enable");
+static const QString DEBUG_PATH = QLatin1String ("Debug/output-path");
 
-
-class  SettingsPrivate {
-public:
-    SettingsPrivate();
-    ~SettingsPrivate();
-    QSettings m_settings;
-};
-
-SettingsPrivate::SettingsPrivate()
-    : m_settings(QLatin1String("org.jensge"), QLatin1String("Helium"))
+SettingsPrivate::SettingsPrivate(Settings *parent)
+    : QObject(parent)
+    , m_settings(QSettings::IniFormat, QSettings::UserScope, QLatin1String("org.jensge"),
+                 QLatin1String("Helium"))
+    , m_monitor()
+    , m_valueCache()
+    , q_ptr(parent)
 {
+    m_monitor.addPath(m_settings.fileName());
+    connect(&m_monitor, SIGNAL(fileChanged(QString)),
+            this, SLOT(onFileChanged(QString)));
+}
+
+void SettingsPrivate::set(const QString &key, const QVariant &value)
+{
+    m_valueCache[key] = value;
+    m_settings.setValue(key, value);
+    m_settings.sync();
 }
 
 SettingsPrivate::~SettingsPrivate()
 {
-    m_settings.sync();
+}
+
+void SettingsPrivate::onFileChanged(const QString &path)
+{
+    Q_Q(Settings);
+    Q_UNUSED(path);
+
+    if (m_valueCache[DISPLAY_DEVICE_ICONS] != q->displayDeviceIcons()) {
+        m_valueCache[DISPLAY_DEVICE_ICONS] = q->displayDeviceIcons();
+        Q_EMIT q->displayDeviceIconsChanged();
+    }
+
+    if (m_valueCache[DISPLAY_MEDIA_ART] != q->displayMediaArt()) {
+        m_valueCache[DISPLAY_MEDIA_ART] = q->displayMediaArt();
+        Q_EMIT q->displayMediaArtChanged();
+    }
+
+    if (m_valueCache[SHOW_DEVICE_POPUP] != q->showDevicePopUp()) {
+        m_valueCache[SHOW_DEVICE_POPUP] = q->showDevicePopUp();
+        Q_EMIT q->showDevicePopUp();
+    }
+
+    if (m_valueCache[FILTER_IN_DETAILS] != q->filterInDetails()) {
+        m_valueCache[FILTER_IN_DETAILS] = q->filterInDetails();
+        Q_EMIT q->filterInDetailsChanged();
+    }
+
+    if (m_valueCache[DEBUG] != q->debug()) {
+        m_valueCache[DEBUG] = q->debug();
+        Q_EMIT q->debugChanged();
+    }
+
+    if (m_valueCache[DEBUG_PATH] != q->debugPath()) {
+        m_valueCache[DEBUG_PATH] = q->debugPath();
+        Q_EMIT q->debugPathChanged();
+    }
 }
 
 Settings::Settings(QObject *parent)
     : QObject(parent)
-    , d_ptr(new SettingsPrivate)
+    , d_ptr(new SettingsPrivate(this))
 {
 }
 
@@ -69,8 +117,7 @@ void Settings::setDisplayDeviceIcons(bool value)
 {
     Q_D(Settings);
 
-    d->m_settings.setValue(DISPLAY_DEVICE_ICONS, value);
-    d->m_settings.sync();
+    d->set(DISPLAY_DEVICE_ICONS, value);
 
     Q_EMIT displayDeviceIconsChanged();
 }
@@ -86,9 +133,7 @@ void Settings::setDisplayMediaArt(bool value)
 {
     Q_D(Settings);
 
-    d->m_settings.setValue(DISPLAY_MEDIA_ART, value);
-    d->m_settings.sync();
-    Q_EMIT displayMediaArtChanged();
+    d->set(DISPLAY_MEDIA_ART, value);
 }
 
 bool Settings::startMediaSharing(void)
@@ -117,8 +162,7 @@ void Settings::setShowDevicePopUp(bool value)
 {
     Q_D(Settings);
 
-    d->m_settings.setValue(SHOW_DEVICE_POPUP, value);
-    d->m_settings.sync();
+    d->set(SHOW_DEVICE_POPUP, value);
     Q_EMIT showDevicePopUpChanged();
 }
 
@@ -128,8 +172,6 @@ bool Settings::filterInDetails(void)
 
     bool val = d->m_settings.value(FILTER_IN_DETAILS, false).toBool();
 
-    qDebug() << "filterInDetails()" << val;
-
     return val;
 }
 
@@ -137,7 +179,37 @@ void Settings::setFilterInDetails(bool value)
 {
     Q_D(Settings);
 
-    d->m_settings.setValue(FILTER_IN_DETAILS, value);
-    d->m_settings.sync();
+    d->set(FILTER_IN_DETAILS, value);
     Q_EMIT filterInDetailsChanged();
+}
+
+bool Settings::debug(void)
+{
+    Q_D(Settings);
+    bool val = d->m_settings.value(DEBUG, false).toBool();
+
+    return val;
+}
+
+void Settings::setDebug(bool value)
+{
+    Q_D(Settings);
+
+    d->set(DEBUG, value);
+    Q_EMIT debugChanged();
+}
+
+QString Settings::debugPath()
+{
+    Q_D(Settings);
+
+    return d->m_settings.value(DEBUG_PATH, QLatin1String("/tmp")).toString();
+}
+
+void Settings::setDebugPath(const QString &value)
+{
+    Q_D(Settings);
+
+    d->set(DEBUG_PATH, value);
+    Q_EMIT debugPathChanged();
 }

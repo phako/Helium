@@ -31,7 +31,8 @@ static quint64 parseDurationString(const QString& duration)
     quint64 seconds = 0;
     int factor = 1;
 
-    int length = duration.indexOf(QLatin1Char('.')) > 0 ?: duration.length();
+    auto index = duration.indexOf(QLatin1Char('.'));
+    int length = index > 0 ? index : duration.length();
     QStringList list = duration.left(length).split(QLatin1Char(':'));
     if (list.count() > 3) {
         return 0;
@@ -95,6 +96,8 @@ void UPnPRenderer::setProtocolInfo(const QString &protocolInfo)
     if (m_protocolInfo == protocolInfo) {
         return;
     }
+
+    qDebug() << "New protocol info" << protocolInfo;
 
     m_protocolInfo = protocolInfo;
 
