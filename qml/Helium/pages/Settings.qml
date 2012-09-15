@@ -95,10 +95,11 @@ Page {
             }
 
             Label {
-                width: parent.width
-                anchors.leftMargin: 10
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.leftMargin: 40
                 anchors.rightMargin: 10
-                text: qsTr("Output path for log files")
+                text: qsTr("Output path for log files:")
                 enabled: settings.debug
             }
 
