@@ -3,14 +3,14 @@ set -e
 
 case "$1" in
     configure)
-        if dpkg --compare-version "$2" lt "0.5.0"
+        if dpkg --compare-versions "$2" lt "0.5.0"
         then
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/show-device-icons false
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/show-media-art true
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/show-device-popup true
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Sharing/start-media-sharing false
         fi
-        if dpkg --compare-version "$2" lt "0.6.0"
+        if dpkg --compare-versions "$2" lt "0.6.0"
         then
             /usr/bin/aegis-exec -s -u user /usr/bin/gconftool -s --type=bool /apps/ControlPanel/Helium/Display/filter-in-details false
         fi
