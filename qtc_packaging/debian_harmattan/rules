@@ -16,7 +16,7 @@
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	##OBS qmake -recursive PREFIX=/opt/Helium MEEGO_EDITION=Harmattan Helium.pro
+	##OBS qmake -recursive PREFIX=/opt/Helium MEEGO_EDITION=harmattan Helium.pro
 
 	touch configure-stamp
 
