@@ -1,3 +1,23 @@
+helium (0.6.0) unstable; urgency=low
+
+  * Update included gupnp-av, use a git submodule
+    - Fix issues with casing in LastChange XML.
+  * Fix an issue with the generated DIDLLite XML
+  * Fix some weird UI behaviour in renderer view
+  * Add a fallback icon for unknown resources
+  * Add a tooltip when seeking and improve general usability
+  * Cleanup gupnp <-> Qt bridge code
+  * Don't display some uninteresting error messages
+  * Fix several leaks and crashes
+  * Add filtering to browse view. Browse lists can now be filtered by title or
+    meta-data
+  * Use name of selected renderer in context menu
+  * Add version to "About" page
+  * Fix postinst script to properly set GConf keys
+  * Add logging of UPnP traffic
+
+ -- Jens Georg <mail+helium@jensge.org>  Sun, 16 Jun 2012 12:49:34 +0200
+
 helium (0.5.0) unstable; urgency=low
 
   * Restart the network connection when user taps on refresh
