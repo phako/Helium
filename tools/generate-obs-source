@@ -17,9 +17,14 @@ sed --in-place -e 's,##OBS ,,g' debian/rules
 # Needed for dpkg-buildpacke as it wants to call make clean
 echo -e "clean:\n\techo clean" > Makefile
 
+rm .tarball-version
+GNOME_TAG_PATTERN=helium tools/git-version-gen .tarball-version >.version
+mv .version .tarball-version
+
 ${MAD} -t ${TARGET} \
     dpkg-buildpackage -sa -S -uc -us \
                      -Imoc -Iobj -Ircc -Iui -I.svn -I*.deb -I*.changes \
                      -Iqtc_packaging -I*.pro.user* -I.git \
                      -I.tx -Iout
 rm -rf debian
+rm .tarball-version

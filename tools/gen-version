@@ -5,5 +5,5 @@ cd $dir/..
 
 export GNOME_TAG_PATTERN=helium
 
-VERSION=$(tools/git-version-gen /tmp/tarball-version)
+VERSION=$(tools/git-version-gen .tarball-version)
 sed -e "s,@VERSION@,$VERSION,g"
