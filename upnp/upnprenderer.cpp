@@ -611,6 +611,26 @@ void UPnPRenderer::pause()
               SLOT(onPause()));
 }
 
+void UPnPRenderer::prev()
+{
+    if (m_avTransport.isNull()) {
+        return;
+    }
+
+    queueCall(m_avTransport->call(QLatin1String("Previous"),
+                                 QLatin1String("InstanceID"), QLatin1String("0")));
+}
+
+void UPnPRenderer::next()
+{
+    if (m_avTransport.isNull()) {
+        return;
+    }
+
+    queueCall(m_avTransport->call(QLatin1String("Next"),
+                                 QLatin1String("InstanceID"), QLatin1String("0")));
+}
+
 void UPnPRenderer::seekRelative(float percent)
 {
     if (not canSeek()) {

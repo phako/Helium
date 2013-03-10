@@ -90,6 +90,8 @@ public:
 
     // AVTransport:1 optional
     Q_INVOKABLE void pause();
+    Q_INVOKABLE void next();
+    Q_INVOKABLE void prev();
 
 Q_SIGNALS:
 

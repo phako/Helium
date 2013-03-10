@@ -64,6 +64,13 @@ Item {
         anchors.bottom: seekHelper.top
         anchors.horizontalCenter: parent.horizontalCenter
         ThemeToolIcon {
+            id: btnPrev
+            enabled: renderer.state === "STOPPED" || renderer.state === "PLAYING"
+            baseIcon: "toolbar-mediacontrol-previous"
+            onClicked: renderer.prev();
+        }
+
+        ThemeToolIcon {
             enabled: renderer.state !== "PLAYING" || (renderer.state === "PLAYING" && renderer.canPause)
             id: btnPlayPause
             baseIcon: "toolbar-mediacontrol-play"
@@ -83,6 +90,13 @@ Item {
             onClicked: {
                 renderer.stop();
             }
+        }
+
+        ThemeToolIcon {
+            id: btnNext
+            enabled: renderer.state === "STOPPED" || renderer.state === "PLAYING"
+            baseIcon: "toolbar-mediacontrol-next"
+            onClicked: renderer.next();
         }
 
         Connections {
