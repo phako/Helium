@@ -204,7 +204,7 @@ Page {
                 mainText: model.title
                 subText: model.detail
                 image: model.icon
-                iconAnnotated: model.uri === ""
+                iconAnnotated: model.uri === "" && model.type !== "container"
                 iconVisible: settings.displayMediaArt
                 drillDown: model.type === "container"
 
