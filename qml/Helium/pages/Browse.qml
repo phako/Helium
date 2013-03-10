@@ -225,15 +225,13 @@ Page {
                     feedback.start();
                     if (settings.showDevicePopUp) {
                         browseModel.lastIndex = index
-                        if (type !== "container") {
                             if (itemContextMenu.status === DialogStatus.Closed) {
                                 itemContextMenu.open();
                             } else {
                                 itemContextMenu.close();
                             }
-                        }
                     } else {
-                        if (type !== "container" && uri !== "") {
+                        if (uri !== "") {
                             renderer.setUriAndPlay(uri, metadata);
                         }
                     }

@@ -360,10 +360,7 @@ QVariant BrowseModelPrivate::data(const QModelIndex &index, int role) const
     case BrowseRoleIcon:
         return findIconForObject(object);
     case BrowseRoleURI:
-        if (GUPNP_IS_DIDL_LITE_ITEM(object)) {
-            return getCompatibleUri(index.row(), m_protocolInfo);
-        }
-        return QVariant();
+        return getCompatibleUri(index.row(), m_protocolInfo);
     case BrowseRoleType:
         if (GUPNP_IS_DIDL_LITE_CONTAINER(object)) {
             return QLatin1String("container");
