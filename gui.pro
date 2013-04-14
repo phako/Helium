@@ -3,7 +3,9 @@ QMAKE_CXXFLAGS += -std=gnu++0x
 # Add more folders to ship with the application, here
 folder_01.source = qml/Helium
 folder_01.target = qml
-DEPLOYMENTFOLDERS = folder_01
+folder_02.source = gupnp-av/data
+folder_02.target = xsd
+DEPLOYMENTFOLDERS = folder_01 folder_02
 
 # Additional import path used to resolve QML modules in Creator's code model
 QML_IMPORT_PATH =
@@ -27,7 +29,7 @@ MOBILITY += feedback
 
 # Include GUPnP libs - do this before boostable stuff otherwise that won't work properly
 CONFIG += link_pkgconfig
-PKGCONFIG += gupnp-1.0
+PKGCONFIG += glib-2.0 gupnp-1.0 gssdp-1.0 libsoup-2.4 libxml-2.0
 
 # include static version of gupnp-av - thanks madde :(
 SUBDIRS += gupnp-av gupnp-qt4

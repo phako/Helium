@@ -8,6 +8,8 @@ PKGCONFIG += glib-2.0 gupnp-1.0 libxml-2.0
 QMAKE_CFLAGS_RELEASE += -w
 QMAKE_CFLAGS_DEBUG += -w
 
+DEFINES += DATADIR=\\\"$${installPrefix}/xsd\\\"
+
 marshal_header.CONFIG += target_predeps no_link
 marshal_header.output = gupnp-av-marshal.h
 marshal_header.input = MARSHAL_LIST
@@ -34,7 +36,7 @@ HEADERS = gupnp-av/libgupnp-av/gupnp-av-error.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-container.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-contributor.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-contributor-private.h \
-          gupnp-av/libgupnp-av/gupnp-didl-lite-descriptor.h \
+          gupnp-av/libgupnp-av/gupnp-didl-lite-createclass-private.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-descriptor-private.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-item.h \
           gupnp-av/libgupnp-av/gupnp-didl-lite-object.h \
@@ -47,11 +49,16 @@ HEADERS = gupnp-av/libgupnp-av/gupnp-av-error.h \
           gupnp-av/libgupnp-av/gupnp-last-change-parser.h \
           gupnp-av/libgupnp-av/gupnp-protocol-info.h \
           gupnp-av/libgupnp-av/gupnp-search-criteria-parser.h \
+          gupnp-av/libgupnp-av/fragment-util.h \
           gupnp-av/libgupnp-av/gvalue-util.h \
-          gupnp-av/libgupnp-av/xml-util.h
+          gupnp-av/libgupnp-av/time-utils.h \
+          gupnp-av/libgupnp-av/xml-util.h \
+          gupnp-av/libgupnp-av/xsd-data.h
+
 SOURCES = gupnp-av/libgupnp-av/gupnp-av-error.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-container.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-contributor.c \
+          gupnp-av/libgupnp-av/gupnp-didl-lite-createclass.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-descriptor.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-item.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-object.c \
@@ -59,8 +66,14 @@ SOURCES = gupnp-av/libgupnp-av/gupnp-av-error.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-resource.c \
           gupnp-av/libgupnp-av/gupnp-didl-lite-writer.c \
           gupnp-av/libgupnp-av/gupnp-dlna.c \
+          gupnp-av/libgupnp-av/gupnp-feature.c \
+          gupnp-av/libgupnp-av/gupnp-feature-list-parser.c \
           gupnp-av/libgupnp-av/gupnp-last-change-parser.c \
+          gupnp-av/libgupnp-av/gupnp-media-collection.c \
           gupnp-av/libgupnp-av/gupnp-protocol-info.c \
           gupnp-av/libgupnp-av/gupnp-search-criteria-parser.c \
+          gupnp-av/libgupnp-av/fragment-util.c \
           gupnp-av/libgupnp-av/gvalue-util.c \
+          gupnp-av/libgupnp-av/time-utils.c \
+          gupnp-av/libgupnp-av/xsd-data.c \
           gupnp-av/libgupnp-av/xml-util.c
