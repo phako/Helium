@@ -36,7 +36,7 @@ static void on_didl_lite_object_available(GUPnPDIDLLiteParser *parser, GUPnPDIDL
 
 DIDLLiteParserPrivate::DIDLLiteParserPrivate(DIDLLiteParser *parent)
     : QObject(parent)
-    , m_parser(RefPtrG<GUPnPDIDLLiteParser>::wrap(gupnp_didl_lite_parser_new()))
+    , m_parser(wrap(gupnp_didl_lite_parser_new()))
     , m_objects()
     , m_lastError(0)
     , q_ptr(parent)

@@ -216,7 +216,7 @@ void UPnPRenderer::setCanVolume(bool canVolume)
 
 UPnPRenderer::UPnPRenderer()
     : UPnPDevice()
-    , m_lastChangeParser(RefPtrG<GUPnPLastChangeParser>::wrap(gupnp_last_change_parser_new()))
+    , m_lastChangeParser(wrap(gupnp_last_change_parser_new()))
     , m_avTransport()
     , m_connectionManager()
     , m_renderingControl(0)

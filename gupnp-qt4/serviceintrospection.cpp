@@ -24,7 +24,7 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 
 ServiceIntrospectionPrivate::ServiceIntrospectionPrivate(ServiceIntrospection *parent,
                                                          GUPnPServiceIntrospection *introspection)
-    : m_introspection(GServiceIntrospection::wrap(introspection))
+    : m_introspection(wrap(introspection))
     , q_ptr (parent)
 {
 }

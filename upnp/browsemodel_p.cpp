@@ -270,10 +270,9 @@ QString BrowseModelPrivate::getCompatibleUri(int index, const QString &protocolI
         QString protocolInfoStrip = QStringList(protocolInfoList.mid(0, split)).join(QLatin1String(","));
         protocolInfoList = protocolInfoList.mid(split);
 
-        resource = RefPtrG<GUPnPDIDLLiteResource>::wrap(
-               gupnp_didl_lite_object_get_compat_resource(object,
-                                                          protocolInfoStrip.toUtf8().constData(),
-                                                          FALSE));
+        resource = wrap(gupnp_didl_lite_object_get_compat_resource(object,
+                                                                   protocolInfoStrip.toUtf8().constData(),
+                                                                   FALSE));
         if (not resource.isEmpty()) {
             urlString = QString::fromUtf8(gupnp_didl_lite_resource_get_uri(resource));
             QUrl url(urlString);
@@ -302,7 +301,7 @@ static QString generateMetaData(GUPnPDIDLLiteObject *object)
     }
 
     // produce minimal DIDL
-    RefPtrG<GUPnPDIDLLiteWriter> writer = RefPtrG<GUPnPDIDLLiteWriter>::wrap(gupnp_didl_lite_writer_new (NULL));
+    auto writer = wrap(gupnp_didl_lite_writer_new (NULL));
     GUPnPDIDLLiteObject *item = GUPNP_DIDL_LITE_OBJECT(gupnp_didl_lite_writer_add_item(writer));
     const char *title = gupnp_didl_lite_object_get_title(object);
 

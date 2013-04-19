@@ -161,7 +161,7 @@ ServiceProxy* UPnPDevice::getService(const char *service) const
 
     auto info = gupnp_device_info_get_service(GUPNP_DEVICE_INFO(m_proxy), service);
     auto p = new ServiceProxy;
-    p->d_ptr->m_proxy = RefPtrG<GUPnPServiceProxy>::wrap(GUPNP_SERVICE_PROXY(info));
+    p->d_ptr->m_proxy = wrap(GUPNP_SERVICE_PROXY(info));
 
     return p;
 }

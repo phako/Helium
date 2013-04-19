@@ -85,7 +85,7 @@ void ServiceProxyPrivate::onIntrospection(GUPnPServiceInfo *info, GUPnPServiceIn
     Q_UNUSED(info);
 
     self->m_introspection = new ServiceIntrospection();
-    self->m_introspection->d_ptr->m_introspection = RefPtrG<GUPnPServiceIntrospection>::wrap(introspection);
+    self->m_introspection->d_ptr->m_introspection = wrap(introspection);
 
     QMetaObject::invokeMethod(self->q_ptr, "introspectionReady", Qt::QueuedConnection);
 }

@@ -31,7 +31,7 @@ LoggerPrivate::LoggerPrivate(GUPnPContext *context, Logger *parent)
                 QLatin1String("-") +
                 QString::number(QDateTime::currentDateTimeUtc().toTime_t()) +
                 QLatin1String(".log"))
-    , m_logger(GSoupLogger::wrap(soup_logger_new(SOUP_LOGGER_LOG_BODY, -1)))
+    , m_logger(wrap(soup_logger_new(SOUP_LOGGER_LOG_BODY, -1)))
     , m_context(context)
     , q_ptr(parent)
 {

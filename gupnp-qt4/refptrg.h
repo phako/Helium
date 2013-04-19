@@ -31,21 +31,21 @@ along with Helium.  If not, see <http://www.gnu.org/licenses/>.
 template <typename C>
 class RefPtrG {
 public:
-    static RefPtrG<C> wrap(C* type)
+    RefPtrG<C>& wrap(C* type)
     {
-        RefPtrG<C> ref;
-        ref.m_type = type;
+        clear();
+        m_type = type;
 
-        return ref;
+        return *this;
     }
 
     explicit RefPtrG(C *type = 0)
-        : m_type(type == 0 ? 0 : (C *)g_object_ref (type))
+        : m_type(type == 0 ? 0 : static_cast<C *>(g_object_ref (type)))
     {
     }
 
     RefPtrG(RefPtrG const& other)
-        : m_type(other.m_type == 0 ? 0 : (C *)g_object_ref (other.m_type))
+        : m_type(other.m_type == 0 ? 0 : static_cast<C *>(g_object_ref (other.m_type)))
     {
     }
 
@@ -111,6 +111,14 @@ private:
 
     C *m_type;
 };
+
+template<typename C>
+RefPtrG<C> wrap(C* type) {
+    auto p = RefPtrG<C>();
+    p.wrap(type);
+
+    return p;
+}
 
 typedef RefPtrG<GUPnPDeviceProxy> DeviceProxy;
 
