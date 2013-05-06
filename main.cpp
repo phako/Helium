@@ -42,7 +42,9 @@ QDeclarativeContext *rootContext;
 
 Q_DECL_EXPORT int main(int argc, char *argv[])
 {
+#if !GLIB_CHECK_VERSION(2,36,0)
     g_type_init ();
+#endif
 
     // Used in GUPnP User-Agent
     g_set_application_name("Helium");
