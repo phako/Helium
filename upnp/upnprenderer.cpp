@@ -462,8 +462,12 @@ void UPnPRenderer::onAVTransportIntrospectionReady()
         }
     }
 
-    connect(m_renderingControl.data(), SIGNAL(introspectionReady()), SLOT(onRenderingControlIntrospectionReady()));
-    m_renderingControl->introspect();
+    if (not m_renderingControl.isNull()) {
+        connect(m_renderingControl.data(), SIGNAL(introspectionReady()), SLOT(onRenderingControlIntrospectionReady()));
+        m_renderingControl->introspect();
+    } else {
+        Q_EMIT ready();
+    }
 }
 
 void UPnPRenderer::onRenderingControlIntrospectionReady()
