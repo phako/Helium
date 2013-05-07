@@ -229,6 +229,11 @@ UPnPRenderer::UPnPRenderer()
     , m_position(START_POSITION)
     , m_canSeek(false)
     , m_seekMode(QLatin1String(""))
+    , m_canVolume(false)
+    , m_volume(0)
+    , m_maxVolume(0)
+    , m_canMute(false)
+    , m_mute(false)
 {
     connect(&m_progressTimer, SIGNAL(timeout()), SLOT(onProgressTimeout()));
 }
